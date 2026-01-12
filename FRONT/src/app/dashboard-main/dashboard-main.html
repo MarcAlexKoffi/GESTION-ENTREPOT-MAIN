@@ -1,0 +1,277 @@
+<div class="pageMain">
+  <div class="page-root">
+    <main class="page-main">
+      <div class="admin-scroll">
+        <div class="content">
+          <!-- HEADER -->
+          <div class="page-head">
+            <div>
+              <h2 class="page-title">Vue d'ensemble des entrepôts</h2>
+              <p class="page-desc">Bonjour, Marc. Bienvenue sur votre tableau de bord.</p>
+            </div>
+
+            <button class="btn-primary" type="button" (click)="openWarehouseModal()">
+              <span class="material-symbols-outlined">add</span>
+              <span>Nouvel enregistrement</span>
+            </button>
+          </div>
+
+          <!-- FILTERS (MATCHING SCREENSHOT) -->
+          <section class="filters-chips-section" aria-label="Filtres">
+            <div class="filter-chip-wrap">
+              <span class="material-symbols-outlined chip-icon">location_on</span>
+              <select aria-label="Filtrer par région">
+                <option value="">Toutes les régions</option>
+                <option value="nord">Nord</option>
+                <option value="sud">Sud</option>
+              </select>
+              <span class="material-symbols-outlined chip-arrow">expand_more</span>
+            </div>
+
+            <div class="filter-chip-wrap">
+              <span class="material-symbols-outlined chip-icon">factory</span>
+              <select aria-label="Filtrer par site">
+                <option value="">Tous les sites</option>
+              </select>
+              <span class="material-symbols-outlined chip-arrow">expand_more</span>
+            </div>
+          </section>
+
+          <!-- Warehouses Grid (MATCHING SCREENSHOT) -->
+          <div class="warehouse-grid">
+            <article
+              *ngFor="let card of cards"
+              class="warehouse-card card"
+              (click)="handleContainerClick(card)"
+            >
+              <!-- Image Section -->
+              <div
+                class="warehouse-image"
+                [style.background-image]="
+                  'url(' + (card.imageUrl || 'assets/placeholder-warehouse.png') + ')'
+                "
+              >
+                <!-- Badge Notification Top Left -->
+                <div *ngIf="card.unreadCount > 0" class="notification-badge">
+                  {{ card.unreadCount }}
+                </div>
+
+                <!-- Menu Button Top Right -->
+                <button
+                  class="card-menu-btn"
+                  type="button"
+                  (click)="openActionsMenu(card, $event)"
+                  title="Actions"
+                >
+                  <span class="material-symbols-outlined">more_vert</span>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div
+                  class="warehouse-dropdown"
+                  *ngIf="actionsMenuWarehouseId === card.id"
+                  (click)="$event.stopPropagation()"
+                >
+                  <button type="button" (click)="onEditWarehouse(card)">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modifier
+                  </button>
+                  <button type="button" class="danger" (click)="onDeleteWarehouse(card)">
+                    <span class="material-symbols-outlined">delete</span>
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Content Section -->
+              <div class="warehouse-content">
+                <div class="warehouse-info">
+                  <h3 class="warehouse-name">{{ card.name }}</h3>
+                  <p class="warehouse-location">
+                    <span class="material-symbols-outlined">location_on</span>
+                    {{ card.location }}
+                  </p>
+                </div>
+
+                <div class="card-divider"></div>
+
+                <div class="warehouse-footer">
+                  <div class="status-block">
+                    <span class="status-label">EN ATTENTE</span>
+                    <span class="status-count">{{ card.pending }}</span>
+                  </div>
+                  <span class="material-symbols-outlined footer-arrow">arrow_forward</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Chart Section -->
+          <section class="card chart-section">
+            <div class="section-head">
+              <h3 class="chart-title">Volume de camions sur les 7 derniers jours</h3>
+              <div class="chart-legend">
+                <div class="legend-item"><span class="dot primary"></span> Camions déchargés</div>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <!-- Background Grid Lines -->
+              <div class="chart-grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+
+              <div class="chart-bars">
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 60%">
+                    <div class="bar-tooltip">60%</div>
+                  </div>
+                  <p>Lun</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 75%">
+                    <div class="bar-tooltip">75%</div>
+                  </div>
+                  <p>Mar</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 50%">
+                    <div class="bar-tooltip">50%</div>
+                  </div>
+                  <p>Mer</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 85%">
+                    <div class="bar-tooltip">85%</div>
+                  </div>
+                  <p>Jeu</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 95%">
+                    <div class="bar-tooltip">95%</div>
+                  </div>
+                  <p>Ven</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 40%">
+                    <div class="bar-tooltip">40%</div>
+                  </div>
+                  <p>Sam</p>
+                </div>
+                <div class="chart-day">
+                  <div class="chart-bar" style="height: 20%">
+                    <div class="bar-tooltip">20%</div>
+                  </div>
+                  <p>Dim</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODALE : Créer/Modifier un entrepôt -->
+          <div class="modal" *ngIf="showWarehouseModal">
+            <div class="modal__backdrop" (click)="closeWarehouseModal()"></div>
+
+            <div class="modal__panel">
+              <div class="truck-modal-header">
+                <h2 class="truck-modal-title">
+                  {{ editingWarehouseId ? 'Modifier l’entrepôt' : 'Nouvel entrepôt' }}
+                </h2>
+                <button
+                  type="button"
+                  class="truck-modal-close"
+                  aria-label="Fermer"
+                  (click)="closeWarehouseModal()"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="truck-modal-body">
+                <p class="modal-intro">
+                  {{
+                    editingWarehouseId
+                      ? 'Modifiez les informations de l’entrepôt sélectionné.'
+                      : 'Renseignez les informations ci-dessous pour créer un nouvel entrepôt.'
+                  }}
+                </p>
+
+                <div class="truck-field">
+                  <label class="truck-label">Nom de l’entrepôt</label>
+                  <input
+                    type="text"
+                    class="truck-input"
+                    placeholder="Ex : Entrepôt Paris Nord"
+                    [(ngModel)]="newWarehouse.name"
+                  />
+                </div>
+
+                <div class="truck-field">
+                  <label class="truck-label">Localisation</label>
+                  <input
+                    type="text"
+                    class="truck-input"
+                    placeholder="Ex : Gonesse, Île-de-France"
+                    [(ngModel)]="newWarehouse.location"
+                  />
+                </div>
+
+                <div class="truck-field">
+                  <label class="truck-label">Image de couverture</label>
+
+                  <div class="file-upload-container">
+                    <!-- Hidden native input -->
+                    <input
+                      #fileInput
+                      type="file"
+                      accept="image/*"
+                      style="display: none"
+                      (change)="onImageSelected($event)"
+                    />
+
+                    <!-- Premium Custom Trigger -->
+                    <div class="upload-controls">
+                      <button type="button" class="file-upload-btn" (click)="fileInput.click()">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        {{ selectedImageFile ? "Changer l'image" : 'Choisir une image' }}
+                      </button>
+
+                      <span class="file-name" [class.has-file]="!!selectedImageFile">
+                        {{ selectedImageFile ? selectedImageFile.name : 'Aucun fichier choisi' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p class="truck-help">Formats acceptés : JPG, PNG.</p>
+
+                  <div
+                    *ngIf="imagePreview"
+                    class="image-preview-box"
+                    [style.backgroundImage]="'url(' + imagePreview + ')'"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="truck-modal-footer">
+                <button type="button" class="mini-btn cancel-btn" (click)="closeWarehouseModal()">
+                  Annuler
+                </button>
+
+                <button class="btn-primary" (click)="saveWarehouse()" [disabled]="isLoading">
+                  <span *ngIf="isLoading">Enregistrement...</span>
+                  <span *ngIf="!isLoading">
+                    {{ editingWarehouseId ? 'Enregistrer' : 'Créer l’entrepôt' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- END MODAL -->
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+[
+  {
+    "id": 2,
+    "name": "Deuxième entrepôt",
+    "location": "Bouaké",
+    "imageUrl": "/uploads/warehouses/warehouse-1767987102526.jpg",
+    "createdAt": "2026-01-09T16:27:33.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Entrepôt d'Abidjan",
+    "location": "Abidjan, Deux plateaux Vallon",
+    "imageUrl": "/uploads/warehouses/warehouse-1767986578466.jpg",
+    "createdAt": "2026-01-09T19:22:58.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Entrepos de Yakro",
+    "location": "Yamoussoukro",
+    "imageUrl": "/uploads/warehouses/warehouse-1767986797068.png",
+    "createdAt": "2026-01-09T19:26:37.000Z"
+  },
+  {
+    "id": 5,
+    "name": "Entrepos de Bouaké",
+    "location": "Bouaké",
+    "imageUrl": "/uploads/1768035742640-631234618.jpg",
+    "createdAt": "2026-01-10T09:02:22.000Z"
+  },
+  {
+    "id": 6,
+    "name": "Entrepos de Bouna",
+    "location": "Bouna",
+    "imageUrl": "/uploads/1768037366887-352836986.jpg",
+    "createdAt": "2026-01-10T09:29:26.000Z"
+  }
+]

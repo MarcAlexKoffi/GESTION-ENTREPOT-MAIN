@@ -1,0 +1,84 @@
+  <body>
+    <div class="modal">
+      <div class="modal__backdrop"></div>
+
+      <div class="modal__panel truck-modal">
+        <div class="truck-modal-header">
+          <h2 class="truck-modal-title">Enregistrer un nouveau camion</h2>
+          <button type="button" class="truck-modal-close" aria-label="Fermer">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="truck-modal-body">
+          <div class="truck-field">
+            <label class="truck-label" for="entrepot">Entrepôt</label>
+            <select id="entrepot" class="truck-select" disabled>
+              <option selected>Entrepôt Principal (Nord)</option>
+            </select>
+          </div>
+
+          <div class="truck-field">
+            <label class="truck-label" for="immatriculation">
+              Immatriculation du camion
+            </label>
+            <input
+              id="immatriculation"
+              type="text"
+              class="truck-input"
+              placeholder="Ex : AB-123-CD"
+            />
+          </div>
+
+          <div class="truck-field">
+            <label class="truck-label" for="transporteur">
+              Transporteur / Chauffeur
+            </label>
+            <input
+              id="transporteur"
+              type="text"
+              class="truck-input"
+              placeholder="Nom du transporteur ou du chauffeur"
+            />
+          </div>
+
+          <div class="truck-field">
+            <label class="truck-label" for="transfert">N° fiche de transfert</label>
+            <input
+              id="transfert"
+              type="text"
+              class="truck-input"
+              placeholder="Ex : FT-2025-001"
+            />
+          </div>
+
+          <div class="truck-field">
+            <label class="truck-label" for="marchandise">Type de marchandise</label>
+            <select id="marchandise" class="truck-select">
+              <option value="" disabled selected>Choisir un type</option>
+              <option value="palettes">Palettes</option>
+              <option value="vrac">Vrac</option>
+              <option value="frigorifique">Frigorifique</option>
+              <option value="dangereux">Matières dangereuses</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="truck-modal-footer">
+          <div class="truck-confirm">
+            <span class="material-symbols-outlined truck-confirm-icon">
+              check_circle
+            </span>
+            <div>
+              <p class="truck-confirm-title">Camion enregistré</p>
+              <p class="truck-confirm-sub">Statut : EN ATTENTE</p>
+            </div>
+          </div>
+
+          <button type="button" class="truck-submit">
+            Enregistrer l’arrivée
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>

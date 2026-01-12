@@ -1,0 +1,16 @@
+[
+  {
+    "id": 9,
+    "name": "Entrepos de Yakro",
+    "location": "Yamoussoukro",
+    "imageUrl": "/uploads/1768045066297-483063515.png",
+    "createdAt": "2026-01-10T11:37:46.000Z"
+  },
+  {
+    "id": 8,
+    "name": "Entrepôt d'Abidjan",
+    "location": "Abidjan, Deux plateaux Vallon",
+    "imageUrl": "/uploads/1768045041254-290049457.jpg",
+    "createdAt": "2026-01-10T11:37:21.000Z"
+  }
+]

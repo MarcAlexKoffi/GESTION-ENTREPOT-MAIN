@@ -1,0 +1,128 @@
+<body>
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
+              fill="currentColor"
+            ></path>
+          </svg>
+        </div>
+        <h1 class="sidebar-logo-title">Entrepôts</h1>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a
+          [routerLink]="'/userdashboard/userdashboardmain'"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <p>Tableau de bord</p>
+        </a>
+
+        <!-- ✅ Lien dynamique vers l'entrepôt assigné -->
+        <a
+          *ngIf="userEntrepotId !== null"
+          [routerLink]="['/userdashboard/userentrepot', userEntrepotId]"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <span class="material-symbols-outlined">warehouse</span>
+          <p>Entrepôt</p>
+        </a>
+<!-- 
+        <a
+          [routerLink]="'/userdashboard/userhistorique'"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <span class="material-symbols-outlined">history</span>
+          <p>Historique</p>
+        </a> -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link" (click)="$event.preventDefault()">
+          <span class="material-symbols-outlined">help</span>
+          <p>Aide</p>
+        </a>
+
+        <a href="#" class="nav-link nav-link--danger" (click)="$event.preventDefault(); logout()">
+          <span class="material-symbols-outlined">logout</span>
+          <p>Déconnexion</p>
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main">
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-actions">
+          <div
+            class="notification-wrapper"
+            (click)="toggleNotifications(); $event.stopPropagation()"
+            style="position: relative"
+          >
+            <button class="icon-button" type="button">
+              <span class="material-symbols-outlined">notifications</span>
+
+              <span *ngIf="notifCount > 0" class="notif-badge">
+                {{ notifCount }}
+              </span>
+            </button>
+
+            <div class="notif-dropdown" *ngIf="showNotifDropdown">
+              <p class="notif-title">Actions administrateur</p>
+
+              <div *ngIf="notifications.length === 0" class="notif-empty">Aucune notification.</div>
+
+              <div
+                *ngFor="let n of notifications"
+                class="notif-item"
+                (click)="openNotification(n); $event.stopPropagation()"
+              >
+                <div class="notif-line-main">
+                  <span class="notif-immat">{{ n.immatriculation }}</span>
+                  <span class="notif-entrepot">{{ n.entrepotName }}</span>
+                </div>
+
+                <div class="notif-line-meta">
+                  <span>Statut : {{ n.statut }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ✅ User dynamique -->
+          <div class="user-block">
+            <div
+              class="user-avatar"
+              style="
+                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPHyHGMfTjg0KY3dZ-4D-csVv0_-YYCb8FAMEwxtDUIYrSr0qUlMlx9xc0kD5FdKoHfGT2TO7q3AfmgKtLEa3ZZSJssGPPp0WNOEjaBIbeeeOYdn3xAbxA5qOPiXRi5piRgZ9GB7GF8kudQYw8dkAAgGGYEsWT2DXaQ8m7QeeV5YTKpQb33QwQOQPF6tgTY0ZM5PfeTpb8NQByRdbDmwCCBSNPHz0CRZWMFIro1_4Unfqodv6iXWCL4YMw3aQxA9Y9MNpk4lnTUBoL');
+              "
+            ></div>
+
+            <div class="user-info">
+              <p class="user-name">{{ userName }}</p>
+              <p class="user-role">{{ userRoleLabel }}</p>
+            </div>
+
+            <button class="user-toggle" type="button">
+              <span class="material-symbols-outlined">expand_more</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="page">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+</body>

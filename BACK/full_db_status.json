@@ -1,0 +1,67 @@
+{
+  "warehouses": [
+    {
+      "id": 2,
+      "name": "Deuxième entrepôt",
+      "location": "Bouaké"
+    },
+    {
+      "id": 3,
+      "name": "Entrepôt d'Abidjan",
+      "location": "Abidjan, Deux plateaux Vallon"
+    },
+    {
+      "id": 4,
+      "name": "Entrepos de Yakro",
+      "location": "Yamoussoukro"
+    },
+    {
+      "id": 5,
+      "name": "Entrepos de Bouaké",
+      "location": "Bouaké"
+    },
+    {
+      "id": 6,
+      "name": "Entrepos de Bouna",
+      "location": "Bouna"
+    }
+  ],
+  "trucks_per_warehouse": [
+    {
+      "entrepotId": 3,
+      "count": 5
+    }
+  ],
+  "recent_trucks": [
+    {
+      "id": 5,
+      "entrepotId": 3,
+      "immatriculation": "AAAABBBB",
+      "transporteur": "Marcus Turam"
+    },
+    {
+      "id": 4,
+      "entrepotId": 3,
+      "immatriculation": "BBBBBBB",
+      "transporteur": "Franck Kouamé"
+    },
+    {
+      "id": 3,
+      "entrepotId": 3,
+      "immatriculation": "ARTZ23",
+      "transporteur": "Anne Myra"
+    },
+    {
+      "id": 2,
+      "entrepotId": 3,
+      "immatriculation": "AAAAAAA",
+      "transporteur": "Marc Alex Koffi"
+    },
+    {
+      "id": 1,
+      "entrepotId": 3,
+      "immatriculation": "NNNNNNN",
+      "transporteur": "Yao Jean Marie"
+    }
+  ]
+}

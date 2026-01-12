@@ -1,0 +1,283 @@
+<div class="pageMain">
+  <div class="admin-root">
+    <main class="admin-main">
+      <div class="admin-scroll">
+        <div class="content">
+          <div class="page-head">
+            <div>
+              <h2 class="page-title">Utilisateurs</h2>
+              <p class="page-desc">Gérez les accès et affectez les entrepôts aux opérateurs.</p>
+            </div>
+
+            <button class="btn-primary" type="button" (click)="openCreateUser()">
+              <span class="material-symbols-outlined">person_add</span>
+              <span>Créer un utilisateur</span>
+            </button>
+          </div>
+
+          <!-- Toast Message (Simple & Sleek) -->
+          <div
+            *ngIf="toastMessage"
+            class="card toast-card"
+            style="
+              margin-bottom: 2rem;
+              padding: 1rem 1.5rem;
+              background: var(--primary-subtle);
+              border-color: rgba(43, 140, 238, 0.2);
+              color: var(--primary);
+              font-weight: 700;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 0.75rem">
+              <span class="material-symbols-outlined">info</span>
+              {{ toastMessage }}
+            </div>
+          </div>
+
+          <!-- Filters Section -->
+          <section class="card filters" aria-label="Filtres">
+            <div class="filters-row">
+              <div class="field">
+                <span class="left-icon">
+                  <span class="material-symbols-outlined">search</span>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Rechercher par nom ou identifiant..."
+                  [(ngModel)]="searchTerm"
+                />
+              </div>
+
+              <div class="select-wrap">
+                <select aria-label="Filtrer par rôle" [(ngModel)]="selectedRole">
+                  <option value="">Tous les rôles</option>
+                  <option value="admin">Administrateur</option>
+                  <option value="operator">Opérateur</option>
+                </select>
+              </div>
+
+              <div class="select-wrap">
+                <select aria-label="Filtrer par entrepôt" [(ngModel)]="selectedWarehouseId">
+                  <option value="">Tous les entrepôts</option>
+                  <option *ngFor="let w of warehouses" [value]="w.id">{{ w.name }}</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Users Table -->
+          <section class="card" aria-label="Liste des utilisateurs">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Utilisateur</th>
+                    <th>Rôle</th>
+                    <th class="hide-md">Entrepôt Affecté</th>
+                    <th>Statut</th>
+                    <th style="text-align: right">Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngIf="filteredUsers.length === 0">
+                    <td colspan="5" class="sub" style="text-align: center; padding: 3rem">
+                      <span
+                        class="material-symbols-outlined"
+                        style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem"
+                        >person_off</span
+                      >
+                      Aucun utilisateur ne correspond aux filtres.
+                    </td>
+                  </tr>
+
+                  <tr *ngFor="let u of filteredUsers">
+                    <td>
+                      <div class="user-cell">
+                        <div class="initials">{{ getInitials(u.nom) }}</div>
+                        <div>
+                          <span class="name">{{ u.nom }}</span>
+                          <span class="sub">@{{ u.username }}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="badge">
+                        <span class="material-symbols-outlined">{{ roleIcon(u.role) }}</span>
+                        {{ roleLabel(u.role) }}
+                      </span>
+                    </td>
+
+                    <td class="hide-md">
+                      <div class="warehouse-display" *ngIf="u.role === 'operator'">
+                        <span
+                          class="material-symbols-outlined"
+                          style="font-size: 18px; color: var(--text-secondary); opacity: 0.7"
+                          >domain</span
+                        >
+                        <span
+                          [style.color]="
+                            u.entrepotId ? 'var(--text-primary)' : 'var(--text-secondary)'
+                          "
+                        >
+                          {{ getWarehouseName(u.entrepotId) }}
+                        </span>
+                      </div>
+                      <span
+                        class="sub"
+                        *ngIf="u.role === 'admin'"
+                        style="font-style: italic; opacity: 0.6"
+                      >
+                        Accès complet
+                      </span>
+                    </td>
+
+                    <td>
+                      <span
+                        class="status-pill"
+                        [ngClass]="{
+                          'status-pill--validated': u.status === 'Actif',
+                          'status-pill--refoule': u.status === 'Inactif',
+                          'status-pill--pending': u.status === 'En attente'
+                        }"
+                      >
+                        <span class="dot"></span>
+                        {{ u.status }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="row-actions">
+                        <button
+                          class="mini-btn"
+                          title="Modifier"
+                          type="button"
+                          (click)="openEditUser(u)"
+                        >
+                          <span class="material-symbols-outlined">edit</span>
+                        </button>
+
+                        <button
+                          class="mini-btn danger"
+                          title="Supprimer"
+                          type="button"
+                          (click)="deleteUser(u)"
+                        >
+                          <span class="material-symbols-outlined">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- MODAL: Create/Edit User -->
+          <div class="modal" *ngIf="showUserModal">
+            <div class="modal__backdrop" (click)="closeUserModal()"></div>
+
+            <div class="modal__panel">
+              <div class="truck-modal-header">
+                <h2 class="truck-modal-title">
+                  {{ isEditMode ? 'Modifier l’utilisateur' : 'Créer un utilisateur' }}
+                </h2>
+                <button
+                  type="button"
+                  class="truck-modal-close"
+                  aria-label="Fermer"
+                  (click)="closeUserModal()"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="truck-modal-body">
+                <div class="truck-field">
+                  <label class="truck-label">Nom complet</label>
+                  <input
+                    class="truck-input"
+                    type="text"
+                    placeholder="Ex : Jean Dupont"
+                    [(ngModel)]="formUser.nom"
+                  />
+                </div>
+
+                <div class="truck-field">
+                  <label class="truck-label">Identifiant (Username)</label>
+                  <input
+                    class="truck-input"
+                    type="text"
+                    placeholder="Ex : jdupont"
+                    [(ngModel)]="formUser.username"
+                  />
+                </div>
+
+                <div class="truck-field">
+                  <label class="truck-label">
+                    Mot de passe
+                    <small *ngIf="isEditMode" style="text-transform: none; opacity: 0.7">
+                      (laisser vide pour ne pas changer)</small
+                    >
+                  </label>
+                  <input
+                    class="truck-input"
+                    type="password"
+                    placeholder="••••••••"
+                    [(ngModel)]="formUser.password"
+                  />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+                  <div class="truck-field">
+                    <label class="truck-label">Rôle</label>
+                    <select class="truck-select" [(ngModel)]="formUser.role">
+                      <option value="admin">Administrateur</option>
+                      <option value="operator">Opérateur</option>
+                    </select>
+                  </div>
+
+                  <div class="truck-field">
+                    <label class="truck-label">Statut</label>
+                    <select class="truck-select" [(ngModel)]="formUser.status">
+                      <option value="Actif">Actif</option>
+                      <option value="Inactif">Inactif</option>
+                      <option value="En attente">En attente</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="truck-field" *ngIf="formUser.role === 'operator'">
+                  <label class="truck-label">Entrepôt Affecté</label>
+                  <select
+                    class="truck-select"
+                    [(ngModel)]="formUser.entrepotId"
+                    [disabled]="warehouses.length === 0"
+                  >
+                    <option [ngValue]="null">Sélectionner un entrepôt</option>
+                    <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>
+                  </select>
+                  <p
+                    class="truck-help"
+                    *ngIf="warehouses.length === 0"
+                    style="color: #ef4444; font-size: 0.75rem; margin-top: 0.25rem"
+                  >
+                    Aucun entrepôt disponible.
+                  </p>
+                </div>
+              </div>
+
+              <div class="truck-modal-footer">
+                <button type="button" class="truck-submit" (click)="saveUserFromModal()">
+                  {{ isEditMode ? 'Enregistrer les modifications' : 'Créer l’utilisateur' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- END MODAL -->
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

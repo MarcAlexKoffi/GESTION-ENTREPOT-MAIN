@@ -1,0 +1,318 @@
+<div class="pageMain admin-scroll">
+  <div class="content">
+    <!-- HEADER -->
+    <div class="page-head">
+      <div class="page-title-block">
+        <div class="title-with-back">
+          <button
+            type="button"
+            class="btn-icon-back"
+            [routerLink]="'/dashboard/dashboard-main'"
+            title="Retour"
+          >
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2 class="page-title">{{ entrepot.nom }}</h2>
+        </div>
+        <p class="page-desc">{{ entrepot.lieu }}</p>
+      </div>
+
+      <div class="head-actions">
+        <!-- Period Filter Chip -->
+        <div class="filter-chip-wrap" (click)="togglePeriodDropdown()">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <span class="chip-label">{{ selectedPeriodLabel }}</span>
+          <span class="material-symbols-outlined arrow">expand_more</span>
+
+          <div
+            class="filter-dropdown"
+            *ngIf="showPeriodDropdown"
+            (click)="$event.stopPropagation()"
+          >
+            <button class="dropdown-item" (click)="setPeriod('today')">Aujourd'hui</button>
+            <button class="dropdown-item" (click)="setPeriod('7days')">7 derniers jours</button>
+            <button class="dropdown-item" (click)="setPeriod('30days')">30 derniers jours</button>
+            <button class="dropdown-item" (click)="setPeriod('all')">Toutes périodes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="stats-overview">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Total camions</p>
+          <h3 class="stat-value">{{ totalCamionsArrives }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <span class="material-symbols-outlined">hourglass_empty</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">En attente</p>
+          <h3 class="stat-value">{{ nbPending }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon validated">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Validés</p>
+          <h3 class="stat-value">{{ nbValidated }}</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon accepted">
+          <span class="material-symbols-outlined">assignment_turned_in</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Acceptés</p>
+          <h3 class="stat-value">{{ nbAccepted }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TABLE CARD -->
+    <div class="card table-card">
+      <!-- Search & Tabs Toolbar -->
+      <div class="card-toolbar">
+        <div class="tabs-scroll">
+          <nav class="tabs-nav">
+            <button
+              class="tab-btn"
+              [class.active]="currentTab === 'pending'"
+              (click)="setTab('pending')"
+            >
+              En attente <span class="tab-badge">{{ nbPending }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="currentTab === 'validated'"
+              (click)="setTab('validated')"
+            >
+              Validés <span class="tab-badge">{{ nbValidated }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="currentTab === 'accepted'"
+              (click)="setTab('accepted')"
+            >
+              Acceptés <span class="tab-badge">{{ nbAccepted }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="currentTab === 'cancelled'"
+              (click)="setTab('cancelled')"
+            >
+              Refoulés <span class="tab-badge">{{ nbCancelled }}</span>
+            </button>
+            <button
+              class="tab-btn"
+              [class.active]="currentTab === 'renvoyes'"
+              (click)="setTab('renvoyes')"
+            >
+              Renvoyés <span class="tab-badge">{{ nbRenvoyes }}</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="search-box">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un camion..." />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Immatriculation</th>
+              <th>Transporteur</th>
+              <th>Heure</th>
+              <th>Statut</th>
+              <th>Statut avancé</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredTrucks.length === 0">
+              <td colspan="6" class="empty-state">
+                <span class="material-symbols-outlined">info</span>
+                Aucun camion trouvé pour ce statut.
+              </td>
+            </tr>
+            <tr *ngFor="let t of filteredTrucks" class="row-hover">
+              <td>
+                <div class="plate-number">
+                  {{ t.immatriculation }}
+                  <span *ngIf="t.unreadForAdmin" class="new-dot"></span>
+                </div>
+              </td>
+              <td>
+                <span class="text-secondary">{{ t.transporteur }}</span>
+              </td>
+              <td>
+                <span class="text-secondary">{{ getHourForCurrentTab(t) }}</span>
+              </td>
+              <td>
+                <span [ngClass]="getStatusClass(t)">
+                  <span class="material-symbols-outlined icon">{{ getStatusIcon(t) }}</span>
+                  {{ getStatusLabel(t) }}
+                </span>
+              </td>
+              <td>
+                <span [ngClass]="getAdvancedStatusClass(t)">
+                  <span class="material-symbols-outlined icon">{{ getAdvancedStatusIcon(t) }}</span>
+                  {{ getAdvancedStatusLabel(t) }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-view" (click)="openDetailsModal(t)">
+                  <span>Voir plus</span>
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-root" *ngIf="showDetailsModal">
+    <div class="modal-backdrop" (click)="closeDetailsModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div class="modal-titles">
+          <h3 class="modal-title">Détails du passage</h3>
+          <p class="modal-subtitle">
+            {{ selectedTruck?.immatriculation }} — {{ selectedTruck?.transporteur }}
+          </p>
+        </div>
+        <button class="btn-close" (click)="closeDetailsModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body custom-scroll">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Coopérative</span>
+            <span class="value">{{ selectedTruck?.cooperative || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Fiche transfert</span>
+            <span class="value">{{ selectedTruck?.transfert || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">KOR</span>
+            <span class="value">{{ selectedTruck?.kor || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">TH (Taux Horaire)</span>
+            <span class="value">{{ selectedTruck?.th || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Heure d'arrivée</span>
+            <span class="value">{{ selectedTruck?.heureArrivee | date : 'HH:mm' }}</span>
+          </div>
+        </div>
+
+        <!-- Product section if available -->
+        <div class="section-divider" *ngIf="selectedTruck?.products"></div>
+        <div class="info-grid" *ngIf="selectedTruck?.products">
+          <div class="info-item">
+            <span class="label">Numéro de lot</span>
+            <span class="value">{{ selectedTruck?.products?.numeroLot || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Nombre de sacs</span>
+            <span class="value">{{ selectedTruck?.products?.nombreSacsDecharges || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Poids brut</span>
+            <span class="value">{{ selectedTruck?.products?.poidsBrut || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Poids net</span>
+            <span class="value">{{ selectedTruck?.products?.poidsNet || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="comment-field">
+          <label class="comment-label">Commentaire administrateur</label>
+          <textarea
+            class="comment-area"
+            [(ngModel)]="adminComment"
+            placeholder="Ajouter une instruction ou une remarque..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left" *ngIf="selectedTruck?.statut === 'Annulé'">
+          <button class="btn-secondary danger" (click)="reintegrateTruck()">
+            <span class="material-symbols-outlined">restore</span> Réintégré
+          </button>
+        </div>
+
+        <div class="footer-right">
+          <ng-container *ngIf="selectedTruck?.statut === 'En attente'">
+            <button class="btn-danger-outline" (click)="refuseTruck()">Refouler</button>
+            <button class="btn-primary-action" (click)="validateTruck()">Valider le passage</button>
+          </ng-container>
+
+          <ng-container *ngIf="isAcceptedFinal(selectedTruck!)">
+            <button class="btn-secondary" (click)="printSelectedTruck()">
+              <span class="material-symbols-outlined">print</span> Imprimer
+            </button>
+          </ng-container>
+
+          <button
+            class="btn-close-modal"
+            (click)="closeDetailsModal()"
+            *ngIf="selectedTruck?.statut !== 'En attente'"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL (SIMPLIFIED) -->
+  <div class="modal-root" *ngIf="showHistoryModal">
+    <div class="modal-backdrop" (click)="closeHistoryModal()"></div>
+    <div class="modal-panel mini">
+      <div class="modal-header">
+        <h3 class="modal-title">Historique</h3>
+        <button class="btn-close" (click)="closeHistoryModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="timeline" *ngIf="historyTruck?.history?.length">
+          <div class="timeline-item" *ngFor="let h of historyTruck?.history">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <p class="event">{{ h.event }}</p>
+              <p class="meta">{{ h.by }} — {{ h.date | date : 'short' }}</p>
+            </div>
+          </div>
+        </div>
+        <p class="empty-msg" *ngIf="!historyTruck?.history?.length">Aucun historique disponible.</p>
+      </div>
+    </div>
+  </div>
+</div>

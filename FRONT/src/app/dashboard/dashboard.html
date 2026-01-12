@@ -1,0 +1,133 @@
+<div class="app-shell">
+  <!-- SIDEBAR: Refined Navigation -->
+  <aside class="sidebar-container" role="navigation">
+    <div class="sidebar-header">
+      <div class="logo-wrapper">
+        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
+            fill="currentColor"
+          ></path>
+        </svg>
+      </div>
+      <h1 class="logo-title">Entrepôts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <p class="section-label">Administration</p>
+        <a
+          [routerLink]="'/dashboard/dashboard-main'"
+          routerLinkActive="active"
+          class="sidebar-link"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="link-label">Tableau de bord</span>
+        </a>
+        <a [routerLink]="'/dashboard/userManager'" routerLinkActive="active" class="sidebar-link">
+          <span class="material-symbols-outlined">manage_accounts</span>
+          <span class="link-label">Utilisateurs</span>
+        </a>
+        <a [routerLink]="'/dashboard/historique'" routerLinkActive="active" class="sidebar-link">
+          <span class="material-symbols-outlined">history_edu</span>
+          <span class="link-label">Historique</span>
+        </a>
+        <a [routerLink]="'/dashboard/statistique'" routerLinkActive="active" class="sidebar-link">
+          <span class="material-symbols-outlined">analytics</span>
+          <span class="link-label">Statistiques</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-link secondary">
+        <span class="material-symbols-outlined">help</span>
+        <span class="link-label">Centre d'aide</span>
+      </a>
+      <div class="footer-divider"></div>
+      <a href="#" class="sidebar-link logout">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="link-label">Déconnexion</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA: Contents & Topbar -->
+  <div class="content-wrapper">
+    <!-- TOPBAR: Glassmorphism & Profile -->
+    <header class="top-header">
+      <div class="top-header-left">
+        <!-- Breadcrumb or Search placeholder can go here -->
+      </div>
+
+      <div class="top-header-right">
+        <!-- NOTIFICATIONS -->
+        <div class="notification-container" (click)="$event.stopPropagation()">
+          <button
+            class="notif-button"
+            type="button"
+            (click)="toggleNotifications($event)"
+            [attr.aria-expanded]="showNotifDropdown"
+          >
+            <span class="material-symbols-outlined">notifications</span>
+            <span *ngIf="notifCount > 0" class="notif-badge-dot"></span>
+          </button>
+
+          <!-- DROPDOWN PANEL -->
+          <div class="notif-popover" *ngIf="showNotifDropdown">
+            <div class="popover-header">
+              <h3 class="popover-title">Notifications</h3>
+              <span class="popover-count" *ngIf="notifCount > 0">{{ notifCount }}</span>
+            </div>
+
+            <div class="popover-scroll custom-scroll">
+              <div *ngIf="notifications.length === 0" class="popover-empty">
+                <span class="material-symbols-outlined">notifications_off</span>
+                <p>Aucune notification</p>
+              </div>
+
+              <div
+                *ngFor="let n of notifications"
+                class="notif-card-item"
+                (click)="openNotification(n)"
+              >
+                <div class="notif-icon-circle">
+                  <span class="material-symbols-outlined">local_shipping</span>
+                </div>
+                <div class="notif-body">
+                  <div class="notif-row">
+                    <span class="notif-immat">{{ n.immatriculation }}</span>
+                    <span class="notif-clock">{{ n.heureArrivee | date : 'HH:mm' }}</span>
+                  </div>
+                  <p class="notif-subtitle">{{ n.entrepotName }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- USER PROFILE AREA -->
+        <div class="profile-block">
+          <div
+            class="profile-avatar"
+            style="
+              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPHyHGMfTjg0KY3dZ-4D-csVv0_-YYCb8FAMEwxtDUIYrSr0qUlMlx9xc0kD5FdKoHfGT2TO7q3AfmgKtLEa3ZZSJssGPPp0WNOEjaBIbeeeOYdn3xAbxA5qOPiXRi5piRgZ9GB7GF8kudQYw8dkAAgGGYEsWT2DXaQ8m7QeeV5YTKpQb33QwQOQPF6tgTY0ZM5PfeTpb8NQByRdbDmwCCBSNPHz0CRZWMFIro1_4Unfqodv6iXWCL4YMw3aQxA9Y9MNpk4lnTUBoL');
+            "
+          ></div>
+          <div class="profile-info">
+            <p class="name">Marc Alex</p>
+            <p class="role">Administrateur</p>
+          </div>
+          <button class="profile-toggle">
+            <span class="material-symbols-outlined">expand_more</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE VIEWPORT -->
+    <main class="page-overflow admin-scroll">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

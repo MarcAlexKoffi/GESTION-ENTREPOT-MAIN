@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nom": "Administrateur",
+    "username": "Administrateur",
+    "role": "admin",
+    "entrepotId": null
+  },
+  {
+    "id": 3,
+    "nom": "Marc Alex Koffi",
+    "username": "Marc Koffi",
+    "role": "operator",
+    "entrepotId": 3
+  },
+  {
+    "id": 4,
+    "nom": "Operateur N°2",
+    "username": "Operateur2",
+    "role": "operator",
+    "entrepotId": 4
+  }
+]

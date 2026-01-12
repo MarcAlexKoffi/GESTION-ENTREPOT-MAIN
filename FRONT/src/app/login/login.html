@@ -1,0 +1,85 @@
+<body class="login-body">
+  <div class="login-root">
+    <div class="login-bg">
+      <img
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtT7imjTahttl-toNOm7jB_l_srQeiFcr4Iqhkw_LhsoyZWr9Ow36pmMxJQOwqoG0-sQAUQWRHOk63_ccsz1atw33D6gd7W5FGe97_I6X1vcdUiOE1s4IVP8tWqXTQR95DZqmizDGoe0rRcL9xcwMNtTWMtkj-LjlneEiNrKRKr5Mw6-vFX2AHnJOgM6vK6SYerEdt5faBVyYJjksSFwydSAWN-rhud1RuvzuZ4PoGJVIEKrSuJ-PCDEpzd00nfQlLtnQhyqIaLedo"
+        alt="Illustration abstraite d'un camion et d'un entrepôt"
+      />
+    </div>
+    <div class="login-card">
+      <div class="login-card-content">
+        <div class="login-header">
+          <span class="material-symbols-outlined login-header-icon">
+            local_shipping
+          </span>
+          <h1 class="login-title">Gestion Entrepôts</h1>
+        </div>
+
+        <h2 class="login-subtitle">Connexion</h2>
+
+        <form class="login-form" (ngSubmit)="onSubmit()">
+          <div *ngIf="errorMessage" style="margin-bottom: 12px;">
+            <div class="input-field" style="border-color: rgba(239, 68, 68, .6);">
+              {{ errorMessage }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="username">Identifiant</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <input
+                id="username"
+                type="text"
+                class="input-field"
+                placeholder="Saisissez votre identifiant"
+                autocomplete="username"
+                [(ngModel)]="username"
+                name="username"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Mot de passe</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">lock</span>
+
+              <input
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                class="input-field"
+                placeholder="Saisissez votre mot de passe"
+                autocomplete="current-password"
+                [(ngModel)]="password"
+                name="password"
+              />
+
+              <button
+                class="password-toggle"
+                type="button"
+                aria-label="Afficher ou masquer le mot de passe"
+                (click)="togglePassword()"
+              >
+                <span class="material-symbols-outlined">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">Se connecter</button>
+
+          <div class="forgot-password">
+            <a href="#" (click)="$event.preventDefault()">Mot de passe oublié ?</a>
+          </div>
+
+          <div class="forgot-password" style="margin-top: 10px; opacity: .9;">
+            <small>
+              Compte par défaut : <b>admin</b> / <b>admin123</b>
+            </small>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>

@@ -1,0 +1,249 @@
+<div class="pageMain">
+  <div class="page-root">
+    <main class="page-main">
+      <div class="admin-scroll">
+        <div class="content">
+          <!-- HEADER -->
+          <div class="page-head">
+            <div>
+              <h2 class="page-title">Historique des passages</h2>
+              <p class="page-desc">
+                Consultez et filtrez l'historique de tous les passages de camions.
+              </p>
+            </div>
+
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="exporterCSV()"
+              [disabled]="filteredRows.length === 0"
+            >
+              <span class="material-symbols-outlined">download</span>
+              <span>Exporter en CSV</span>
+            </button>
+          </div>
+
+          <!-- FILTERS -->
+          <section class="card filters" aria-label="Filtres d'historique">
+            <div class="filters-row">
+              <!-- Recherche -->
+              <div class="field">
+                <span class="left-icon">
+                  <span class="material-symbols-outlined">search</span>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Rechercher par nom ou immatriculation"
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="applyFilters()"
+                />
+              </div>
+
+              <!-- Filtres sous forme de sélecteurs premium -->
+              <div class="select-wrap">
+                <select
+                  aria-label="Filtrer par entrepôt"
+                  [(ngModel)]="selectedWarehouseId"
+                  (change)="applyFilters()"
+                >
+                  <option [ngValue]="'all'">Tous les entrepôts</option>
+                  <option *ngFor="let w of warehousesOptions" [value]="w.id">
+                    {{ w.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="select-wrap">
+                <select
+                  aria-label="Filtrer par période"
+                  [(ngModel)]="selectedPeriod"
+                  (change)="applyFilters()"
+                >
+                  <option value="all">Toutes les périodes</option>
+                  <option value="today">Aujourd'hui</option>
+                  <option value="7days">7 derniers jours</option>
+                  <option value="30days">30 derniers jours</option>
+                </select>
+              </div>
+
+              <div class="select-wrap">
+                <select
+                  aria-label="Filtrer par statut"
+                  [(ngModel)]="selectedStatus"
+                  (change)="applyFilters()"
+                >
+                  <option [ngValue]="'all'">Tous les statuts</option>
+                  <option value="En attente">En attente</option>
+                  <option value="En cours de déchargement">En cours de déchargement</option>
+                  <option value="Déchargé">Déchargé</option>
+                  <option value="Annulé">Annulé</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- TABLE -->
+          <section class="card" aria-label="Tableau des passages">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Entrepôt</th>
+                    <th>Immatriculation</th>
+                    <th>Transporteur</th>
+                    <th>Date Arrivée</th>
+                    <th>Heure Enr.</th>
+                    <th>Statut</th>
+                    <th style="text-align: right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Si aucune ligne -->
+                  <tr *ngIf="filteredRows.length === 0">
+                    <td colspan="7" class="sub" style="text-align: center; padding: 3rem">
+                      <span
+                        class="material-symbols-outlined"
+                        style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem"
+                        >history_toggle_off</span
+                      >
+                      Aucun passage ne correspond aux filtres.
+                    </td>
+                  </tr>
+
+                  <!-- Lignes d'historique -->
+                  <tr *ngFor="let row of filteredRows">
+                    <td>
+                      <div class="warehouse-display">
+                        <span
+                          class="material-symbols-outlined"
+                          style="font-size: 18px; color: var(--text-secondary); opacity: 0.7"
+                          >domain</span
+                        >
+                        {{ row.entrepotName }}
+                      </div>
+                    </td>
+                    <td>
+                      <span class="name">{{ row.immatriculation }}</span>
+                    </td>
+                    <td>
+                      <span class="sub">{{ row.transporteur || '—' }}</span>
+                    </td>
+                    <td>{{ row.createdAt | date : 'dd/MM/yyyy' }}</td>
+                    <td>{{ formatHeure(row.createdAt) }}</td>
+                    <td>
+                      <span class="status-pill" [ngClass]="getStatusCssClass(row.statut)">
+                        <span class="material-symbols-outlined status-icon">{{
+                          getStatusIcon(row.statut)
+                        }}</span>
+                        {{ row.statut }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button
+                          type="button"
+                          class="mini-btn"
+                          title="Voir le détail"
+                          (click)="openDetailsModal(row)"
+                        >
+                          <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- HISTORIQUE MODAL -->
+          <div class="modal" *ngIf="showDetailsModal">
+            <div class="modal__backdrop" (click)="closeDetailsModal()"></div>
+            <div class="modal__panel">
+              <div class="truck-modal-header">
+                <h2 class="truck-modal-title">Historique du camion</h2>
+                <button
+                  type="button"
+                  class="truck-modal-close"
+                  aria-label="Fermer"
+                  (click)="closeDetailsModal()"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="truck-modal-body" *ngIf="selectedRow">
+                <div class="truck-summary">
+                  <div class="truck-summary-row">
+                    <div class="summary-key">Immatriculation</div>
+                    <div class="summary-value">{{ selectedRow.immatriculation }}</div>
+                  </div>
+                  <div class="truck-summary-row">
+                    <div class="summary-key">Transporteur</div>
+                    <div class="summary-value">{{ selectedRow.transporteur || '—' }}</div>
+                  </div>
+                  <div class="truck-summary-row">
+                    <div class="summary-key">Entrepôt</div>
+                    <div class="summary-value">{{ selectedRow.entrepotName }}</div>
+                  </div>
+                  <div class="truck-summary-row">
+                    <div class="summary-key">Date arrivée</div>
+                    <div class="summary-value">
+                      {{ selectedRow.createdAt | date : 'dd/MM/yyyy' }} •
+                      {{ formatHeure(selectedRow.createdAt) }}
+                    </div>
+                  </div>
+                  <div class="truck-summary-row">
+                    <div class="summary-key">KOR / TH</div>
+                    <div class="summary-value">
+                      {{ selectedRow.kor || '—' }} / {{ selectedRow.th || '—' }}
+                    </div>
+                  </div>
+                  <div class="truck-summary-row">
+                    <div class="summary-key">Statut</div>
+                    <div class="summary-value">
+                      <span class="status-pill" [ngClass]="getStatusCssClass(selectedRow.statut)">
+                        <span class="material-symbols-outlined status-icon">{{
+                          getStatusIcon(selectedRow.statut)
+                        }}</span>
+                        {{ selectedRow.statut }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="history-section">
+                  <div
+                    *ngIf="!selectedRow.history || selectedRow.history.length === 0"
+                    class="sub"
+                    style="text-align: center; opacity: 0.6; padding: 1rem"
+                  >
+                    Aucun historique disponible.
+                  </div>
+
+                  <div *ngFor="let h of selectedRow.history" class="history-item">
+                    <div class="history-dot"></div>
+                    <div class="history-content">
+                      <div class="history-event">{{ h.event }}</div>
+                      <div class="history-meta">
+                        <strong>{{ h.by || '—' }}</strong> •
+                        {{ h.date | date : 'dd/MM/yyyy HH:mm' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="truck-modal-footer">
+                <button type="button" class="btn-primary" (click)="closeDetailsModal()">
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- END MODAL -->
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

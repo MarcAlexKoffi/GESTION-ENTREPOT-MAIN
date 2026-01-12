@@ -1,0 +1,154 @@
+:host {
+  display: block;
+}
+
+/* FOND IDENTIQUE À LA PAGE ENTREPÔTS */
+:host ::ng-deep .pageMain {
+  background: var(--background-light) !important;
+  padding-top: 0 !important;
+  min-height: 100vh;
+}
+
+/* CONTENEUR PRINCIPAL */
+:host ::ng-deep .kpi-page {
+  max-width: 1350px;
+  margin: 0 auto;
+  padding: 48px 32px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* TITRES */
+:host ::ng-deep .kpi-page-title {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #111827;
+}
+
+:host ::ng-deep .kpi-page-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 36px;
+}
+
+/* FILTRES TEMPORELS (STYLE ROND COMME TES DROPDOWNS) */
+:host ::ng-deep .kpi-filters-card {
+  background: white;
+  padding: 22px 28px;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 4px 12px rgba(0, 0, 20, 0.05);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48px;
+}
+
+.kpi-filters-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.kpi-filters-group {
+  display: flex;
+  gap: 22px;
+}
+
+.kpi-filter-btn {
+  padding: 8px 26px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.kpi-filter-btn--active {
+  background: #dde9ff;
+  border-color: #bfd6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+/* TITRES DES SECTIONS */
+.kpi-section-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 32px;
+  color: #111827;
+}
+
+/* GRILLE DE KPI */
+:host ::ng-deep .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* STYLE CARTE KPI IDENTIQUE AUX CARTES ENTREPÔTS */
+:host ::ng-deep .kpi-card {
+  background: white;
+  padding: 24px 26px;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 6px 16px rgba(0, 0, 20, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: 0.25s;
+}
+
+.kpi-card:hover {
+  box-shadow: 0px 8px 22px rgba(0, 0, 20, 0.10);
+  transform: translateY(-2px);
+}
+
+/* HAUT DE LA CARTE */
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* VALEUR KPI */
+.kpi-card-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* VARIANTES COLORÉES */
+.kpi-card--attention {
+  background: #fff5da;
+  border-color: #f8e1a1;
+}
+
+.kpi-card--danger {
+  background: #ffe1e2;
+  border-color: #ffbfc3;
+}
+
+/* COULEURS ICONES */
+.kpi-icon--success {
+  color: #10b981;
+}
+
+.kpi-icon--warning {
+  color: #f97316;
+}
+
+.kpi-icon--danger {
+  color: #ef4444;
+}
+
+.kpi-icon--info {
+  color: #3b82f6;
+}

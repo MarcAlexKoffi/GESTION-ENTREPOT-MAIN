@@ -1,0 +1,19 @@
+Found 3 trucks with status 'Enregistré'
+--- Truck ID 2 ---
+Column heureArrivee: Sun Jan 11 2026 14:30:09 GMT+0000 (heure moyenne de Greenwich) (Type: object)
+Metadata raw: {"kor":"","th":"","heureArrivee":"14:30","history":[{"event":"Camion enregistré","by":"gerant","date":"2026-01-11T14:30:09.416Z"}],"unreadForAdmin":true}
+Metadata has heureArrivee? true
+Metadata heureArrivee value: "14:30"
+Is metadata heureArrivee valid date? false
+--- Truck ID 9 ---
+Column heureArrivee: Sun Jan 11 2026 17:23:57 GMT+0000 (heure moyenne de Greenwich) (Type: object)
+Metadata raw: {"kor":"","th":"","heureArrivee":"17:23","history":[{"event":"Camion enregistré","by":"gerant","date":"2026-01-11T17:23:57.064Z"}],"unreadForAdmin":true}
+Metadata has heureArrivee? true
+Metadata heureArrivee value: "17:23"
+Is metadata heureArrivee valid date? false
+--- Truck ID 10 ---
+Column heureArrivee: Sun Jan 11 2026 17:50:24 GMT+0000 (heure moyenne de Greenwich) (Type: object)
+Metadata raw: {"kor":"","th":"","heureArrivee":"17:50","history":[{"event":"Camion enregistré","by":"gerant","date":"2026-01-11T17:50:24.095Z"}],"unreadForAdmin":true}
+Metadata has heureArrivee? true
+Metadata heureArrivee value: "17:50"
+Is metadata heureArrivee valid date? false

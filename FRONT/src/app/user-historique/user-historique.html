@@ -1,0 +1,152 @@
+<body>
+  <div class="page-root">
+    <main class="page-main">
+      <div class="page-container">
+        <!-- HEADER -->
+        <header class="page-header">
+          <div class="page-title-block">
+            <p class="page-title">Historique des passages</p>
+            <p class="page-subtitle">
+              Consultez et filtrez l'historique de tous les passages de camions.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="primary-chip-button"
+            (click)="exporterCSV()"
+            [disabled]="filteredRows.length === 0"
+          >
+            <span class="material-symbols-outlined">download</span>
+            <span>Exporter</span>
+          </button>
+        </header>
+        <!-- FILTERS -->
+        <section class="filters-section" aria-label="Filtres d'historique">
+          <div class="filters-grid">
+            <!-- Recherche -->
+            <div class="search-wrapper">
+              <div class="search-field">
+                <div class="search-icon-box">
+                  <span class="material-symbols-outlined">search</span>
+                </div>
+                <input
+                  type="text"
+                  class="search-input"
+                  placeholder="Rechercher par immatriculation ou transporteur..."
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="applyFilters()"
+                />
+              </div>
+            </div>
+            <!-- Filtres sous forme de "chips" -->
+            <div class="filter-chips-row">
+              <!-- Filtre Période -->
+              <div class="filter-chip">
+                <span>Période</span>
+                <select
+                  class="filter-select"
+                  [(ngModel)]="selectedPeriod"
+                  (change)="applyFilters()"
+                >
+                  <option value="all">Toutes</option>
+                  <option value="today">Aujourd'hui</option>
+                  <option value="7days">7 derniers jours</option>
+                </select>
+                <span class="material-symbols-outlined">arrow_drop_down</span>
+              </div>
+
+              <!-- Filtre Statut -->
+              <div class="filter-chip">
+                <span>Statut</span>
+                <select
+                  class="filter-select"
+                  [(ngModel)]="selectedStatus"
+                  (change)="applyFilters()"
+                >
+                  <option [ngValue]="'all'">Tous</option>
+                  <option value="En attente">En attente</option>
+                  <option value="En cours de déchargement">En cours de déchargement</option>
+                  <option value="Déchargé">Déchargé</option>
+                  <option value="Annulé">Annulé</option>
+                </select>
+                <span class="material-symbols-outlined">arrow_drop_down</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABLE -->
+        <section class="table-card" aria-label="Tableau des passages">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Immatriculation</th>
+                  <th>Transporteur</th>
+                  <th>Date Arrivée Camion</th>
+                  <th>Heure d'enrégistrement</th>
+                  <th>Statut</th>
+                  <th class="action-cell">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Si aucune ligne -->
+                <tr *ngIf="filteredRows.length === 0">
+                  <td colspan="9" class="cell-muted">
+                    Aucun passage ne correspond à vos filtres pour le moment.
+                  </td>
+                </tr>
+
+                <!-- Lignes d'historique -->
+                <ng-container *ngIf="filteredRows.length > 0">
+                  <tr *ngFor="let row of filteredRows">
+                    <!-- Immatriculation -->
+                    <td class="cell-main">
+                      {{ row.immatriculation }}
+                    </td>
+
+                    <!-- Transporteur -->
+                    <td class="cell-muted">
+                      {{ row.transporteur }}
+                    </td>
+
+                    <!-- Date arrivée camion -->
+                    <td class="cell-muted">
+                      {{ row.heureArrivee ? (row.heureArrivee | date : 'dd/MM/yyyy') : '-' }}
+                    </td>
+
+                    <!-- Heure d'enregistrement (USER) -->
+                    <td class="cell-muted">
+                      {{ formatHeure(row.createdAt) }}
+                    </td>
+
+                    <!-- Statut -->
+                    <td>
+                      <span [ngClass]="getStatusCssClass(row.statut)">
+                        <span class="material-symbols-outlined status-icon">{{
+                          getStatusIcon(row.statut)
+                        }}</span>
+                        {{ row.statut }}
+                      </span>
+                    </td>
+
+                    <!-- Action -->
+                    <td class="action-cell">
+                      <button
+                        type="button"
+                        class="icon-ghost-button"
+                        title="Voir le détail du passage"
+                      >
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>

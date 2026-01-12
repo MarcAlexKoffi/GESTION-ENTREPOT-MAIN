@@ -1,0 +1,538 @@
+﻿[33mÔØ»[39m Building...
+node.exe : 
+Au caractère 
+C:\Program Files\node
+js\npx.ps1:29 : 3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (:String   
+ ) [], RemoteExce    
+ption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  polyfills-5CFQRCPP.
+js  33.8kb
+
+Done in 101ms
+X [ERROR] TS2551: 
+Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ht
+ml:408:64:
+      408 Ôöé ...put 
+class="truck-input" [
+(ngModel)]="editTruck
+Data.coperative" />
+          ÔòÁ        
+                     
+                     
+     ~~~~~~~~~~
+
+  Error occurs in 
+the template of 
+component 
+UserEntrepot.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:15:15:
+      15 Ôöé   
+templateUrl: './user-
+entrepot.html',
+         ÔòÁ         
+       ~~~~~~~~~~~~~~
+~~~~~~~~
+
+X [ERROR] TS2551: 
+Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ht
+ml:408:64:
+      408 Ôöé ...put 
+class="truck-input" [
+(ngModel)]="editTruck
+Data.coperative" />
+          ÔòÁ        
+                     
+                     
+     ~~~~~~~~~~
+
+  Error occurs in 
+the template of 
+component 
+UserEntrepot.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:15:15:
+      15 Ôöé   
+templateUrl: './user-
+entrepot.html',
+         ÔòÁ         
+       ~~~~~~~~~~~~~~
+~~~~~~~~
+
+X [ERROR] TS2561: 
+Object literal may 
+only specify known 
+properties, but 
+'coperative' does 
+not exist in type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean to write 
+'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:407:6:
+      407 Ôöé       
+coperative: '',
+          ÔòÁ       
+~~~~~~~~~~
+
+X [ERROR] TS2561: 
+Object literal may 
+only specify known 
+properties, but 
+'coperative' does 
+not exist in type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean to write 
+'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:478:6:
+      478 Ôöé       
+coperative: 
+t.coperative || '',
+          ÔòÁ       
+~~~~~~~~~~
+
+X [ERROR] TS2551: 
+Property 
+'coperative' does 
+not exist on type 
+'UITruck'. Did you 
+mean 'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:478:20:
+      478 Ôöé       
+coperative: 
+t.coperative || '',
+          ÔòÁ        
+             
+~~~~~~~~~~
+
+  'cooperative' is 
+declared here.
+
+    src/app/services/
+truck.service.ts:33:2
+:
+      33 Ôöé   
+cooperative?: string;
+         ÔòÁ   
+~~~~~~~~~~~
+
+X [ERROR] TS2551: 
+Property 
+'coperative' does 
+not exist on type 
+'UITruck'. Did you 
+mean 'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:491:6:
+      491 Ôöé     
+t.coperative = this.e
+ditTruckData.coperati
+ve.trim();
+          ÔòÁ       
+~~~~~~~~~~
+
+  'cooperative' is 
+declared here.
+
+    src/app/services/
+truck.service.ts:33:2
+:
+      33 Ôöé   
+cooperative?: string;
+         ÔòÁ   
+~~~~~~~~~~~
+
+X [ERROR] TS2551: 
+Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 'cooperative'? 
+[plugin 
+angular-compiler]
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:491:38:
+      491 Ôöé     
+t.coperative = this.e
+ditTruckData.coperati
+ve.trim();
+          ÔòÁ        
+                     
+          ~~~~~~~~~~
+
+  'cooperative' is 
+declared here.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:50:74:
+      50 Ôöé 
+...iculation: '', 
+transporteur: '', 
+transfert: '', 
+cooperative: '' };
+         ÔòÁ         
+                     
+                     
+ ~~~~~~~~~~~~~~~
+
+7 errors
+[32mÔ£ö[39m Building...
+Application bundle generation failed. [10.920 seconds] - 2026-01-10T09:13:29.295Z
+
+[1m[31m[31mX [41;
+31m[[41;97mERROR[41
+;31m][0m 
+[1mTS2551: Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ht
+ml:408:64:
+[37m      408 Ôöé 
+...put 
+class="truck-input" [
+(ngModel)]="editTruck
+Data.[32mcoperative
+[37m" />
+          ÔòÁ        
+                     
+                     
+     
+[32m~~~~~~~~~~[0m
+
+  Error occurs in 
+the template of 
+component 
+UserEntrepot.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:15:15:
+[37m      15 Ôöé   
+templateUrl: [32m'./
+user-entrepot.html'[
+37m,
+         ÔòÁ         
+       [32m~~~~~~~~~
+~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2551: 
+Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ht
+ml:408:64:
+[37m      408 Ôöé 
+...put 
+class="truck-input" [
+(ngModel)]="editTruck
+Data.[32mcoperative
+[37m" />
+          ÔòÁ        
+                     
+                     
+     
+[32m~~~~~~~~~~[0m
+
+  Error occurs in 
+the template of 
+component 
+UserEntrepot.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:15:15:
+[37m      15 Ôöé   
+templateUrl: [32m'./
+user-entrepot.html'[
+37m,
+         ÔòÁ         
+       [32m~~~~~~~~~
+~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2561: Object 
+literal may only 
+specify known 
+properties, but 
+'coperative' does 
+not exist in type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean to write 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:407:6:
+[37m      407 Ôöé   
+    [32mcoperative[
+37m: '',
+          ÔòÁ       
+[32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2561: Object 
+literal may only 
+specify known 
+properties, but 
+'coperative' does 
+not exist in type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean to write 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:478:6:
+[37m      478 Ôöé   
+    [32mcoperative[
+37m: t.coperative || 
+'',
+          ÔòÁ       
+[32m~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2551: 
+Property 
+'coperative' does 
+not exist on type 
+'UITruck'. Did you 
+mean 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:478:20:
+[37m      478 Ôöé   
+    coperative: t.[3
+2mcoperative[37m || 
+'',
+          ÔòÁ        
+             
+[32m~~~~~~~~~~[0m
+
+  'cooperative' is 
+declared here.
+
+    src/app/services/
+truck.service.ts:33:2
+:
+[37m      33 Ôöé   
+[32mcooperative[37m?
+: string;
+         ÔòÁ   
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2551: 
+Property 
+'coperative' does 
+not exist on type 
+'UITruck'. Did you 
+mean 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:491:6:
+[37m      491 Ôöé   
+  t.[32mcoperative[
+37m = this.editTruckD
+ata.coperative.trim()
+;
+          ÔòÁ       
+[32m~~~~~~~~~~[0m
+
+  'cooperative' is 
+declared here.
+
+    src/app/services/
+truck.service.ts:33:2
+:
+[37m      33 Ôöé   
+[32mcooperative[37m?
+: string;
+         ÔòÁ   
+[32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;
+97mERROR[41;31m][0m
+ [1mTS2551: 
+Property 
+'coperative' does 
+not exist on type '{ 
+immatriculation: 
+string; 
+transporteur: 
+string; transfert: 
+string; cooperative: 
+string; }'. Did you 
+mean 
+'cooperative'?[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:491:38:
+[37m      491 Ôöé   
+  t.coperative = this
+.editTruckData.[32mc
+operative[37m.trim()
+;
+          ÔòÁ        
+                     
+          
+[32m~~~~~~~~~~[0m
+
+  'cooperative' is 
+declared here.
+
+    src/app/user-entr
+epot/user-entrepot.ts
+:50:74:
+[37m      50 Ôöé 
+...iculation: '', 
+transporteur: '', 
+transfert: '', 
+[32mcooperative: 
+''[37m };
+         ÔòÁ         
+                     
+                     
+ [32m~~~~~~~~~~~~~~~
+[0m
+
+[39m[22m
