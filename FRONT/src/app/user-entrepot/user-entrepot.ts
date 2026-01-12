@@ -244,18 +244,6 @@ export class UserEntrepot implements OnInit {
 
   applyFilters(): void {
     const base = this.getBaseListForTab();
-
-    console.log(
-      '[user-entrepot] applyFilters - currentTab=',
-      this.currentTab,
-      'selectedPeriod=',
-      this.selectedPeriod,
-      'selectedStatus=',
-      this.selectedStatus,
-      'baseCount=',
-      base.length
-    );
-
     const search = this.filterSearch.trim().toLowerCase();
     const now = new Date();
 
@@ -308,21 +296,10 @@ export class UserEntrepot implements OnInit {
 
       return true;
     });
-
-    console.log(
-      '[user-entrepot] applyFilters - result filteredTrucks.length=',
-      this.filteredTrucks.length
-    );
   }
 
   ngOnInit(): void {
-    console.log('[user-entrepot] ngOnInit - start, entrepot.id =', this.entrepot.id);
     this.loadEntrepot();
-    console.log(
-      '[user-entrepot] ngOnInit - called loadEntrepot(), entrepot.id =',
-      this.entrepot.id
-    );
-    console.log('[user-entrepot] ngOnInit - waiting for entrepot to load before trucks');
   }
 
   private refreshView(): void {
@@ -373,12 +350,9 @@ export class UserEntrepot implements OnInit {
   loadEntrepot(): void {
     const idParam = Number(this.route.snapshot.paramMap.get('id'));
 
-    console.log('[user-entrepot] loadEntrepot - idParam=', idParam);
     this.warehouseService.getWarehouse(idParam).subscribe({
       next: (w) => {
-        console.log('[user-entrepot] loadEntrepot - API returned', w);
         this.entrepot = { id: w.id, nom: w.name, lieu: w.location };
-        console.log('[user-entrepot] loadEntrepot - this.entrepot now', this.entrepot);
         try {
           localStorage.setItem('lastVisitedEntrepot', String(this.entrepot.id));
         } catch (e) {
@@ -406,10 +380,8 @@ export class UserEntrepot implements OnInit {
   }
 
   loadTrucks(): void {
-    console.log('[user-entrepot] loadTrucks - requesting trucks for entrepotId=', this.entrepot.id);
     this.truckService.getTrucks(this.entrepot.id).subscribe({
       next: (data) => {
-        console.log('[user-entrepot] loadTrucks - received', data?.length, 'trucks from API');
         // Force filter by entrepotId in case backend returns extras
         const filtered = (data || []).filter(
           (t) => Number(t.entrepotId) === Number(this.entrepot.id)
@@ -631,7 +603,10 @@ export class UserEntrepot implements OnInit {
 
         const iso =
           // si tu remplis un jour validatedAt, il sera prioritaire
-          (t as any).validatedAt || this.findHistoryDate(t, 'Validation administrateur') || t.createdAt || fallback;
+          (t as any).validatedAt ||
+          this.findHistoryDate(t, 'Validation administrateur') ||
+          t.createdAt ||
+          fallback;
         return this.formatHourFromIso(iso);
       }
 
@@ -1119,7 +1094,8 @@ export class UserEntrepot implements OnInit {
     const upper = s.toUpperCase();
     if (!s) return 'help_outline';
     if (upper.includes('ACCEP') || upper.includes('ACCEPT')) return 'task_alt';
-    if (upper.includes('RENVOY') || upper.includes('RENVOYE') || upper.includes('RENV')) return 'send_to_mobile';
+    if (upper.includes('RENVOY') || upper.includes('RENVOYE') || upper.includes('RENV'))
+      return 'send_to_mobile';
     if (upper.includes('REINT') || upper.includes('REINTEG')) return 'autorenew';
     if (upper.includes('ATTENT') || upper.includes('WAIT')) return 'hourglass_top';
     if (upper.includes('REFUS') || upper.includes('REFUSE')) return 'cancel';
@@ -1183,4 +1159,3 @@ export class UserEntrepot implements OnInit {
     }
   }
 }
-

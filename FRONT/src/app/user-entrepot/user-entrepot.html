@@ -163,20 +163,7 @@
                 <tr *ngFor="let t of filteredTrucks">
                   <td>
                     {{ t.immatriculation }}
-                    <span
-                      *ngIf="t.unreadForGerant"
-                      class="badge-new"
-                      style="
-                        background-color: #ef4444;
-                        color: white;
-                        padding: 2px 6px;
-                        border-radius: 4px;
-                        font-size: 0.7em;
-                        margin-left: 5px;
-                        font-weight: bold;
-                      "
-                      >Nouveau</span
-                    >
+                    <span *ngIf="t.unreadForGerant" class="badge-new">Nouveau</span>
                   </td>
                   <td class="cell-muted">{{ t.transporteur }}</td>
                   <td class="cell-muted">{{ getHourForCurrentTab(t) }}</td>
@@ -465,7 +452,7 @@
 
       <div class="truck-modal-body">
         <div class="truck-field">
-          <label class="truck-label">KOR <span style="color: red">*</span></label>
+          <label class="truck-label">KOR <span class="required-star">*</span></label>
           <input
             class="truck-input"
             [class.input-error]="isAnalysisInvalid"
@@ -478,7 +465,7 @@
         </div>
 
         <div class="truck-field">
-          <label class="truck-label">TH <span style="color: red">*</span></label>
+          <label class="truck-label">TH <span class="required-star">*</span></label>
           <input
             class="truck-input"
             [class.input-error]="isAnalysisInvalid"
