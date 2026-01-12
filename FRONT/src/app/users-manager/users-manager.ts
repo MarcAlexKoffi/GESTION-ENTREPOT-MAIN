@@ -27,6 +27,9 @@ export class UsersManager implements OnInit {
 
   formUser: Partial<User> = this.getEmptyFormUser();
 
+  // UI state for validation messages
+  saveAttempted = false;
+
   // --- UI message simple
   toastMessage: string | null = null;
   isLoading = false;
@@ -170,6 +173,7 @@ export class UsersManager implements OnInit {
   }
 
   saveUserFromModal(): void {
+    this.saveAttempted = true;
     console.log('saveUserFromModal called', { formUser: this.formUser, isEditMode: this.isEditMode });
 
     if (!this.formUser.nom || !this.formUser.username || !this.formUser.role) {
@@ -210,16 +214,28 @@ export class UsersManager implements OnInit {
     };
 
     try {
-      if (this.isEditMode && this.formUser.id) {
-        this.userService.updateUser(this.formUser.id, this.formUser).subscribe(observer);
-      } else {
-        if (!this.formUser.password) {
+      if (this.isEditMode) {
+        if (!this.formUser.id) {
           this.isLoading = false;
-          this.showToast('Mot de passe requis pour la création.');
+          this.showToast("Impossible : identifiant utilisateur manquant.");
           return;
         }
-        this.userService.createUser(this.formUser as User).subscribe(observer);
+
+        // Prepare payload: don't send empty password on update
+        const payload: Partial<User> = { ...this.formUser };
+        if (payload.password === '' || payload.password === undefined) delete payload.password;
+
+        this.userService.updateUser(this.formUser.id, payload).subscribe(observer);
+        return;
       }
+
+      // Creation flow
+      if (!this.formUser.password) {
+        this.isLoading = false;
+        this.showToast('Mot de passe requis pour la création.');
+        return;
+      }
+      this.userService.createUser(this.formUser as User).subscribe(observer);
     } catch (err) {
       this.isLoading = false;
       console.error('saveUserFromModal sync error', err);

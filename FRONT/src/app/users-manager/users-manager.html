@@ -196,22 +196,30 @@
               <div class="truck-modal-body">
                 <div class="truck-field">
                   <label class="truck-label">Nom complet</label>
-                  <input
-                    class="truck-input"
-                    type="text"
-                    placeholder="Ex : Jean Dupont"
-                    [(ngModel)]="formUser.nom"
-                  />
+                   <input
+                     class="truck-input"
+                     type="text"
+                     placeholder="Ex : Jean Dupont"
+                     [(ngModel)]="formUser.nom"
+                     required
+                   />
+                   <div class="field-error" *ngIf="saveAttempted && !formUser.nom">
+                     Le nom est requis.
+                   </div>
                 </div>
 
                 <div class="truck-field">
                   <label class="truck-label">Identifiant (Username)</label>
-                  <input
-                    class="truck-input"
-                    type="text"
-                    placeholder="Ex : jdupont"
-                    [(ngModel)]="formUser.username"
-                  />
+                   <input
+                     class="truck-input"
+                     type="text"
+                     placeholder="Ex : jdupont"
+                     [(ngModel)]="formUser.username"
+                     required
+                   />
+                   <div class="field-error" *ngIf="saveAttempted && !formUser.username">
+                     L'identifiant est requis.
+                   </div>
                 </div>
 
                 <div class="truck-field">
@@ -226,13 +234,14 @@
                     type="password"
                     placeholder="••••••••"
                     [(ngModel)]="formUser.password"
+                    name="password"
                   />
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
                   <div class="truck-field">
                     <label class="truck-label">Rôle</label>
-                    <select class="truck-select" [(ngModel)]="formUser.role">
+                    <select class="truck-select" [(ngModel)]="formUser.role" required>
                       <option value="admin">Administrateur</option>
                       <option value="operator">Opérateur</option>
                     </select>
@@ -240,7 +249,7 @@
 
                   <div class="truck-field">
                     <label class="truck-label">Statut</label>
-                    <select class="truck-select" [(ngModel)]="formUser.status">
+                    <select class="truck-select" [(ngModel)]="formUser.status" required>
                       <option value="Actif">Actif</option>
                       <option value="Inactif">Inactif</option>
                       <option value="En attente">En attente</option>
@@ -254,6 +263,7 @@
                     class="truck-select"
                     [(ngModel)]="formUser.entrepotId"
                     [disabled]="warehouses.length === 0"
+                    required
                   >
                     <option [ngValue]="null">Sélectionner un entrepôt</option>
                     <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>

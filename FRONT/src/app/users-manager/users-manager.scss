@@ -465,6 +465,13 @@ table {
   }
 }
 
+/* Inline validation message style */
+.field-error {
+  color: #ef4444;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+}
+
 .truck-modal-footer {
   padding: 1.5rem;
   border-top: 1px solid var(--border-light);

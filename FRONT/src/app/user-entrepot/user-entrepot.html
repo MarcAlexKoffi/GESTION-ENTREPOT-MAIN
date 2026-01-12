@@ -337,6 +337,7 @@
             placeholder="Ex : AB-123-CD"
             [(ngModel)]="newTruck.immatriculation"
             name="immatriculation"
+            required
           />
         </div>
 
@@ -350,6 +351,7 @@
             placeholder="Nom du transporteur ou du chauffeur"
             [(ngModel)]="newTruck.transporteur"
             name="transporteur"
+            required
           />
         </div>
 
@@ -413,12 +415,12 @@
       <div class="truck-modal-body">
         <div class="truck-field">
           <label class="truck-label">Immatriculation</label>
-          <input class="truck-input" [(ngModel)]="editTruckData.immatriculation" />
+          <input class="truck-input" [(ngModel)]="editTruckData.immatriculation" required />
         </div>
 
         <div class="truck-field">
           <label class="truck-label">Transporteur</label>
-          <input class="truck-input" [(ngModel)]="editTruckData.transporteur" />
+          <input class="truck-input" [(ngModel)]="editTruckData.transporteur" required />
         </div>
 
         <div class="truck-field">
@@ -510,6 +512,7 @@
             type="text"
             placeholder="Ex : AB-123-CD"
             [(ngModel)]="productForm.numeroCamion"
+            required
           />
         </div>
 
@@ -521,6 +524,7 @@
             type="text"
             placeholder="Ex : FT-2025-0012"
             [(ngModel)]="productForm.numeroFicheTransfert"
+            required
           />
         </div>
 
