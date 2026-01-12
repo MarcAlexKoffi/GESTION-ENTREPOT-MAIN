@@ -3,6 +3,7 @@ import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,8 +32,16 @@ export class Dashboard implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private truckService: TruckService,
-    private warehouseService: WarehouseService
+    private warehouseService: WarehouseService,
+    private authService: AuthService
   ) {}
+
+  // ===============================================================
+  // SESSION: Déconnexion
+  // ===============================================================
+  logout(): void {
+    this.authService.logout();
+  }
 
   private pollingInterval: any;
 

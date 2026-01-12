@@ -269,8 +269,9 @@
               </div>
 
               <div class="truck-modal-footer">
-                <button type="button" class="truck-submit" (click)="saveUserFromModal()">
-                  {{ isEditMode ? 'Enregistrer les modifications' : 'Créer l’utilisateur' }}
+                <button type="button" class="truck-submit" (click)="saveUserFromModal()" [disabled]="isLoading">
+                  <ng-container *ngIf="!isLoading">{{ isEditMode ? 'Enregistrer les modifications' : 'Créer l’utilisateur' }}</ng-container>
+                  <ng-container *ngIf="isLoading">Enregistrement...</ng-container>
                 </button>
               </div>
             </div>

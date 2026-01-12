@@ -170,6 +170,8 @@ export class UsersManager implements OnInit {
   }
 
   saveUserFromModal(): void {
+    console.log('saveUserFromModal called', { formUser: this.formUser, isEditMode: this.isEditMode });
+
     if (!this.formUser.nom || !this.formUser.username || !this.formUser.role) {
       this.showToast('Veuillez remplir les champs obligatoires.');
       return;
@@ -207,15 +209,21 @@ export class UsersManager implements OnInit {
       },
     };
 
-    if (this.isEditMode && this.formUser.id) {
-      this.userService.updateUser(this.formUser.id, this.formUser).subscribe(observer);
-    } else {
-      if (!this.formUser.password) {
-        this.isLoading = false;
-        this.showToast('Mot de passe requis pour la création.');
-        return;
+    try {
+      if (this.isEditMode && this.formUser.id) {
+        this.userService.updateUser(this.formUser.id, this.formUser).subscribe(observer);
+      } else {
+        if (!this.formUser.password) {
+          this.isLoading = false;
+          this.showToast('Mot de passe requis pour la création.');
+          return;
+        }
+        this.userService.createUser(this.formUser as User).subscribe(observer);
       }
-      this.userService.createUser(this.formUser as User).subscribe(observer);
+    } catch (err) {
+      this.isLoading = false;
+      console.error('saveUserFromModal sync error', err);
+      this.showToast('Erreur interne. Voir console.');
     }
   }
 

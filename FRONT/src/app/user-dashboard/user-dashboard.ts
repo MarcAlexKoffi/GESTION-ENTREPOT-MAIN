@@ -3,6 +3,7 @@ import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { AuthService } from '../services/auth.service';
 
 type UserRole = 'admin' | 'operator' | 'driver' | 'security';
 type UserStatus = 'Actif' | 'Inactif' | 'En attente';
@@ -48,7 +49,8 @@ export class UserDashboard implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private truckService: TruckService,
-    private warehouseService: WarehouseService
+    private warehouseService: WarehouseService,
+    private authService: AuthService
   ) {}
 
   private pollingInterval: any;
@@ -99,8 +101,7 @@ export class UserDashboard implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   private roleLabel(role: UserRole): string {
