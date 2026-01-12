@@ -1,0 +1,82 @@
+<div class="pageMain">
+  <div class="page-shell">
+    <header class="page-header">
+      <div class="page-title-block">
+        <h1 class="page-title">Gestion des Empotages</h1>
+        <p class="page-subtitle">Suivez et gérez l'ensemble de vos opérations de chargement.</p>
+      </div>
+      <button class="btn-primary-main">
+        <span class="material-symbols-outlined">add</span>
+        <span>Nouveau empotage</span>
+      </button>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p class="stat-label">TOTAL</p>
+        <p class="stat-value">{{ stats.total }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label" style="color: #3b82f6;">EN COURS</p>
+        <p class="stat-value">{{ stats.enCours }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label" style="color: #10b981;">TERMINÉS</p>
+        <p class="stat-value">{{ stats.termines }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label" style="color: #94a3b8;">À VENIR</p>
+        <p class="stat-value">{{ stats.aVenir }}</p>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Booking</th>
+              <th class="text-center">Conteneurs</th>
+              <th class="text-center">Volume (m³)</th>
+              <th>Période</th>
+              <th>Statut</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of empotages">
+              <td>
+                <div class="client-info">
+                  <strong>{{ item.client }}</strong>
+                  <small>{{ item.clientType }}</small>
+                </div>
+              </td>
+              <td>
+                <a href="#" class="booking-link">{{ item.booking }}</a>
+              </td>
+              <td class="text-center">{{ item.conteneurs }}</td>
+              <td class="text-center">{{ item.volume }}</td>
+              <td>{{ item.dateStart }} - {{ item.dateEnd }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="getStatusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="text-right">
+                <div class="actions">
+                  <button class="actions-menu-button" title="Modifier">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button class="actions-menu-button" title="Voir">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

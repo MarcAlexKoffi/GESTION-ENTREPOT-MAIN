@@ -12,6 +12,8 @@ import { UserDashboardMain } from './user-dashboard-main/user-dashboard-main';
 import { UserHistorique } from './user-historique/user-historique';
 import { UserEntrepot } from './user-entrepot/user-entrepot';
 import { UsersManager } from './users-manager/users-manager';
+import { AdminEmpotage } from './admin-empotage/admin-empotage';
+import { UserEmpotage } from './user-empotage/user-empotage';
 
 export const routes: Routes = [
     {
@@ -51,6 +53,10 @@ export const routes: Routes = [
             {
                 path: 'userManager',
                 component: UsersManager
+            },
+            {
+                path: 'adminEmpotage',
+                component: AdminEmpotage
             }
         ],
     },
@@ -82,6 +88,10 @@ export const routes: Routes = [
             {
                 path: 'userentrepot/:id',
                 component: UserEntrepot
+            },
+            {
+                path: 'userEmpotage',
+                component: UserEmpotage
             }
         ]
     },

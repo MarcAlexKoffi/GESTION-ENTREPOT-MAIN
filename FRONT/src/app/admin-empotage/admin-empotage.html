@@ -1,0 +1,184 @@
+<div class="pageMain">
+  <div class="page-shell">
+    <!-- HEADER -->
+    <header class="page-header">
+      <div class="page-title-block">
+        <h1 class="page-title">Supervision des Empotages</h1>
+        <p class="page-subtitle">
+          <span class="material-symbols-outlined icon-subtitle">admin_panel_settings</span>
+          Vue administrateur - Monitoring temps réel des opérations
+        </p>
+      </div>
+      <button class="btn-export">
+        <span class="material-symbols-outlined">download</span>
+        <span>Exporter en CSV</span>
+      </button>
+    </header>
+
+    <!-- STATS CARDS -->
+    <section class="stats-grid">
+      <!-- Total -->
+      <article class="stat-card">
+        <div class="stat-header">
+          <div class="icon-box bg-blue-100 text-blue-600">
+            <span class="material-symbols-outlined">inventory_2</span>
+          </div>
+          <span class="trend-pill positive">+{{ stats.totalTrend }}%</span>
+        </div>
+        <p class="stat-label">Total empotages</p>
+        <p class="stat-value">{{ stats.total | number }}</p>
+      </article>
+
+      <!-- A venir -->
+      <article class="stat-card">
+        <div class="stat-header">
+          <div class="icon-box bg-orange-100 text-orange-600">
+            <span class="material-symbols-outlined">event_upcoming</span>
+          </div>
+          <span class="trend-pill positive">+{{ stats.aVenirTrend }}%</span>
+        </div>
+        <p class="stat-label">À venir</p>
+        <p class="stat-value">{{ stats.aVenir }}</p>
+      </article>
+
+      <!-- En cours -->
+      <article class="stat-card">
+        <div class="stat-header">
+          <div class="icon-box bg-blue-50 text-blue-500">
+            <span class="material-symbols-outlined">assignment_return</span>
+          </div>
+          <span class="trend-pill negative">{{ stats.enCoursTrend }}%</span>
+        </div>
+        <p class="stat-label">En cours</p>
+        <p class="stat-value">{{ stats.enCours }}</p>
+      </article>
+
+      <!-- Terminés -->
+      <article class="stat-card">
+        <div class="stat-header">
+          <div class="icon-box bg-green-100 text-green-600">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <span class="trend-pill positive">+{{ stats.terminesTrend }}%</span>
+        </div>
+        <p class="stat-label">Terminés (24h)</p>
+        <p class="stat-value">{{ stats.termines }}</p>
+      </article>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="filters-card">
+      <div class="filter-header">
+        <span class="material-symbols-outlined">filter_list</span>
+        <h3>FILTRES DE RECHERCHE</h3>
+      </div>
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>Client</label>
+          <div class="select-wrapper">
+            <span class="material-symbols-outlined prefix-icon">person</span>
+            <select [(ngModel)]="filters.client">
+              <option value="all">Tous les clients</option>
+              <option value="cma">CMA CGM</option>
+              <option value="maersk">Maersk</option>
+            </select>
+            <span class="material-symbols-outlined suffix-icon">expand_more</span>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>N° Booking</label>
+          <div class="input-wrapper">
+            <span class="prefix">#</span>
+            <input type="text" placeholder="Ex: BK-9283..." [(ngModel)]="filters.booking" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Période (Début)</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined prefix-icon">calendar_today</span>
+            <input type="date" [(ngModel)]="filters.dateDebut" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Période (Fin)</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined prefix-icon">calendar_today</span>
+            <input type="date" [(ngModel)]="filters.dateFin" />
+          </div>
+        </div>
+
+        <button class="btn-reset" (click)="resetFilters()">
+          <span class="material-symbols-outlined">refresh</span>
+          Réinitialiser
+        </button>
+      </div>
+    </section>
+
+    <!-- TABLE LIST -->
+    <div class="list-section">
+      <div class="list-header">
+        <div class="list-title-group">
+          <h2>Liste des opérations</h2>
+          <span class="badge-count">Total: {{ stats.enCours }} en cours</span>
+        </div>
+        <button class="btn-icon-settings">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+      </div>
+
+      <section class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>CLIENT</th>
+                <th>BOOKING</th>
+                <th>CONTENEURS</th>
+                <th>VOLUME (M³)</th>
+                <th>DÉBUT PRÉVU</th>
+                <th>FIN ESTIMÉE</th>
+                <th>STATUT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let op of operations">
+                <td>
+                  <div class="client-cell">
+                    <div class="avatar-circle" [ngClass]="op.clientColor">
+                      {{ op.clientInitials }}
+                    </div>
+                    <span class="client-name">{{ op.clientName }}</span>
+                  </div>
+                </td>
+                <td class="font-medium">{{ op.booking }}</td>
+                <td class="font-medium">{{ op.conteneurs }}</td>
+                <td class="font-bold">{{ op.volume }}</td>
+                <td class="text-muted">{{ op.debutPrevu }}</td>
+                <td class="text-muted">{{ op.finEstimee }}</td>
+                <td>
+                  <span class="status-pill" [ngClass]="getStatusClass(op.statut)">
+                    <span class="material-symbols-outlined status-icon">
+                      {{ getStatusIcon(op.statut) }}
+                    </span>
+                    {{ op.statut }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="pagination-footer">
+          <span class="page-info">PAGE 1 DE 12</span>
+          <div class="pagination-controls">
+            <button class="btn-page" disabled><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class="btn-page"><span class="material-symbols-outlined">chevron_right</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
