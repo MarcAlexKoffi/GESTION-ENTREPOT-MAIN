@@ -35,8 +35,13 @@
     <!-- CREATE MODAL -->
     <div class="modal-backdrop" *ngIf="showCreateModal">
       <div class="modal-card">
-        <h3>Créer un nouvel empotage</h3>
-        <form (submit)="createEmpotage(); $event.preventDefault();">
+        <div class="modal-header">
+          <h3>{{ isEditing ? 'Modifier empotage' : 'Créer un nouvel empotage' }}</h3>
+          <button class="btn-close-modal" (click)="closeCreateModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form (submit)="saveEmpotage(); $event.preventDefault();">
           <div class="form-row">
             <label>Client</label>
             <input type="text" [(ngModel)]="newEmpotage.client" name="client" required />
@@ -86,11 +91,36 @@
           <div class="modal-actions">
             <button type="button" class="btn-secondary" (click)="closeCreateModal()" [disabled]="saving">Annuler</button>
             <button type="submit" class="btn-primary-main" [disabled]="saving">
-              <span *ngIf="!saving">Créer</span>
+              <span *ngIf="!saving">{{ isEditing ? 'Enregistrer' : 'Créer' }}</span>
               <span *ngIf="saving">En cours...</span>
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal-backdrop" *ngIf="showDeleteModal">
+      <div class="modal-card" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3>Confirmer la suppression</h3>
+          <button class="btn-close-modal" (click)="cancelDelete()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div style="margin-bottom: 2rem; color: var(--text-secondary); line-height: 1.5;">
+          <p>Êtes-vous sûr de vouloir supprimer cet empotage ?</p>
+          <p *ngIf="itemToDelete" style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem;">
+            {{ itemToDelete.client }} ({{ itemToDelete.booking }})
+          </p>
+          <p style="margin-top: 0.5rem; font-size: 0.9em;">Cette action est irréversible.</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cancelDelete()">Annuler</button>
+          <button type="button" class="btn-primary-main" style="background: #ef4444; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);" (click)="confirmDelete()">
+            Supprimer
+          </button>
+        </div>
       </div>
     </div>
 
@@ -122,8 +152,8 @@
               <th>Booking</th>
               <th class="text-center">Conteneurs</th>
               <th class="text-center">Volume (m³)</th>
-              <th>Période</th>
-              <th>Statut</th>
+              <th>Début</th>
+              <th>Fin</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
@@ -140,22 +170,19 @@
               </td>
               <td class="text-center">{{ item.conteneurs }}</td>
               <td class="text-center">{{ item.volume }}</td>
-              <td>{{ item.dateStart }} - {{ item.dateEnd }}</td>
               <td>
-                <span class="status-pill" [ngClass]="getStatusClass(item.status)">
-                  {{ item.status }}
-                </span>
+                 <span style="font-size: 0.9rem; color: #64748b;">{{ item.dateStart | date:'dd/MM/yyyy HH:mm' }}</span>
+              </td>
+              <td>
+                 <span style="font-size: 0.9rem; color: #64748b;">{{ item.dateEnd | date:'dd/MM/yyyy HH:mm' }}</span>
               </td>
               <td class="text-right">
                 <div class="actions">
-                  <button class="actions-menu-button" title="Modifier">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
                   <button class="actions-menu-button" title="Modifier" (click)="editEmpotage(item)">
                     <span class="material-symbols-outlined">edit</span>
                   </button>
-                  <button class="actions-menu-button" title="Voir" (click)="viewEmpotage(item)">
-                    <span class="material-symbols-outlined">visibility</span>
+                  <button class="actions-menu-button delete-btn" title="Supprimer" (click)="deleteEmpotage(item)">
+                    <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
               </td>

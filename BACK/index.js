@@ -738,6 +738,21 @@ app.put('/api/empotages/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/empotages/:id
+app.delete('/api/empotages/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query('DELETE FROM empotages WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Empotage non trouvé' });
+    }
+    res.json({ message: 'Empotage supprimé avec succès' });
+  } catch (err) {
+    console.error('Erreur DELETE /api/empotages/:id', err);
+    res.status(500).json({ message: 'Erreur suppression empotage', error: err.message });
+  }
+});
+
 // GET /api/empotages/export - returns CSV of filtered items
 app.get('/api/empotages/export', async (req, res) => {
   const { q = '', status } = req.query;

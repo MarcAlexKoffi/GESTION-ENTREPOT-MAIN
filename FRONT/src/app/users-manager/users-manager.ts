@@ -23,6 +23,11 @@ export class UsersManager implements OnInit {
 
   // --- modal create/edit
   showUserModal = false;
+  
+  // --- modal delete
+  showDeleteModal = false;
+  userToDelete: User | null = null;
+  
   isEditMode = false;
 
   formUser: Partial<User> = this.getEmptyFormUser();
@@ -253,17 +258,29 @@ export class UsersManager implements OnInit {
       }
     }
 
-    const ok = confirm(`Supprimer l'utilisateur "${user.nom}" ?`);
-    if (!ok) return;
+    // Ouvrir la modale
+    this.userToDelete = user;
+    this.showDeleteModal = true;
+  }
 
-    this.userService.deleteUser(user.id!).subscribe({
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.userToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.userToDelete || !this.userToDelete.id) return;
+    
+    this.userService.deleteUser(this.userToDelete.id).subscribe({
       next: () => {
         this.showToast('Utilisateur supprimé.');
         this.loadUsers();
+        this.cancelDelete();
       },
       error: (err) => {
         this.showToast('Erreur suppression.');
         console.error(err);
+        this.cancelDelete();
       },
     });
   }

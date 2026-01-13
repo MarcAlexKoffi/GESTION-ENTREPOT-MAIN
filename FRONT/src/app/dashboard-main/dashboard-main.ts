@@ -50,6 +50,11 @@ export class DashboardMain implements OnInit {
 
   // Modale création / édition
   showWarehouseModal = false;
+  
+  // Modale suppression
+  showDeleteModal = false;
+  warehouseToDelete: CardInfo | null = null;
+
   mode: 'create' | 'edit' = 'create';
   editingWarehouseId: number | null = null;
   selectedImageFile: File | null = null;
@@ -214,23 +219,30 @@ export class DashboardMain implements OnInit {
   // ---------------------------------------------------------------------------
   onDeleteWarehouse(card: CardInfo): void {
     this.actionsMenuWarehouseId = null;
+    this.warehouseToDelete = card;
+    this.showDeleteModal = true;
+  }
 
-    const confirmation = confirm(`Voulez-vous vraiment supprimer l'entrepôt "${card.name}" ? `);
-    if (!confirmation) {
-      return;
-    }
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.warehouseToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.warehouseToDelete) return;
+    const card = this.warehouseToDelete;
 
     // Appel API pour suppression
     this.warehouseService.delete(card.id).subscribe({
       next: () => {
         // 1) Mettre à jour l'affichage
         this.cards = this.cards.filter((w) => w.id !== card.id);
-
-        // 2) Nettoyage localStorage inutile car Cascade coté DB
+        this.closeDeleteModal();
       },
       error: (err) => {
         console.error('Erreur suppression entrepôt', err);
         alert('Erreur lors de la suppression de l’entrepôt');
+        this.closeDeleteModal();
       },
     });
   }

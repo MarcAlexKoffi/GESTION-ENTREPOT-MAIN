@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface Empotage {
+  id?: number;
   client: string;
   clientType: string;
   booking: string;
@@ -22,62 +23,28 @@ interface Empotage {
 })
 export class UserEmpotage implements OnInit {
   stats = {
-    total: 24,
-    enCours: 12,
-    termines: 8,
-    aVenir: 4
+    total: 0,
+    enCours: 0,
+    termines: 0,
+    aVenir: 0
   };
 
-  empotages: Empotage[] = [
-    {
-      client: 'CMA CGM',
-      clientType: 'Maritime',
-      booking: 'BK-88291',
-      conteneurs: 5,
-      volume: 120,
-      dateStart: '12/10/24',
-      dateEnd: '15/10/24',
-      status: 'A venir'
-    },
-    {
-      client: 'Maersk Line',
-      clientType: 'Global Transport',
-      booking: 'BK-99302',
-      conteneurs: 2,
-      volume: 45,
-      dateStart: '10/10/24',
-      dateEnd: '12/10/24',
-      status: 'En cours'
-    },
-    {
-      client: 'MSC Cargo',
-      clientType: 'Logistic Hub',
-      booking: 'BK-77110',
-      conteneurs: 10,
-      volume: 250,
-      dateStart: '01/10/24',
-      dateEnd: '05/10/24',
-      status: 'Terminé'
-    },
-    {
-      client: 'Hapag-Lloyd',
-      clientType: 'Maritime Services',
-      booking: 'BK-44556',
-      conteneurs: 3,
-      volume: 75,
-      dateStart: '14/10/24',
-      dateEnd: '18/10/24',
-      status: 'A venir'
-    }
-  ];
+  empotages: Empotage[] = [];
   
   // UI state
   search: string = '';
   filterStatus: '' | 'A venir' | 'En cours' | 'Terminé' = '';
   loading = false;
+  
   // Modal state
   showCreateModal = false;
   saving = false;
+  isEditing = false;
+  currentId: number | null = null;
+  
+  // Delete Modal State
+  showDeleteModal = false;
+  itemToDelete: Empotage | null = null;
 
   newEmpotage: Empotage = {
     client: '',
@@ -94,11 +61,13 @@ export class UserEmpotage implements OnInit {
   get filteredEmpotages(): Empotage[] {
     const q = this.search.trim().toLowerCase();
     return this.empotages.filter(item => {
+      // 1. Filter by status
       if (this.filterStatus && item.status !== this.filterStatus) return false;
+      // 2. Filter by search query
       if (!q) return true;
       return (
-        item.client.toLowerCase().includes(q) ||
-        item.booking.toLowerCase().includes(q)
+        (item.client || '').toLowerCase().includes(q) ||
+        (item.booking || '').toLowerCase().includes(q)
       );
     });
   }
@@ -113,14 +82,54 @@ export class UserEmpotage implements OnInit {
   }
 
   // Actions
-  viewEmpotage(item: Empotage) {
-    // Replace with a proper route/modal in future
-    alert(`Voir empotage: ${item.booking} — ${item.client}`);
+  deleteEmpotage(item: Empotage) {
+    if (!item.id) return;
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
+  }
+
+  async confirmDelete() {
+    if (!this.itemToDelete || !this.itemToDelete.id) return;
+    
+    try {
+      const res = await fetch(`http://localhost:3000/api/empotages/${this.itemToDelete.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      // refresh
+      await this.loadEmpotages();
+    } catch (e) {
+      console.error('Erreur suppression', e);
+      alert('Erreur lors de la suppression');
+    } finally {
+      this.cancelDelete();
+    }
   }
 
   editEmpotage(item: Empotage) {
-    // Replace with actual edit flow
-    alert(`Modifier empotage: ${item.booking}`);
+    this.isEditing = true;
+    this.currentId = item.id || null;
+    
+    // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      // Adjust to local ISO string roughly
+      const pad = (n: number) => n < 10 ? '0' + n : n;
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    this.newEmpotage = { 
+      ...item,
+      dateStart: formatDate(item.dateStart),
+      dateEnd: formatDate(item.dateEnd)
+    };
+    this.showCreateModal = true;
   }
 
   // Export the currently visible rows as CSV
@@ -166,19 +175,30 @@ export class UserEmpotage implements OnInit {
     this.loading = true;
     try {
       const params = new URLSearchParams();
-      if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
-      if (this.filterStatus) params.set('status', this.filterStatus);
-      const url = `http://localhost:3000/api/empotages?${params.toString()}`;
+      // On backend, q and status are handled, but we filter client-side for reactivity too
+      // if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
+      // if (this.filterStatus) params.set('status', this.filterStatus);
+      const url = `http://localhost:3000/api/empotages`;
       const res = await fetch(url, { method: 'GET' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       this.empotages = data;
+      this.calculateStats();
     } catch (e) {
       console.error('Erreur chargement empotages', e);
-      alert('Erreur chargement empotages (voir console)');
+      // alert('Erreur chargement empotages (voir console)');
     } finally {
       this.loading = false;
     }
+  }
+
+  calculateStats() {
+    this.stats = {
+      total: this.empotages.length,
+      enCours: this.empotages.filter(e => e.status === 'En cours').length,
+      termines: this.empotages.filter(e => e.status === 'Terminé').length,
+      aVenir: this.empotages.filter(e => e.status === 'A venir').length
+    };
   }
 
   // Trigger server-side CSV download
@@ -191,6 +211,8 @@ export class UserEmpotage implements OnInit {
   }
 
   openCreateModal() {
+    this.isEditing = false;
+    this.currentId = null;
     this.showCreateModal = true;
     // reset
     this.newEmpotage = {
@@ -201,9 +223,11 @@ export class UserEmpotage implements OnInit {
   closeCreateModal() {
     this.showCreateModal = false;
     this.saving = false;
+    this.isEditing = false;
+    this.currentId = null;
   }
 
-  async createEmpotage() {
+  async saveEmpotage() {
     // Basic validation
     if (!this.newEmpotage.client || !this.newEmpotage.booking) {
       alert('Veuillez renseigner au minimum le client et le booking');
@@ -211,27 +235,36 @@ export class UserEmpotage implements OnInit {
     }
     this.saving = true;
     try {
-      const res = await fetch('http://localhost:3000/api/empotages', {
-        method: 'POST',
+      let url = 'http://localhost:3000/api/empotages';
+      let method = 'POST';
+
+      if (this.isEditing && this.currentId) {
+        url = `http://localhost:3000/api/empotages/${this.currentId}`;
+        method = 'PUT';
+      }
+
+      const res = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(this.newEmpotage)
       });
+
       if (!res.ok) {
         // Try to read body for a helpful message
         let text = '';
         try { text = await res.text(); } catch (e) { /* ignore */ }
-        console.error('createEmpotage failed', res.status, text);
-        alert(`Erreur création empotage: ${res.status} ${text || ''}`);
+        console.error('saveEmpotage failed', res.status, text);
+        alert(`Erreur : ${res.status} ${text || ''}`);
         return;
       }
-      const created = await res.json();
+      
       this.closeCreateModal();
       // reload list
       await this.loadEmpotages();
-      alert('Empotage créé');
+      // alert(this.isEditing ? 'Empotage modifié' : 'Empotage créé');
     } catch (e) {
-      console.error('Erreur création empotage', e);
-      alert('Erreur création empotage (voir console)');
+      console.error('Erreur sauvegarde empotage', e);
+      alert('Erreur sauvegarde empotage (voir console)');
     } finally {
       this.saving = false;
     }

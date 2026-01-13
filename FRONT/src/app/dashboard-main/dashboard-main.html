@@ -269,6 +269,55 @@
               </div>
             </div>
           </div>
+
+          <!-- MODALE : Confirmation Suppression -->
+          <div class="modal" *ngIf="showDeleteModal">
+            <div class="modal__backdrop" (click)="closeDeleteModal()"></div>
+            <div class="modal__panel" style="max-width: 420px;">
+              <div class="truck-modal-header">
+                <h2 class="truck-modal-title">Confirmer la suppression</h2>
+                <button
+                  type="button"
+                  class="truck-modal-close"
+                  aria-label="Fermer"
+                  (click)="closeDeleteModal()"
+                >
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div class="truck-modal-body">
+                 <p style="color: #64748b; line-height: 1.5; margin-bottom: 0.5rem;">
+                   Êtes-vous sûr de vouloir supprimer cet entrepôt ?
+                 </p>
+                 <div *ngIf="warehouseToDelete" style="background: #f8fafc; padding: 1rem; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                    <p style="margin: 0; font-weight: 700; color: #0f172a;">{{ warehouseToDelete.name }}</p>
+                    <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">
+                       {{ warehouseToDelete.location }}
+                    </p>
+                 </div>
+                 <p style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+                    Cette action est irréversible.
+                 </p>
+              </div>
+
+              <div class="truck-modal-footer">
+                <button type="button" class="mini-btn cancel-btn" (click)="closeDeleteModal()">
+                  Annuler
+                </button>
+                <button 
+                  type="button" 
+                  class="btn-primary" 
+                  style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border: none;"
+                  (click)="confirmDelete()"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- END MODAL -->
         </div>
       </div>
