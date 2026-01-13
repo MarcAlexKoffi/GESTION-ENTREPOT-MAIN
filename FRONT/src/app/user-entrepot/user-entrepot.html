@@ -91,7 +91,7 @@
               (click)="currentTab = 'enregistres'; applyFilters(); $event.preventDefault()"
             >
               Enregistrés
-              <span class="tab-pill">{{ nbEnregistresByPeriod }}</span>
+              <!-- <span class="tab-pill">{{ nbEnregistresByPeriod }}</span> -->
             </a>
             <a
               href="#"
@@ -100,7 +100,7 @@
               (click)="currentTab = 'attente'; applyFilters(); $event.preventDefault()"
             >
               En attente
-              <span class="tab-pill">{{ nbAttenteByPeriod }}</span>
+              <!-- <span class="tab-pill">{{ nbAttenteByPeriod }}</span> -->
             </a>
 
             <a
@@ -110,7 +110,7 @@
               (click)="currentTab = 'valides'; applyFilters(); $event.preventDefault()"
             >
               Validés
-              <span class="tab-pill">{{ nbValidesByPeriod }}</span>
+              <!-- <span class="tab-pill">{{ nbValidesByPeriod }}</span> -->
             </a>
             <a
               href="#"
@@ -119,7 +119,7 @@
               (click)="currentTab = 'refoules'; applyFilters(); $event.preventDefault()"
             >
               Refoulés
-              <span class="tab-pill">{{ nbRefoulesByPeriod }}</span>
+              <!-- <span class="tab-pill">{{ nbRefoulesByPeriod }}</span> -->
             </a>
 
             <a
@@ -129,7 +129,7 @@
               (click)="currentTab = 'acceptes'; applyFilters(); $event.preventDefault()"
             >
               Acceptés
-              <span class="tab-pill">{{ nbAcceptesByPeriod }}</span>
+              <!-- <span class="tab-pill">{{ nbAcceptesByPeriod }}</span> -->
             </a>
             <a
               href="#"
@@ -249,59 +249,65 @@
 
                   <!-- ACTIONS -->
                   <td class="cell-actions">
-                    <div class="actions-menu-wrapper">
-                      <!-- BOUTON ... -->
-                      <button class="actions-menu-button" (click)="t.showMenu = !t.showMenu">
-                        <span class="material-symbols-outlined">more_vert</span>
+                    <div class="actions-group">
+                      <!-- ENREGISTRÉS -->
+                      <ng-container *ngIf="t.statut === 'Enregistré'">
+                        <button 
+                          class="action-btn btn-edit" 
+                          title="Modifier"
+                          (click)="openEditModal(t)"
+                        >
+                          <span class="material-symbols-outlined">edit</span>
+                        </button>
+
+                        <button 
+                          class="action-btn btn-science" 
+                          title="Résultats analyses"
+                          (click)="openAnalysisModal(t)"
+                        >
+                          <span class="material-symbols-outlined">science</span>
+                        </button>
+                      </ng-container>
+                      <!-- VALIDÉS : Renseigner produits -->
+                      <button 
+                        class="action-btn btn-inventory" 
+                        title="Renseigner détails produits"
+                        *ngIf="t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL'"
+                        (click)="openProductsModal(t)"
+                      >
+                         <span class="material-symbols-outlined">inventory_2</span>
                       </button>
 
-                      <!-- MENU -->
-                      <div class="actions-menu" *ngIf="t.showMenu">
-                        <!-- ENREGISTRÉS -->
+                      <!-- REFOULE : attente gérant -->
                         <button
-                          *ngIf="t.statut === 'Enregistré'"
-                          (click)="openEditModal(t); t.showMenu = false"
-                        >
-                          Modifier
-                        </button>
-
-                        <button
-                          *ngIf="t.statut === 'Enregistré'"
-                          (click)="openAnalysisModal(t); t.showMenu = false"
-                        >
-                          Résultats analyses
-                        </button>
-
-                        <!-- VALIDÉS : Renseigner produits -->
-                        <button
-                          *ngIf="t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL'"
-                          (click)="openProductsModal(t); t.showMenu = false"
-                        >
-                          Renseigner détails produits
-                        </button>
-
-                        <!-- REFOULE : attente gérant -->
-                        <button
+                          class="action-btn btn-send"
+                          title="Marquer comme renvoyé"
                           *ngIf="
                             (t.statut === 'Refoulé' || t.statut === 'Annulé') &&
                             t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT'
                           "
-                          (click)="markAsRenvoye(t); t.showMenu = false"
+                          (click)="markAsRenvoye(t)"
                         >
-                          Marquer comme renvoyé
+                          <span class="material-symbols-outlined">send</span>
                         </button>
 
                         <!-- HISTORIQUE -->
-                        <button (click)="openHistoryModal(t); t.showMenu = false">
-                          Voir historique
-                        </button>
-                        <button
-                          *ngIf="t.advancedStatus === 'ACCEPTE_FINAL' && t.products"
-                          (click)="openDetailsModal(t); t.showMenu = false"
+                        <button 
+                          class="action-btn btn-history"
+                          title="Voir historique"
+                          (click)="openHistoryModal(t)"
                         >
-                          Voir détails / Imprimer
+                           <span class="material-symbols-outlined">history</span>
                         </button>
-                      </div>
+
+                        <button
+                          class="action-btn btn-visibility"
+                          title="Voir détails / Imprimer"
+                          *ngIf="t.advancedStatus === 'ACCEPTE_FINAL' && t.products"
+                          (click)="openDetailsModal(t)"
+                        >
+                           <span class="material-symbols-outlined">visibility</span>
+                        </button>
                     </div>
                   </td>
                 </tr>

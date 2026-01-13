@@ -796,3 +796,50 @@ tr:hover td {
         white-space: nowrap;
     }
 }
+
+/* ACTIONS GROUP */
+.actions-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    align-items: center;
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #64748b;
+
+        .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        &:hover {
+            background: #e2e8f0;
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        // Specific colors for actions
+        &.btn-edit:hover { background: #eff6ff; color: #3b82f6; } /* Blue */
+        &.btn-science:hover { background: #f0fdf4; color: #10b981; } /* Emerald */
+        &.btn-inventory:hover { background: #fff7ed; color: #f97316; } /* Orange */
+        &.btn-send:hover { background: #fef2f2; color: #ef4444; } /* Red */
+        &.btn-visibility:hover { background: #f5f3ff; color: #8b5cf6; } /* Violet */
+        &.btn-history:hover { background: #f1f5f9; color: #475569; } /* Slate */
+    }
+
+    body.dark & {
+        .action-btn {
+            color: #94a3b8;
+            &:hover { background: #334155; }
+        }
+    }
+}
