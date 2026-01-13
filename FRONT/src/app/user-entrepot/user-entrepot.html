@@ -15,22 +15,18 @@
             <p class="stat-label">Camions enregistrés aujourd'hui</p>
             <p class="stat-value">{{ totalEnregistres }}</p>
           </article>
-
           <article class="stat-card">
             <p class="stat-label">En attente de validation</p>
             <p class="stat-value">{{ totalEnAttente }}</p>
           </article>
-
           <article class="stat-card">
             <p class="stat-label">Validés</p>
             <p class="stat-value">{{ totalValides }}</p>
           </article>
-
           <article class="stat-card">
             <p class="stat-label">Acceptés</p>
             <p class="stat-value">{{ totalAcceptes }}</p>
           </article>
-
           <article class="stat-card">
             <p class="stat-label">Refoulés</p>
             <p class="stat-value">{{ totalRefoules }}</p>
@@ -53,7 +49,6 @@
                 (ngModelChange)="applyFilters()"
               />
             </div>
-
             <!-- PERIOD FILTER -->
             <div class="filter-dropdown-wrapper">
               <button type="button" class="filter-button" (click)="togglePeriodMenu()">
@@ -61,7 +56,6 @@
                 <span>{{ periodLabel }}</span>
                 <span class="material-symbols-outlined">arrow_drop_down</span>
               </button>
-
               <div class="filter-dropdown" *ngIf="showPeriodMenu">
                 <button type="button" (click)="setPeriod('today')">Aujourd'hui</button>
                 <button type="button" (click)="setPeriod('7days')">7 derniers jours</button>

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService } from '../services/warehouse.service';
@@ -19,12 +20,10 @@ interface StoredUser {
   createdAt: string;
 }
 
-type PeriodFilter = 'day' | 'week' | 'month' | 'year';
-
 @Component({
   selector: 'app-user-dashboard-main',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-dashboard-main.html',
   styleUrl: './user-dashboard-main.scss',
 })
@@ -34,15 +33,18 @@ export class UserDashboardMain implements OnInit {
   entrepotId: number | null = null;
   entrepotName = '—';
 
-  // filtre période
-  period: PeriodFilter = 'day';
+  // filtre
+  period: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
+  filterDate: string = '';
 
   // data
-  trucks: Truck[] = [];
+  trucks: Truck[] = []; // Raw list
+  filteredTrucks: Truck[] = []; // Display list
 
   constructor(private truckService: TruckService, private warehouseService: WarehouseService) {}
 
   ngOnInit(): void {
+    // initialize date to today for the input if needed, or leave empty until specific selected
     this.loadCurrentUser();
     this.loadEntrepotLabel();
     this.loadTrucks();
@@ -87,85 +89,103 @@ export class UserDashboardMain implements OnInit {
     if (!this.entrepotId) {
       console.warn('loadTrucks: No entrepotId available');
       this.trucks = [];
+      this.filteredTrucks = [];
       return;
     }
 
     this.truckService.getTrucks(this.entrepotId).subscribe({
       next: (data) => {
-        // Apply period filter locally on the fetched data
-        this.trucks = this.applyPeriodFilter(data, this.period);
+        this.trucks = data;
+        this.applyFilters();
       },
       error: (err) => console.error('Erreur loading trucks', err),
     });
   }
 
-  setPeriod(p: PeriodFilter): void {
-    this.period = p;
-    this.loadTrucks();
-  }
-
-  private applyPeriodFilter(list: Truck[], period: PeriodFilter): Truck[] {
+  applyFilters() {
+    let list = [...this.trucks];
     const now = new Date();
-    const start = new Date(now);
+    
+    // Date utils
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    if (period === 'day') {
-      start.setHours(0, 0, 0, 0);
-    } else if (period === 'week') {
-      start.setDate(now.getDate() - 7);
-    } else if (period === 'month') {
-      start.setMonth(now.getMonth() - 1);
-    } else if (period === 'year') {
-      start.setFullYear(now.getFullYear() - 1);
+    if (this.period === 'specific' && this.filterDate) {
+      const target = new Date(this.filterDate).toDateString();
+      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee).toDateString() === target);
+    } else if (this.period === 'today') {
+      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee).toDateString() === now.toDateString());
+    } else if (this.period === 'week') {
+      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfWeek);
+    } else if (this.period === 'month') {
+      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfMonth);
+    } else if (this.period === 'year') {
+      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfYear);
     }
 
-    const startTime = start.getTime();
+    this.filteredTrucks = list;
+  }
 
-    return list.filter((t) => {
-      const dateStr = t.heureArrivee || '';
-      const time = new Date(dateStr).getTime();
-      return !Number.isNaN(time) && time >= startTime;
-    });
+  onPeriodChange() {
+    if (this.period !== 'specific') {
+      this.filterDate = '';
+    }
+    this.applyFilters();
+  }
+
+  onDateChange() {
+    if (this.filterDate) {
+      this.period = 'specific';
+    } else {
+        // If user clears date, revert to default? or just stay specific (empty)
+        this.period = 'today'; 
+    }
+    this.applyFilters();
   }
 
   // -------------------------
   // KPIs dynamiques
   // -------------------------
   get totalPresents(): number {
-    return this.trucks.length;
+    return this.filteredTrucks.length;
   }
 
   get enAttente(): number {
-    return this.trucks.filter((t) => t.statut === 'En attente').length;
+    return this.filteredTrucks.filter((t) => t.statut === 'En attente').length;
   }
 
   // interprétation actuelle du flux UserEntrepot : "Validé" = en cours côté gérant
   get enDechargement(): number {
-    return this.trucks.filter((t) => t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL')
+    return this.filteredTrucks.filter((t) => t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL')
       .length;
   }
 
   get decharges(): number {
-    return this.trucks.filter((t) => t.advancedStatus === 'ACCEPTE_FINAL').length;
+    return this.filteredTrucks.filter((t) => t.advancedStatus === 'ACCEPTE_FINAL').length;
   }
 
   get annules(): number {
-    return this.trucks.filter((t) => t.statut === 'Annulé').length;
+    return this.filteredTrucks.filter((t) => t.statut === 'Annulé').length;
   }
 
   // "Attente décision admin" : on s’appuie sur unreadForAdmin (déjà utilisé dans ton flux)
   get attenteDecisionAdmin(): number {
-    return this.trucks.filter((t) => t.unreadForAdmin === true).length;
+    return this.filteredTrucks.filter((t) => t.unreadForAdmin === true).length;
   }
 
   get refusesAttenteGerant(): number {
-    return this.trucks.filter((t) => t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT').length;
+    return this.filteredTrucks.filter((t) => t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT').length;
   }
 
   get refusesRenvoyes(): number {
-    return this.trucks.filter((t) => t.advancedStatus === 'REFUSE_RENVOYE').length;
+    return this.filteredTrucks.filter((t) => t.advancedStatus === 'REFUSE_RENVOYE').length;
   }
 
-  get reintegres(): number {
-    return this.trucks.filter((t) => t.advancedStatus === 'REFUSE_REINTEGRE').length;
+  get refusesRintegres(): number {
+    return this.filteredTrucks.filter((t) => t.advancedStatus === 'REFUSE_REINTEGRE').length;
   }
 }

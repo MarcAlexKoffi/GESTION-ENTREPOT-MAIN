@@ -220,8 +220,8 @@ export class UserEmpotage implements OnInit {
       total: list.length,
       today: list.filter(e => {
         if (!e.dateStart) return false;
-        return new Date(e.dateStart) >= startOfDay; 
         const d = new Date(e.dateStart);
+        // On compare strictement la date du jour (ignorer l'heure pour le jour courant)
         return d.toDateString() === now.toDateString();
       }).length,
       week: list.filter(e => {
