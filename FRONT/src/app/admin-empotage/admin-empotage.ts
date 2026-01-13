@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { WarehouseService } from '../services/warehouse.service';
 
 interface EmpotageStats {
   total: number;
@@ -21,6 +23,7 @@ interface EmpotageOperation {
   debutPrevu: string;
   finEstimee: string;
   statut: 'En cours' | 'Terminé' | 'A venir' | string;
+  entrepotId?: number;
 }
 
 @Component({
@@ -31,6 +34,12 @@ interface EmpotageOperation {
   styleUrl: './admin-empotage.scss',
 })
 export class AdminEmpotage implements OnInit {
+  private route = inject(ActivatedRoute);
+  private warehouseService = inject(WarehouseService);
+  
+  entrepotId: number = 0;
+  entrepotName: string = '';
+
   stats: EmpotageStats = {
     total: 0,
     today: 0,
@@ -51,18 +60,39 @@ export class AdminEmpotage implements OnInit {
   loading = false;
 
   async ngOnInit() {
-    await this.loadOperations();
+    this.route.params.subscribe(async (params) => {
+      this.entrepotId = +params['id'];
+      if(this.entrepotId) {
+        await this.loadWarehouseInfo();
+        await this.loadOperations();
+      }
+    });
+  }
+
+  async loadWarehouseInfo() {
+    this.warehouseService.getWarehouse(this.entrepotId).subscribe({
+        next: (w) => {
+            this.entrepotName = w.name;
+        },
+        error: (err) => console.error(err)
+    });
   }
 
   async loadOperations() {
     this.loading = true;
     try {
+      // Pour l'instant on récupère tout et on filtre côté client
+      // Idéalement : /api/empotages?entrepotId=...
       const url = `http://localhost:3000/api/empotages`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      this.rawOperations = data;
-      this.operations = data.map((item: any) => this.mapToOperation(item));
+      
+      // Filtre uniquement pour cet entrepôt
+      const filteredData = data.filter((op: any) => op.entrepotId === this.entrepotId);
+      
+      this.rawOperations = filteredData;
+      this.operations = filteredData.map((item: any) => this.mapToOperation(item));
       this.calculateStats();
     } catch (e) {
       console.error('Erreur chargement empotages admin', e);
@@ -95,7 +125,8 @@ export class AdminEmpotage implements OnInit {
       volume: item.volume || 0,
       debutPrevu: item.dateStart ? new Date(item.dateStart).toLocaleString() : '-',
       finEstimee: item.dateEnd ? new Date(item.dateEnd).toLocaleString() : '-',
-      statut: item.status || 'A venir'
+      statut: item.status || 'A venir',
+      entrepotId: item.entrepotId
     };
   }
 

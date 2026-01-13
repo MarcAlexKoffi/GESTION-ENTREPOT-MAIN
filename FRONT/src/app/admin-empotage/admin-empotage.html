@@ -3,7 +3,10 @@
     <!-- HEADER -->
     <header class="page-header">
       <div class="page-title-block">
-        <h1 class="page-title">Supervision des Empotages</h1>
+        <h1 class="page-title">
+          Supervision des Empotages 
+          <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
+        </h1>
         <p class="page-subtitle">
           <span class="material-symbols-outlined icon-subtitle">admin_panel_settings</span>
           Vue administrateur - Monitoring temps réel des opérations

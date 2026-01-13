@@ -43,6 +43,15 @@
         color: var(--text-primary);
         letter-spacing: -0.025em;
         margin: 0;
+
+        .warehouse-name {
+            color: var(--primary);
+            font-weight: 300;
+            opacity: 0.8;
+            font-size: 0.7em;
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
     }
 
     .page-subtitle {

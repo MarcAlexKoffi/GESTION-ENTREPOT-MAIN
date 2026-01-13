@@ -14,6 +14,7 @@ import { UserEntrepot } from './user-entrepot/user-entrepot';
 import { UsersManager } from './users-manager/users-manager';
 import { AdminEmpotage } from './admin-empotage/admin-empotage';
 import { UserEmpotage } from './user-empotage/user-empotage';
+import { AdminEmpotageMain } from './admin-empotage-main/admin-empotage-main';
 
 export const routes: Routes = [
     {
@@ -55,8 +56,12 @@ export const routes: Routes = [
                 component: UsersManager
             },
             {
-                path: 'adminEmpotage',
+                path: 'adminEmpotage/:id',
                 component: AdminEmpotage
+            },
+            {
+                path: 'adminEmpotageMain',
+                component: AdminEmpotageMain
             }
         ],
     },
