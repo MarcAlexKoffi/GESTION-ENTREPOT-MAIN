@@ -14,15 +14,16 @@
     <!-- CONTROLS: search, status filter, export -->
     <div class="controls-row">
       <div class="control-item">
-        <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search" (ngModelChange)="loadEmpotages()" class="search-input" />
+        <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search" (ngModelChange)="calculateStats()" class="search-input" />
       </div>
       <div class="control-item">
-        <select [(ngModel)]="filterStatus" (change)="loadEmpotages()" class="status-select">
-          <option value="">Tous les statuts</option>
-          <option value="A venir">À venir</option>
-          <option value="En cours">En cours</option>
-          <option value="Terminé">Terminé</option>
-        </select>
+        <input 
+          type="date" 
+          [(ngModel)]="filterDate" 
+          (ngModelChange)="calculateStats()"
+          class="status-select" 
+          style="padding: 0.75rem; color: #64748b; font-family: inherit;" 
+        />
       </div>
       <div class="control-item control-actions">
         <button class="btn-primary-main" (click)="exportCsvServer()" [disabled]="loading">
@@ -130,16 +131,20 @@
         <p class="stat-value">{{ stats.total }}</p>
       </article>
       <article class="stat-card">
-        <p class="stat-label" style="color: #3b82f6;">EN COURS</p>
-        <p class="stat-value">{{ stats.enCours }}</p>
+        <p class="stat-label" style="color: #3b82f6;">AUJOURD'HUI</p>
+        <p class="stat-value">{{ stats.today }}</p>
       </article>
       <article class="stat-card">
-        <p class="stat-label" style="color: #10b981;">TERMINÉS</p>
-        <p class="stat-value">{{ stats.termines }}</p>
+        <p class="stat-label" style="color: #8b5cf6;">CETTE SEMAINE</p>
+        <p class="stat-value">{{ stats.week }}</p>
       </article>
       <article class="stat-card">
-        <p class="stat-label" style="color: #94a3b8;">À VENIR</p>
-        <p class="stat-value">{{ stats.aVenir }}</p>
+        <p class="stat-label" style="color: #10b981;">CE MOIS</p>
+        <p class="stat-value">{{ stats.month }}</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label" style="color: #f59e0b;">CETTE ANNÉE</p>
+        <p class="stat-value">{{ stats.year }}</p>
       </article>
     </section>
 
@@ -158,7 +163,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of empotages">
+            <tr *ngFor="let item of filteredEmpotages">
               <td>
                 <div class="client-info">
                   <strong>{{ item.client }}</strong>

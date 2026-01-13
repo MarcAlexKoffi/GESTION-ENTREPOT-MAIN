@@ -24,16 +24,17 @@ interface Empotage {
 export class UserEmpotage implements OnInit {
   stats = {
     total: 0,
-    enCours: 0,
-    termines: 0,
-    aVenir: 0
+    today: 0,
+    week: 0,
+    month: 0,
+    year: 0
   };
 
   empotages: Empotage[] = [];
   
   // UI state
   search: string = '';
-  filterStatus: '' | 'A venir' | 'En cours' | 'Terminé' = '';
+  filterDate: string = '';
   loading = false;
   
   // Modal state
@@ -61,8 +62,17 @@ export class UserEmpotage implements OnInit {
   get filteredEmpotages(): Empotage[] {
     const q = this.search.trim().toLowerCase();
     return this.empotages.filter(item => {
-      // 1. Filter by status
-      if (this.filterStatus && item.status !== this.filterStatus) return false;
+      // 1. Filter by Date (comparing dateStart YYYY-MM-DD in local time)
+      if (this.filterDate) {
+        if (!item.dateStart) return false;
+        const d = new Date(item.dateStart);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        return dateStr === this.filterDate;
+      }
+      
       // 2. Filter by search query
       if (!q) return true;
       return (
@@ -193,11 +203,42 @@ export class UserEmpotage implements OnInit {
   }
 
   calculateStats() {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Calculate start of week (Monday)
+    const currentDay = now.getDay() || 7; // Sunday is 0, make it 7
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const list = this.filteredEmpotages;
+
     this.stats = {
-      total: this.empotages.length,
-      enCours: this.empotages.filter(e => e.status === 'En cours').length,
-      termines: this.empotages.filter(e => e.status === 'Terminé').length,
-      aVenir: this.empotages.filter(e => e.status === 'A venir').length
+      total: list.length,
+      today: list.filter(e => {
+        if (!e.dateStart) return false;
+        return new Date(e.dateStart) >= startOfDay; 
+        const d = new Date(e.dateStart);
+        return d.toDateString() === now.toDateString();
+      }).length,
+      week: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfWeek;
+      }).length,
+      month: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfMonth;
+      }).length,
+      year: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfYear;
+      }).length
     };
   }
 
@@ -205,7 +246,7 @@ export class UserEmpotage implements OnInit {
   exportCsvServer() {
     const params = new URLSearchParams();
     if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
-    if (this.filterStatus) params.set('status', this.filterStatus);
+    // Date filter not yet supported on server export endpoint, ignoring for now
     const url = `http://localhost:3000/api/empotages/export?${params.toString()}`;
     window.open(url, '_blank');
   }

@@ -4,13 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 interface EmpotageStats {
   total: number;
-  totalTrend: number; // percentage
-  aVenir: number;
-  aVenirTrend: number;
-  enCours: number;
-  enCoursTrend: number;
-  termines: number;
-  terminesTrend: number;
+  today: number;
+  week: number;
+  month: number;
+  year: number;
 }
 
 interface EmpotageOperation {
@@ -36,13 +33,10 @@ interface EmpotageOperation {
 export class AdminEmpotage implements OnInit {
   stats: EmpotageStats = {
     total: 0,
-    totalTrend: 0,
-    aVenir: 0,
-    aVenirTrend: 0,
-    enCours: 0,
-    enCoursTrend: 0,
-    termines: 0,
-    terminesTrend: 0
+    today: 0,
+    week: 0,
+    month: 0,
+    year: 0
   };
 
   filters = {
@@ -107,19 +101,35 @@ export class AdminEmpotage implements OnInit {
 
   calculateStats() {
     const total = this.operations.length;
-    const aVenir = this.operations.filter(op => op.statut === 'A venir').length;
-    const enCours = this.operations.filter(op => op.statut === 'En cours').length;
-    const termines = this.operations.filter(op => op.statut === 'Terminé').length;
+    
+    // Time-based calculations matches user-empotage logic
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
 
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const today = this.operations.filter(op => {
+      // Need to rely on raw Date objects if possible, but mapToOperation converted to string format
+      // Better to use rawOperations if available or parse back. 
+      // Fortunately we stored rawOperations
+      // Wait, let's look at raw operations logic below
+      return false; 
+    }).length; 
+    
+    // REWRITE using rawOperations for accuracy
+    const raw = this.rawOperations;
+    
     this.stats = {
-      total,
-      totalTrend: 0, 
-      aVenir,
-      aVenirTrend: 0,
-      enCours,
-      enCoursTrend: 0,
-      termines,
-      terminesTrend: 0
+      total: raw.length,
+      today: raw.filter(e => e.dateStart && new Date(e.dateStart).toDateString() === now.toDateString()).length,
+      week: raw.filter(e => e.dateStart && new Date(e.dateStart) >= startOfWeek).length,
+      month: raw.filter(e => e.dateStart && new Date(e.dateStart) >= startOfMonth).length,
+      year: raw.filter(e => e.dateStart && new Date(e.dateStart) >= startOfYear).length
     };
   }
 
