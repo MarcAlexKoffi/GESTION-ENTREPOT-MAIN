@@ -37,7 +37,10 @@
       <!-- CONTENT -->
       <div class="card-content">
         <h3 class="card-title">{{ w.name }}</h3>
-        <p class="card-code">Code: {{ w.code }}</p>
+        <p class="card-stats">
+          <span class="stats-label">Enregistrés Aujourd'hui:</span>
+          <span class="stats-value">{{ w.todayCount }}</span>
+        </p>
         
         <div class="card-footer">
           <span class="location-wrapper">

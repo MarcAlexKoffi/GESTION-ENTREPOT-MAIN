@@ -11,6 +11,7 @@ interface WarehouseUI {
   location: string;
   status: 'ACTIF' | 'SATURÉ' | 'MAINTENANCE';
   imageUrl: string;
+  todayCount: number;
 }
 
 @Component({
@@ -30,24 +31,41 @@ export class AdminEmpotageMain implements OnInit {
     this.loadWarehouses();
   }
 
-  loadWarehouses() {
-    this.warehouseService.getWarehouses().subscribe({
-      next: (data) => {
-        this.warehouses = data.map((w) => ({
-          id: w.id,
-          name: w.name,
-          location: w.location,
-          // Génération d'un code fictif basé sur le nom
-          code: this.generateCode(w.name, w.id),
-          // Statut par défaut (Actif) car non présent en DB
-          status: 'ACTIF',
-          imageUrl: this.fixImageUrl(w.imageUrl),
-        }));
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des entrepôts', err);
-      },
-    });
+  async loadWarehouses() {
+    try {
+        // 1. Get Warehouses
+        const warehousesData = await new Promise<any[]>((resolve, reject) => {
+            this.warehouseService.getWarehouses().subscribe({next: resolve, error: reject});
+        });
+
+        // 2. Get All Empotages (to calculate stats)
+        const res = await fetch('http://localhost:3000/api/empotages');
+        const allEmpotages = await res.json();
+        const now = new Date();
+        const todayStr = now.toDateString();
+
+        this.warehouses = warehousesData.map((w) => {
+            // Count today's empotages for this warehouse
+            const count = allEmpotages.filter((e: any) => {
+                if(!e.entrepotId || e.entrepotId !== w.id) return false;
+                if(!e.dateStart) return false;
+                return new Date(e.dateStart).toDateString() === todayStr;
+            }).length;
+
+            return {
+                id: w.id,
+                name: w.name,
+                location: w.location,
+                code: this.generateCode(w.name, w.id),
+                status: 'ACTIF',
+                imageUrl: this.fixImageUrl(w.imageUrl),
+                todayCount: count
+            };
+        });
+
+    } catch (err) {
+      console.error('Erreur lors du chargement des données', err);
+    }
   }
 
   private fixImageUrl(url: string): string {

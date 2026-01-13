@@ -58,6 +58,14 @@
             <input type="text" [(ngModel)]="newEmpotage.booking" name="booking" required />
           </div>
 
+          <div class="form-row">
+            <label>Entrepôt</label>
+            <select [(ngModel)]="newEmpotage.entrepotId" name="entrepotId">
+              <option [ngValue]="undefined">-- Aucun --</option>
+              <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>
+            </select>
+          </div>
+
           <div class="form-row two-cols">
             <div>
               <label>Conteneurs</label>

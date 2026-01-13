@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { WarehouseService } from '../services/warehouse.service';
 
 interface Empotage {
   id?: number;
@@ -12,6 +13,7 @@ interface Empotage {
   dateStart: string;
   dateEnd: string;
   status: 'A venir' | 'En cours' | 'Terminé';
+  entrepotId?: number; // Added to sync with Admin
 }
 
 @Component({
@@ -22,6 +24,10 @@ interface Empotage {
   styleUrl: './user-empotage.scss',
 })
 export class UserEmpotage implements OnInit {
+  private warehouseService = inject(WarehouseService);
+  
+  warehouses: any[] = []; // List to select from
+
   stats = {
     total: 0,
     today: 0,
@@ -55,10 +61,103 @@ export class UserEmpotage implements OnInit {
     volume: 0,
     dateStart: '',
     dateEnd: '',
-    status: 'A venir'
+    status: 'A venir',
+    entrepotId: undefined
   };
+  
+  // ... (computed filteredEmpotages and other methods remain same)
 
-  // Computed list (applies search and status filter)
+  // --- Server integration ---
+  ngOnInit(): void {
+    this.loadEmpotages();
+    this.loadWarehouses();
+  }
+
+  loadWarehouses() {
+    this.warehouseService.getWarehouses().subscribe({
+        next: (res) => this.warehouses = res,
+        error: (err) => console.error('Erreur loading warehouses', err)
+    });
+  }
+
+  async loadEmpotages() {
+    this.loading = true;
+    try {
+      const params = new URLSearchParams();
+      // On backend, q and status are handled, but we filter client-side for reactivity too
+      // if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
+      // if (this.filterStatus) params.set('status', this.filterStatus);
+      const url = `http://localhost:3000/api/empotages`;
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.empotages = data;
+      this.calculateStats();
+    } catch (e) {
+      console.error('Erreur chargement empotages', e);
+      // alert('Erreur chargement empotages (voir console)');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  calculateStats() {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Calculate start of week (Monday)
+    const currentDay = now.getDay() || 7; // Sunday is 0, make it 7
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const list = this.filteredEmpotages;
+
+    this.stats = {
+      total: list.length,
+      today: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        // On compare strictement la date du jour (ignorer l'heure pour le jour courant)
+        return d.toDateString() === now.toDateString();
+      }).length,
+      week: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfWeek;
+      }).length,
+      month: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfMonth;
+      }).length,
+      year: list.filter(e => {
+        if (!e.dateStart) return false;
+        const d = new Date(e.dateStart);
+        return d >= startOfYear;
+      }).length
+    };
+  }
+
+  // Trigger server-side CSV download
+  exportCsvServer() {
+    const params = new URLSearchParams();
+    if (this.search) params.append('q', this.search);
+    window.location.href = `http://localhost:3000/api/empotages/export?${params.toString()}`;
+  }
+
+  openCreateModal() {
+    this.isEditing = false;
+    this.currentId = null;
+    this.showCreateModal = true;
+    // reset
+    this.newEmpotage = {
+      client: '', clientType: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir',
+      entrepotId: this.warehouses.length > 0 ? this.warehouses[0].id : undefined // Default to first
+    };
+  }
   get filteredEmpotages(): Empotage[] {
     const q = this.search.trim().toLowerCase();
     return this.empotages.filter(item => {
@@ -174,91 +273,6 @@ export class UserEmpotage implements OnInit {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }
-
-  // --- Server integration ---
-  ngOnInit(): void {
-    this.loadEmpotages();
-  }
-
-  async loadEmpotages() {
-    this.loading = true;
-    try {
-      const params = new URLSearchParams();
-      // On backend, q and status are handled, but we filter client-side for reactivity too
-      // if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
-      // if (this.filterStatus) params.set('status', this.filterStatus);
-      const url = `http://localhost:3000/api/empotages`;
-      const res = await fetch(url, { method: 'GET' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      this.empotages = data;
-      this.calculateStats();
-    } catch (e) {
-      console.error('Erreur chargement empotages', e);
-      // alert('Erreur chargement empotages (voir console)');
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  calculateStats() {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    // Calculate start of week (Monday)
-    const currentDay = now.getDay() || 7; // Sunday is 0, make it 7
-    const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
-
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-    const list = this.filteredEmpotages;
-
-    this.stats = {
-      total: list.length,
-      today: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        // On compare strictement la date du jour (ignorer l'heure pour le jour courant)
-        return d.toDateString() === now.toDateString();
-      }).length,
-      week: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfWeek;
-      }).length,
-      month: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfMonth;
-      }).length,
-      year: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfYear;
-      }).length
-    };
-  }
-
-  // Trigger server-side CSV download
-  exportCsvServer() {
-    const params = new URLSearchParams();
-    if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
-    // Date filter not yet supported on server export endpoint, ignoring for now
-    const url = `http://localhost:3000/api/empotages/export?${params.toString()}`;
-    window.open(url, '_blank');
-  }
-
-  openCreateModal() {
-    this.isEditing = false;
-    this.currentId = null;
-    this.showCreateModal = true;
-    // reset
-    this.newEmpotage = {
-      client: '', clientType: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir'
-    };
   }
 
   closeCreateModal() {
