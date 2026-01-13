@@ -1,67 +1,100 @@
 {
   "warehouses": [
     {
-      "id": 2,
-      "name": "Deuxième entrepôt",
-      "location": "Bouaké"
-    },
-    {
-      "id": 3,
+      "id": 8,
       "name": "Entrepôt d'Abidjan",
       "location": "Abidjan, Deux plateaux Vallon"
     },
     {
-      "id": 4,
+      "id": 9,
       "name": "Entrepos de Yakro",
       "location": "Yamoussoukro"
     },
     {
-      "id": 5,
-      "name": "Entrepos de Bouaké",
+      "id": 10,
+      "name": "Entrepôt  de Bouaké",
       "location": "Bouaké"
     },
     {
-      "id": 6,
-      "name": "Entrepos de Bouna",
-      "location": "Bouna"
+      "id": 11,
+      "name": "TEST",
+      "location": "GHFGHH"
     }
   ],
   "trucks_per_warehouse": [
     {
-      "entrepotId": 3,
-      "count": 5
+      "entrepotId": 8,
+      "count": 2
+    },
+    {
+      "entrepotId": 9,
+      "count": 6
+    },
+    {
+      "entrepotId": 10,
+      "count": 13
     }
   ],
   "recent_trucks": [
     {
-      "id": 5,
-      "entrepotId": 3,
-      "immatriculation": "AAAABBBB",
-      "transporteur": "Marcus Turam"
+      "id": 21,
+      "entrepotId": 8,
+      "immatriculation": "uuitu",
+      "transporteur": "yves"
     },
     {
-      "id": 4,
-      "entrepotId": 3,
-      "immatriculation": "BBBBBBB",
+      "id": 20,
+      "entrepotId": 8,
+      "immatriculation": "23",
+      "transporteur": "jiles"
+    },
+    {
+      "id": 19,
+      "entrepotId": 10,
+      "immatriculation": "AAAAAAA",
       "transporteur": "Franck Kouamé"
     },
     {
-      "id": 3,
-      "entrepotId": 3,
+      "id": 18,
+      "entrepotId": 10,
       "immatriculation": "ARTZ23",
-      "transporteur": "Anne Myra"
-    },
-    {
-      "id": 2,
-      "entrepotId": 3,
-      "immatriculation": "AAAAAAA",
       "transporteur": "Marc Alex Koffi"
     },
     {
-      "id": 1,
-      "entrepotId": 3,
+      "id": 17,
+      "entrepotId": 10,
+      "immatriculation": "AAAAAAA",
+      "transporteur": "Paul Yves"
+    },
+    {
+      "id": 16,
+      "entrepotId": 10,
+      "immatriculation": "ARTZ23",
+      "transporteur": "Franck Kouamé"
+    },
+    {
+      "id": 15,
+      "entrepotId": 10,
       "immatriculation": "NNNNNNN",
-      "transporteur": "Yao Jean Marie"
+      "transporteur": "Paul Yves"
+    },
+    {
+      "id": 14,
+      "entrepotId": 10,
+      "immatriculation": "REZ32",
+      "transporteur": "Paul Yves"
+    },
+    {
+      "id": 13,
+      "entrepotId": 9,
+      "immatriculation": "B3426A",
+      "transporteur": "Marc Alex Koffi"
+    },
+    {
+      "id": 12,
+      "entrepotId": 9,
+      "immatriculation": "ZZZAAA",
+      "transporteur": "Anne Myra"
     }
   ]
 }

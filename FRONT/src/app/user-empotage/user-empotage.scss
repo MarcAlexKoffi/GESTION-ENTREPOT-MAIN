@@ -295,6 +295,47 @@ tr:hover td {
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 
+/* MODAL */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    width: 760px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(2,6,23,0.35);
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(0,0,0,0.04);
+}
+
+.modal-card h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.form-row { margin-bottom: 0.9rem; display: flex; flex-direction: column; }
+.form-row label { font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; font-weight:700; }
+.form-row input, .form-row select { padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid #e6eef8; font-size: 0.95rem; }
+.form-row.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+
+.modal-actions { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; }
+
+body.dark {
+    .modal-card { background: #0f1724; color: #e6eef8; border-color: rgba(255,255,255,0.06); }
+    .form-row label { color: #94a3b8; }
+    .form-row input, .form-row select { background: #0b1320; border-color: rgba(255,255,255,0.06); color: #e6eef8; }
+}
+
 @media (max-width: 768px) {
     .pageMain {
         padding: 1rem;

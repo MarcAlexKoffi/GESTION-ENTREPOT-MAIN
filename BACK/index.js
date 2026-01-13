@@ -77,6 +77,45 @@ console.log('Pool MySQL initialisé');
       console.log("Migration colonnes transfert/cooperative effectuée.");
     } catch (e) {}
 
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS empotages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client VARCHAR(255) NULL,
+        clientType VARCHAR(255) NULL,
+        booking VARCHAR(255) NULL,
+        conteneurs INT DEFAULT 0,
+        volume FLOAT DEFAULT 0,
+        dateStart DATETIME NULL,
+        dateEnd DATETIME NULL,
+        status VARCHAR(50) DEFAULT 'A venir',
+        entrepotId INT DEFAULT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Patch Migration for Empotages (Fix schema mismatch)
+    try {
+       // Check if we have the old schema (french column names)
+       const [cols] = await connection.query("SHOW COLUMNS FROM empotages LIKE 'nomClient'");
+       if (cols.length > 0) {
+          console.log("Migration de la table empotages (renommage colonnes)...");
+          await connection.query("ALTER TABLE empotages CHANGE nomClient client VARCHAR(255) NULL");
+          await connection.query("ALTER TABLE empotages CHANGE numeroBooking booking VARCHAR(255) NULL");
+          await connection.query("ALTER TABLE empotages CHANGE nombreConteneurs conteneurs INT DEFAULT 0");
+          await connection.query("ALTER TABLE empotages CHANGE volumeEmpote volume FLOAT DEFAULT 0");
+          await connection.query("ALTER TABLE empotages CHANGE dateDebutEmpotage dateStart DATETIME NULL");
+          await connection.query("ALTER TABLE empotages CHANGE dateFinEmpotage dateEnd DATETIME NULL");
+       }
+       
+       // Ensure new columns exist
+       try { await connection.query("ALTER TABLE empotages ADD COLUMN clientType VARCHAR(255) NULL"); } catch(e){}
+       try { await connection.query("ALTER TABLE empotages ADD COLUMN status VARCHAR(50) DEFAULT 'A venir'"); } catch(e){}
+       try { await connection.query("ALTER TABLE empotages ADD COLUMN entrepotId INT DEFAULT NULL"); } catch(e){}
+       
+    } catch (e) {
+      console.error("Erreur migration empotages:", e);
+    }
+
     // Aggressive Migration: Fix ID 0 and enforce AUTO_INCREMENT
     try {
       console.log("Début de la migration de réparation des ID...");
@@ -592,11 +631,158 @@ app.delete('/api/warehouses/:id', async (req, res) => {
   }
 });
 
-// =======================
-// Lancement du serveur
-// =======================
-const PORT = 3000;
+// (server will be started after routes are defined)
 
+// -----------------------
+// Empotages API
+// -----------------------
+
+// GET /api/empotages - list with optional filters: q, status
+app.get('/api/empotages', async (req, res) => {
+  const { q = '', status } = req.query;
+  try {
+    let query = 'SELECT * FROM empotages WHERE 1=1';
+    const params = [];
+
+    if (status && String(status).trim() !== '') {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    query += ' ORDER BY id DESC';
+
+    const [rows] = await db.query(query, params);
+
+    // Filtrage recherche (simple implementation in JS to keep consistent with previous behavior)
+    // Mais idéalement, faire un LIKE en SQL
+    const filtered = rows.filter(item => {
+      if (!q || String(q).trim() === '') return true;
+      const qq = String(q).toLowerCase();
+      return (
+        String(item.client || '').toLowerCase().includes(qq) ||
+        String(item.booking || '').toLowerCase().includes(qq)
+      );
+    });
+
+    res.json(filtered);
+  } catch (err) {
+    console.error('Erreur GET /api/empotages', err);
+    res.status(500).json({ message: 'Erreur récupération empotages' });
+  }
+});
+
+// GET /api/empotages/:id
+app.get('/api/empotages/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM empotages WHERE id = ?', [id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Non trouvé' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Erreur GET /api/empotages/:id', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// POST /api/empotages - create
+app.post('/api/empotages', async (req, res) => {
+  try {
+    console.log('POST /api/empotages body:', req.body);
+    const { client, clientType, booking, conteneurs, volume, dateStart, dateEnd, status, entrepotId } = req.body;
+    
+    // Insertion directe dans la table empotages
+    const [result] = await db.query(
+      `INSERT INTO empotages (client, clientType, booking, conteneurs, volume, dateStart, dateEnd, status, entrepotId)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [client, clientType, booking, conteneurs || 0, volume || 0, dateStart || null, dateEnd || null, status || 'A venir', entrepotId || null]
+    );
+
+    const [newRow] = await db.query('SELECT * FROM empotages WHERE id = ?', [result.insertId]);
+    res.status(201).json(newRow[0]);
+  } catch (err) {
+    console.error('Erreur POST /api/empotages', err);
+    res.status(500).json({ message: 'Erreur création empotage', error: err.message });
+  }
+});
+
+// PUT /api/empotages/:id - update status/metadata
+app.put('/api/empotages/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status, client, booking, conteneurs, volume, dateStart, dateEnd, clientType, entrepotId } = req.body;
+  
+  try {
+     // Construction dynamique de l'update
+     const fields = [];
+     const values = [];
+
+     if (client !== undefined) { fields.push('client = ?'); values.push(client); }
+     if (clientType !== undefined) { fields.push('clientType = ?'); values.push(clientType); }
+     if (booking !== undefined) { fields.push('booking = ?'); values.push(booking); }
+     if (conteneurs !== undefined) { fields.push('conteneurs = ?'); values.push(conteneurs); }
+     if (volume !== undefined) { fields.push('volume = ?'); values.push(volume); }
+     if (dateStart !== undefined) { fields.push('dateStart = ?'); values.push(dateStart); }
+     if (dateEnd !== undefined) { fields.push('dateEnd = ?'); values.push(dateEnd); }
+     if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+     if (entrepotId !== undefined) { fields.push('entrepotId = ?'); values.push(entrepotId); }
+
+     if (fields.length === 0) return res.json({ message: 'Rien à mettre à jour' });
+     
+     values.push(id);
+     await db.query(`UPDATE empotages SET ${fields.join(', ')} WHERE id = ?`, values);
+     
+     const [updated] = await db.query('SELECT * FROM empotages WHERE id = ?', [id]);
+     if (updated.length === 0) return res.status(404).json({ message: 'Non trouvé' });
+     res.json(updated[0]);
+  } catch (err) {
+    console.error('Erreur PUT /api/empotages/:id', err);
+    res.status(500).json({ message: 'Erreur mise à jour' });
+  }
+});
+
+// GET /api/empotages/export - returns CSV of filtered items
+app.get('/api/empotages/export', async (req, res) => {
+  const { q = '', status } = req.query;
+  try {
+    let query = 'SELECT * FROM empotages WHERE 1=1';
+    const params = [];
+    if (status && String(status).trim() !== '') {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    query += ' ORDER BY id DESC';
+
+    const [rows] = await db.query(query, params);
+    
+    // Filtre textuel
+    const filtered = rows.filter(item => {
+      if (!q || String(q).trim() === '') return true;
+      const qq = String(q).toLowerCase();
+      return (
+        String(item.client || '').toLowerCase().includes(qq) ||
+        String(item.booking || '').toLowerCase().includes(qq)
+      );
+    });
+
+    const headers = ['Client','Booking','Conteneurs','Volume','Début','Fin','Statut'];
+    const escape = v => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+      return s;
+    };
+    const csv = [headers.join(',')]
+      .concat(filtered.map(r => [r.client, r.booking, r.conteneurs, r.volume, r.dateStart, r.dateEnd, r.status].map(escape).join(',')))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="empotages-export.csv"');
+    res.send(csv);
+  } catch (err) {
+    console.error('Erreur export CSV', err);
+    res.status(500).json({ message: 'Erreur export' });
+  }
+});
+
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Serveur backend démarré sur http://localhost:${PORT}`);
 });

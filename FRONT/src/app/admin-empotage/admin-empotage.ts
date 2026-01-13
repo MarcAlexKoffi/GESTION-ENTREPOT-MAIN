@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -23,7 +23,7 @@ interface EmpotageOperation {
   volume: number;
   debutPrevu: string;
   finEstimee: string;
-  statut: 'En cours' | 'Terminé' | 'Prévu';
+  statut: 'En cours' | 'Terminé' | 'A venir' | string;
 }
 
 @Component({
@@ -33,16 +33,16 @@ interface EmpotageOperation {
   templateUrl: './admin-empotage.html',
   styleUrl: './admin-empotage.scss',
 })
-export class AdminEmpotage {
+export class AdminEmpotage implements OnInit {
   stats: EmpotageStats = {
-    total: 1284,
-    totalTrend: 5,
-    aVenir: 32,
-    aVenirTrend: 12,
-    enCours: 14,
-    enCoursTrend: -2,
-    termines: 82,
-    terminesTrend: 8
+    total: 0,
+    totalTrend: 0,
+    aVenir: 0,
+    aVenirTrend: 0,
+    enCours: 0,
+    enCoursTrend: 0,
+    termines: 0,
+    terminesTrend: 0
   };
 
   filters = {
@@ -52,82 +52,92 @@ export class AdminEmpotage {
     dateFin: ''
   };
 
-  operations: EmpotageOperation[] = [
-    {
-      id: 1,
-      clientName: 'CMA CGM France',
-      clientInitials: 'CM',
-      clientColor: 'bg-blue-100 text-blue-600',
-      booking: 'BK-2023-00192',
-      conteneurs: "4 x 40' HC",
-      volume: 272.5,
-      debutPrevu: '22/05 08:30',
-      finEstimee: '22/05 16:00',
-      statut: 'En cours'
-    },
-    {
-      id: 2,
-      clientName: 'Maersk Logistics',
-      clientInitials: 'MA',
-      clientColor: 'bg-purple-100 text-purple-600',
-      booking: 'BK-2023-00204',
-      conteneurs: "2 x 20' ST",
-      volume: 66.4,
-      debutPrevu: '22/05 09:15',
-      finEstimee: '22/05 14:30',
-      statut: 'En cours'
-    },
-    {
-      id: 3,
-      clientName: 'MSC Shipping',
-      clientInitials: 'MS',
-      clientColor: 'bg-green-100 text-green-600',
-      booking: 'BK-2023-00188',
-      conteneurs: "1 x 40' HC",
-      volume: 68.2,
-      debutPrevu: '22/05 07:00',
-      finEstimee: '22/05 11:20',
-      statut: 'Terminé'
-    },
-    {
-      id: 4,
-      clientName: 'TransFret SARL',
-      clientInitials: 'TF',
-      clientColor: 'bg-gray-100 text-gray-600',
-      booking: 'BK-2023-00215',
-      conteneurs: "8 x 40' HC",
-      volume: 545.0,
-      debutPrevu: '23/05 08:00',
-      finEstimee: '24/05 17:00',
-      statut: 'Prévu'
-    },
-    {
-      id: 5,
-      clientName: 'Hapag-Lloyd',
-      clientInitials: 'HB',
-      clientColor: 'bg-blue-50 text-blue-500',
-      booking: 'BK-2023-00210',
-      conteneurs: "3 x 40' ST",
-      volume: 201.0,
-      debutPrevu: '22/05 10:45',
-      finEstimee: '22/05 19:30',
-      statut: 'En cours'
+  operations: EmpotageOperation[] = [];
+  rawOperations: any[] = [];
+  loading = false;
+
+  async ngOnInit() {
+    await this.loadOperations();
+  }
+
+  async loadOperations() {
+    this.loading = true;
+    try {
+      const url = `http://localhost:3000/api/empotages`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.rawOperations = data;
+      this.operations = data.map((item: any) => this.mapToOperation(item));
+      this.calculateStats();
+    } catch (e) {
+      console.error('Erreur chargement empotages admin', e);
+    } finally {
+      this.loading = false;
     }
-  ];
+  }
+
+  mapToOperation(item: any): EmpotageOperation {
+    const clientName = item.client || 'Inconnu';
+    const init = clientName.substring(0, 2).toUpperCase();
+    
+    // Simple color logic based on first char of initial or length
+    const colors = [
+      'bg-blue-100 text-blue-600',
+      'bg-purple-100 text-purple-600',
+      'bg-green-100 text-green-600',
+      'bg-orange-100 text-orange-600',
+      'bg-pink-100 text-pink-600'
+    ];
+    const colorIndex = (clientName.length + (item.id || 0)) % colors.length;
+
+    return {
+      id: item.id,
+      clientName: clientName,
+      clientInitials: init,
+      clientColor: colors[colorIndex],
+      booking: item.booking || '-',
+      conteneurs: item.conteneurs ? `${item.conteneurs} Ctr` : '0 Ctr',
+      volume: item.volume || 0,
+      debutPrevu: item.dateStart ? new Date(item.dateStart).toLocaleString() : '-',
+      finEstimee: item.dateEnd ? new Date(item.dateEnd).toLocaleString() : '-',
+      statut: item.status || 'A venir'
+    };
+  }
+
+  calculateStats() {
+    const total = this.operations.length;
+    const aVenir = this.operations.filter(op => op.statut === 'A venir').length;
+    const enCours = this.operations.filter(op => op.statut === 'En cours').length;
+    const termines = this.operations.filter(op => op.statut === 'Terminé').length;
+
+    this.stats = {
+      total,
+      totalTrend: 0, 
+      aVenir,
+      aVenirTrend: 0,
+      enCours,
+      enCoursTrend: 0,
+      termines,
+      terminesTrend: 0
+    };
+  }
 
   getStatusClass(statut: string): string {
     switch (statut) {
       case 'En cours': return 'status-encours';
       case 'Terminé': return 'status-termine';
+      case 'A venir': 
       case 'Prévu': return 'status-prevu';
-      default: return '';
+      default: return 'status-default';
     }
   }
 
   getStatusIcon(statut: string): string {
     switch (statut) {
-      case 'En cours': return 'sync'; // or hourglass_empty
+      case 'En cours': return 'sync'; 
       case 'Terminé': return 'check_circle';
+      case 'A venir': 
       case 'Prévu': return 'schedule';
       default: return 'help';
     }
@@ -140,5 +150,7 @@ export class AdminEmpotage {
       dateDebut: '',
       dateFin: ''
     };
+    // Re-apply filters if we implement client-side filtering here
+    // For now it just resets the inputs
   }
 }
