@@ -37,6 +37,7 @@ export interface Truck {
     nombreSacsDecharges: string;
     poidsBrut: string;
     poidsNet: string;
+    type?: string;
   };
 }
 
