@@ -58,11 +58,22 @@
               </button>
               <div class="filter-dropdown" *ngIf="showPeriodMenu">
                 <button type="button" (click)="setPeriod('today')">Aujourd'hui</button>
-                <button type="button" (click)="setPeriod('7days')">7 derniers jours</button>
-                <button type="button" (click)="setPeriod('30days')">30 derniers jours</button>
-                <button type="button" (click)="setPeriod('all')">Toutes périodes</button>
+                <button type="button" (click)="setPeriod('week')">Cette semaine</button>
+                <button type="button" (click)="setPeriod('month')">Ce mois</button>
+                <button type="button" (click)="setPeriod('year')">Cette année</button>
               </div>
             </div>
+
+            <!-- DATE INPUT (Standard HTML5 date picker) -->
+             <div class="date-input-wrapper" style="margin-left: 10px;">
+                <input 
+                  type="date" 
+                  class="date-filter-input" 
+                  style="width: 140px;"
+                  [(ngModel)]="filterDate" 
+                  (ngModelChange)="onDateChange()"
+                />
+             </div>
           </div>
 
           <button type="button" class="btn-primary-main" (click)="openModal()">

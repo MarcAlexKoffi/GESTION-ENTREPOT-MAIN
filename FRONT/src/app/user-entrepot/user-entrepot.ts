@@ -143,22 +143,27 @@ export class UserEntrepot implements OnInit {
   // FILTRES (toolbar)
   // ===============================
   filterSearch = '';
-  selectedPeriod: 'all' | 'today' | '7days' | '30days' = 'today';
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
   selectedStatus: 'all' | string = 'all';
+  filterDate = '';
 
   showPeriodMenu = false;
   showStatusMenu = false;
-
+  
   filteredTrucks: UITruck[] = [];
 
   get periodLabel(): string {
     switch (this.selectedPeriod) {
       case 'today':
         return "Aujourd'hui";
-      case '7days':
-        return '7 derniers jours';
-      case '30days':
-        return '30 derniers jours';
+      case 'week':
+        return 'Cette semaine';
+      case 'month':
+        return 'Ce mois';
+      case 'year':
+        return 'Cette année';
+      case 'specific':
+        return 'Date spécifique';
       default:
         return 'Toutes périodes';
     }
@@ -178,34 +183,30 @@ export class UserEntrepot implements OnInit {
     this.showPeriodMenu = false;
   }
 
-  setPeriod(p: 'all' | 'today' | '7days' | '30days'): void {
+  setPeriod(p: 'today' | 'week' | 'month' | 'year' | 'specific'): void {
     this.selectedPeriod = p;
     this.showPeriodMenu = false;
+    
+    // Clear date input if not specific, or if user switches back to presets
+    if (this.selectedPeriod !== 'specific') {
+       this.filterDate = '';
+    }
+    
     this.applyFilters();
+  }
+
+  onDateChange(): void {
+    if (this.filterDate) {
+      this.setPeriod('specific');
+    } else {
+      this.setPeriod('today');
+    }
   }
 
   setStatus(s: 'all' | string): void {
     this.selectedStatus = s;
     this.showStatusMenu = false;
     this.applyFilters();
-  }
-
-  private isInSelectedPeriod(dateIso: string): boolean {
-    if (this.selectedPeriod === 'all') return true;
-
-    const created = new Date(dateIso);
-    const now = new Date();
-
-    if (this.selectedPeriod === 'today') {
-      return created.toDateString() === now.toDateString();
-    }
-
-    if (this.selectedPeriod === '7days') {
-      const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
-      return created.getTime() >= sevenDaysAgo;
-    }
-
-    return true;
   }
 
   // Ancienne logique getList() renommée en "getBaseListForTab"
@@ -247,21 +248,18 @@ export class UserEntrepot implements OnInit {
     const search = this.filterSearch.trim().toLowerCase();
     const now = new Date();
 
-    // helper date
     const isToday = (iso: string) => {
       const d = new Date(iso);
-      return (
-        d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate()
-      );
+      return d.toDateString() === now.toDateString();
     };
 
-    const inLastDays = (iso: string, days: number) => {
-      const d = new Date(iso).getTime();
-      const limit = now.getTime() - days * 24 * 60 * 60 * 1000;
-      return d >= limit;
-    };
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
 
     this.filteredTrucks = base.filter((t) => {
       // 1) Recherche
@@ -284,14 +282,26 @@ export class UserEntrepot implements OnInit {
         if (t.statut !== this.selectedStatus) return false;
       }
 
-      // 3) Période (basée sur heureArrivee car createdAt est souvent null en base)
-      if (this.selectedPeriod !== 'all') {
-        const dateToFilter = t.heureArrivee || '';
-        if (!dateToFilter) return false;
+      // 3) Période
+      const dateToFilter = t.heureArrivee || '';
+      if (!dateToFilter) return false;
+      const d = new Date(dateToFilter);
 
-        if (this.selectedPeriod === 'today' && !isToday(dateToFilter)) return false;
-        if (this.selectedPeriod === '7days' && !inLastDays(dateToFilter, 7)) return false;
-        if (this.selectedPeriod === '30days' && !inLastDays(dateToFilter, 30)) return false;
+      if (this.selectedPeriod === 'specific' && this.filterDate) {
+        return d.toDateString() === new Date(this.filterDate).toDateString();
+      }
+
+      if (this.selectedPeriod === 'today') {
+        return isToday(dateToFilter);
+      }
+      if (this.selectedPeriod === 'week') {
+        return d >= startOfWeek;
+      }
+      if (this.selectedPeriod === 'month') {
+        return d >= startOfMonth;
+      }
+      if (this.selectedPeriod === 'year') {
+        return d >= startOfYear;
       }
 
       return true;
@@ -548,6 +558,40 @@ export class UserEntrepot implements OnInit {
     } catch (e) {
       return (truck as any).createdAt || truck.heureArrivee || '';
     }
+  }
+
+  private isInSelectedPeriod(dateIso: string): boolean {
+    if (!dateIso) return false;
+    const d = new Date(dateIso);
+    const now = new Date();
+
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    if (this.selectedPeriod === 'specific') {
+      if (!this.filterDate) return true;
+      return d.toDateString() === new Date(this.filterDate).toDateString();
+    }
+
+    if (this.selectedPeriod === 'today') {
+      return d.toDateString() === now.toDateString();
+    }
+    if (this.selectedPeriod === 'week') {
+      return d >= startOfWeek;
+    }
+    if (this.selectedPeriod === 'month') {
+      return d >= startOfMonth;
+    }
+    if (this.selectedPeriod === 'year') {
+      return d >= startOfYear;
+    }
+
+    return true; 
   }
 
   // =========================================================
