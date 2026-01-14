@@ -150,6 +150,9 @@
                                     <span *ngSwitchCase="'REFUSE_RENVOYE'" class="status-pill status-pill--renvoye">
                                          <span class="material-symbols-outlined" style="font-size:16px">reply</span> Renvoyé
                                     </span>
+                                    <span *ngSwitchCase="'REFUSE_REINTEGRE'" class="status-pill status-pill--reintegre">
+                                         <span class="material-symbols-outlined" style="font-size:16px">autorenew</span> Réintégré
+                                    </span>
                                     <span *ngSwitchCase="'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
                                          <span class="material-symbols-outlined" style="font-size:16px">assignment_turned_in</span> Accepté déf.
                                     </span>
@@ -277,14 +280,13 @@
             placeholder="Ex : AMIAN"
             [(ngModel)]="newTruck.cooperative"
             name="cooperative"
+            required
           />
         </div>
 
-        <!-- Confirmation / Footer area inside body for this specific layout or strictly footer? 
-             The original had them inside body/flow. Let's move button to a real footer if we want rigorous design, 
-             but looking at the original code, the 'truck-modal-footer' was just a div at the bottom.
-             I'll use a semantic modal-footer.
-        -->
+        <div *ngIf="isNewTruckInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem; padding:0.5rem; background:#fef2f2; border-radius:0.5rem; border:1px solid #fecaca;">
+            Tous les champs sont requis.
+        </div>
       </div>
 
       <div class="modal-footer" style="display:block">
@@ -330,6 +332,10 @@
              <div class="truck-field">
                 <label class="truck-label">Coopérative</label>
                 <input class="truck-input" [(ngModel)]="editTruckData.cooperative">
+            </div>
+
+            <div *ngIf="isEditInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem; padding:0.5rem; background:#fef2f2; border-radius:0.5rem; border:1px solid #fecaca;">
+                Tous les champs sont requis.
             </div>
         </div>
         <div class="modal-footer">
@@ -413,6 +419,10 @@
              <div class="truck-field">
                 <label class="truck-label">KOR</label>
                 <input type="number" class="truck-input" [(ngModel)]="productsData.kor">
+            </div>
+
+            <div *ngIf="isProductsInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem; padding:0.5rem; background:#fef2f2; border-radius:0.5rem; border:1px solid #fecaca;">
+                Veuillez remplir correctement tous les champs obligatoires (valeurs positives pour les nombres).
             </div>
         </div>
         <div class="modal-footer">
@@ -511,3 +521,37 @@
             </button>
             <button class="truck-submit" style="width:auto; padding:0.75rem 2.5rem;" (click)="closeDetailsModal()">Fermer</button>
         </div>
+    </div>
+</div>
+
+<!-- RENVOYE CONFIRMATION MODAL -->
+<div class="modal-root" *ngIf="showRenvoyeConfirmModal">
+  <div class="modal-backdrop" (click)="closeRenvoyeConfirmModal()"></div>
+  <div class="modal-panel" style="max-width: 500px">
+    <div class="modal-header">
+      <h2 class="modal-title">Confirmer le renvoi</h2>
+      <button class="btn-close-icon" (click)="closeRenvoyeConfirmModal()">
+        <span class="material-symbols-outlined" style="font-size: 20px">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align: center; margin: 2rem 0;">
+         <span class="material-symbols-outlined" style="font-size: 48px; color: #f59e0b; margin-bottom: 1rem;">warning</span>
+         <p style="font-size: 1.1rem; font-weight: 500; color: #1e293b;">
+             Confirmez-vous que le camion <strong>{{ truckToRenvoyer?.immatriculation }}</strong> a bien quitté l'entrepôt ?
+         </p>
+         <p style="font-size: 0.9rem; color: #64748b;">
+             Cette action marquera le camion comme "Renvoyé".
+         </p>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content: center; gap: 1rem;">
+      <button class="truck-submit" style="background: white; color: #64748b; border: 1px solid #cbd5e1; width: auto; padding: 0.75rem 1.5rem;" (click)="closeRenvoyeConfirmModal()">
+        Annuler
+      </button>
+      <button class="truck-submit" style="background: #ef4444; width: auto; padding: 0.75rem 1.5rem;" (click)="confirmRenvoye()">
+        Confirmer le départ
+      </button>
+    </div>
+  </div>
+</div>

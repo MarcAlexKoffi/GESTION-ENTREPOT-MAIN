@@ -31,7 +31,14 @@ export class UserEntrepot implements OnInit {
   showSuccessBanner = false;
   showDetailsModal = false;
 
+  // Modale confirmation renvoi
+  showRenvoyeConfirmModal = false;
+  truckToRenvoyer: UITruck | undefined;
+
   // Validation States
+  isNewTruckInvalid = false;
+  isEditInvalid = false;
+  isProductsInvalid = false;
   isAnalysisInvalid = false;
   analysisError = '';
 
@@ -681,6 +688,7 @@ export class UserEntrepot implements OnInit {
   // =========================================================
   openModal() {
     this.showSuccessBanner = false;
+    this.isNewTruckInvalid = false;
     this.newTruck = {
       immatriculation: '',
       transporteur: '',
@@ -695,8 +703,15 @@ export class UserEntrepot implements OnInit {
   }
 
   saveTruck() {
-    if (!this.newTruck.immatriculation.trim() || !this.newTruck.transporteur.trim()) {
-      alert('Veuillez au moins l’immatriculation et le transporteur.');
+    this.isNewTruckInvalid = false;
+    // Tous les champs sont requis
+    if (
+      !this.newTruck.immatriculation.trim() ||
+      !this.newTruck.transporteur.trim() ||
+      !this.newTruck.transfert.trim() ||
+      !this.newTruck.cooperative.trim()
+    ) {
+      this.isNewTruckInvalid = true;
       return;
     }
 
@@ -813,11 +828,23 @@ export class UserEntrepot implements OnInit {
       transfert: t.transfert || '',
       cooperative: t.cooperative || '',
     };
+    this.isEditInvalid = false;
     this.showEditModal = true;
   }
 
   saveEdit() {
     if (!this.selectedTruckForEdit) return;
+
+    this.isEditInvalid = false;
+    if (
+      !this.editTruckData.immatriculation.trim() ||
+      !this.editTruckData.transporteur.trim() ||
+      !this.editTruckData.transfert.trim() ||
+      !this.editTruckData.cooperative.trim()
+    ) {
+      this.isEditInvalid = true;
+      return;
+    }
 
     const t = this.selectedTruckForEdit;
     // Mise à jour locale pour l'historique
@@ -868,6 +895,7 @@ export class UserEntrepot implements OnInit {
       comment: (t.products as any)?.comment || ''
     };
 
+    this.isProductsInvalid = false;
     this.showProductsModal = true;
   }
 
@@ -881,6 +909,25 @@ export class UserEntrepot implements OnInit {
 
   submitProducts() {
     if (!this.selectedTruckForProducts) return;
+
+    this.isProductsInvalid = false;
+    // Validate all fields
+    if (
+      !this.productsData.numeroFicheTransfert.toString().trim() ||
+      !this.productsData.numeroLot.toString().trim() ||
+      !this.productsData.type.toString().trim() ||
+      !this.productsData.nombreSacsDecharges ||
+      Number(this.productsData.nombreSacsDecharges) <= 0 ||
+      !this.productsData.poidsBrut ||
+      Number(this.productsData.poidsBrut) <= 0 ||
+      !this.productsData.poidsNet ||
+      Number(this.productsData.poidsNet) <= 0 ||
+      !this.productsData.kor ||
+      Number(this.productsData.kor) <= 0
+    ) {
+      this.isProductsInvalid = true;
+      return;
+    }
 
     const t = this.selectedTruckForProducts;
     
@@ -928,6 +975,19 @@ export class UserEntrepot implements OnInit {
   // REFOULEMENT : RENVOYER PAR LE GÉRANT
   // =========================================================
   markAsRenvoye(t: UITruck) {
+    this.truckToRenvoyer = t;
+    this.showRenvoyeConfirmModal = true;
+  }
+
+  closeRenvoyeConfirmModal() {
+    this.showRenvoyeConfirmModal = false;
+    this.truckToRenvoyer = undefined;
+  }
+
+  confirmRenvoye() {
+    if (!this.truckToRenvoyer) return;
+    const t = this.truckToRenvoyer;
+
     //  Assure la compatibilité admin : l’admin classe par statut "Annulé"
     t.statut = 'Annulé';
 
@@ -949,7 +1009,10 @@ export class UserEntrepot implements OnInit {
     };
 
     this.truckService.updateTruck(t.id, updates).subscribe({
-      next: () => this.refreshView(),
+      next: () => {
+        this.closeRenvoyeConfirmModal();
+        this.refreshView();
+      },
       error: () => alert('Erreur renvoi'),
     });
   }
