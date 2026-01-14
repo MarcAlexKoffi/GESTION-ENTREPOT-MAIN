@@ -189,16 +189,39 @@
                 <span class="text-secondary">{{ getHourForCurrentTab(t) }}</span>
               </td>
               <td>
-                <span [ngClass]="getStatusClass(t)">
-                  <span class="material-symbols-outlined icon">{{ getStatusIcon(t) }}</span>
-                  {{ getStatusLabel(t) }}
+                <span *ngIf="t.statut === 'Enregistré'" class="status-pill status-pill--enregistre">
+                    <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> Enregistré
+                </span>
+                <span *ngIf="t.statut === 'En attente'" class="status-pill status-pill--pending">
+                    <span class="material-symbols-outlined" style="font-size:16px">hourglass_empty</span> En attente
+                </span>
+                <span *ngIf="t.statut === 'Validé'" class="status-pill status-pill--validated">
+                    <span class="material-symbols-outlined" style="font-size:16px">verified</span> Validé
+                </span>
+                <span *ngIf="t.statut === 'Refoulé' || (t.statut === 'Annulé' && (t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT' || t.advancedStatus === 'REFUSE_RENVOYE'))" class="status-pill status-pill--refoule">
+                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Refoulé
+                </span>
+                <span *ngIf="t.statut === 'Annulé' && !t.advancedStatus" class="status-pill status-pill--refoule">
+                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Annulé
                 </span>
               </td>
+              <!-- STATUT AVANCÉ -->
               <td>
-                <span [ngClass]="getAdvancedStatusClass(t)">
-                  <span class="material-symbols-outlined icon">{{ getAdvancedStatusIcon(t) }}</span>
-                  {{ getAdvancedStatusLabel(t) }}
-                </span>
+                 <ng-container [ngSwitch]="t.advancedStatus">
+                     <span *ngSwitchCase="'REFUSE_EN_ATTENTE_GERANT'" class="status-pill status-pill--pending">
+                         <span class="material-symbols-outlined" style="font-size:16px">pending</span> En attente gérant
+                     </span>
+                     <span *ngSwitchCase="'REFUSE_RENVOYE'" class="status-pill status-pill--renvoye">
+                          <span class="material-symbols-outlined" style="font-size:16px">reply</span> Renvoyé
+                     </span>
+                     <span *ngSwitchCase="'REFUSE_REINTEGRE'" class="status-pill status-pill--reintegre">
+                          <span class="material-symbols-outlined" style="font-size:16px">autorenew</span> Réintégré
+                     </span>
+                     <span *ngSwitchCase="'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
+                          <span class="material-symbols-outlined" style="font-size:16px">assignment_turned_in</span> Accepté déf.
+                     </span>
+                     <span *ngSwitchDefault class="cell-muted"> — </span>
+                 </ng-container>
               </td>
               <td>
                 <button class="btn-view" (click)="openDetailsModal(t)">
