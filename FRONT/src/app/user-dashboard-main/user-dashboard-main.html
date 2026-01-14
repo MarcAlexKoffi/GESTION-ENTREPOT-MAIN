@@ -1,5 +1,5 @@
 <div class="pageMain">
-  <div class="page-shell">
+  <div class="page-container">
     <!-- TITRE PAGE -->
     <header class="page-header">
       <div>
@@ -35,7 +35,7 @@
     <section aria-label="Indicateurs clés">
       
       <div class="stats-grid">
-        <article class="stat-card">
+        <article class="stat-card card-blue">
           <div class="stat-header">
             <span class="material-symbols-outlined stat-icon">local_shipping</span>
             <span>Total présents</span>
@@ -43,31 +43,31 @@
           <p class="stat-value">{{ totalPresents }}</p>
         </article>
 
-        <article class="stat-card">
+        <article class="stat-card card-info">
           <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon text-info">hourglass_top</span>
+            <span class="material-symbols-outlined stat-icon">hourglass_top</span>
             <span>En attente</span>
           </div>
           <p class="stat-value">{{ enAttente }}</p>
         </article>
 
-        <article class="stat-card">
+        <article class="stat-card card-yellow">
           <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon text-warning">move_down</span>
+            <span class="material-symbols-outlined stat-icon">move_down</span>
             <span>Validés en attente</span>
           </div>
           <p class="stat-value">{{ enDechargement }}</p>
         </article>
 
-        <article class="stat-card">
+        <article class="stat-card card-success">
           <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon text-success">task_alt</span>
+            <span class="material-symbols-outlined stat-icon">task_alt</span>
             <span>Acceptés</span>
           </div>
           <p class="stat-value">{{ decharges }}</p>
         </article>
 
-        <article class="stat-card warning-card">
+        <article class="stat-card card-orange">
           <div class="stat-header">
             <span class="material-symbols-outlined stat-icon">pending_actions</span>
             <span>Attente décision admin</span>
@@ -75,7 +75,7 @@
           <p class="stat-value">{{ attenteDecisionAdmin }}</p>
         </article>
 
-        <article class="stat-card danger-card">
+        <article class="stat-card card-danger">
           <div class="stat-header">
             <span class="material-symbols-outlined stat-icon">report</span>
             <span>Refusés (attente gérant)</span>
@@ -83,7 +83,7 @@
           <p class="stat-value">{{ refusesAttenteGerant }}</p>
         </article>
 
-        <article class="stat-card">
+        <article class="stat-card card-purple">
           <div class="stat-header">
             <span class="material-symbols-outlined stat-icon">undo</span>
             <span>Refusés (renvoyés)</span>
@@ -91,7 +91,7 @@
           <p class="stat-value">{{ refusesRenvoyes }}</p>
         </article>
 
-        <article class="stat-card">
+        <article class="stat-card card-teal">
           <div class="stat-header">
             <span class="material-symbols-outlined stat-icon">published_with_changes</span>
             <span>Réintégrés</span>

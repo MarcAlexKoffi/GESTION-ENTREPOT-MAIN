@@ -1,132 +1,133 @@
-<body>
-  <div class="app-shell">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">
-          <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
-              fill="currentColor"
-            ></path>
-          </svg>
-        </div>
-        <h1 class="sidebar-logo-title">Entrepôts</h1>
+<div class="app-shell">
+  <!-- SIDEBAR: Refined Navigation -->
+  <aside class="sidebar-container" role="navigation">
+    <div class="sidebar-header">
+      <div class="logo-wrapper">
+        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
+            fill="currentColor"
+          ></path>
+        </svg>
       </div>
+      <h1 class="logo-title">Entrepôts</h1>
+    </div>
 
-      <nav class="sidebar-nav">
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <p class="section-label">Menu</p>
         <a
           [routerLink]="'/userdashboard/userdashboardmain'"
           routerLinkActive="active"
-          class="nav-link"
+          class="sidebar-link"
         >
           <span class="material-symbols-outlined">dashboard</span>
-          <p>Tableau de bord</p>
+          <span class="link-label">Tableau de bord</span>
         </a>
-
-        <!-- ✅ Lien dynamique vers l'entrepôt assigné -->
-        <a
+        <a 
           *ngIf="userEntrepotId !== null"
-          [routerLink]="['/userdashboard/userentrepot', userEntrepotId]"
-          routerLinkActive="active"
-          class="nav-link"
+          [routerLink]="['/userdashboard/userentrepot', userEntrepotId]" 
+          routerLinkActive="active" 
+          class="sidebar-link"
         >
           <span class="material-symbols-outlined">warehouse</span>
-          <p>Entrepôt</p>
+          <span class="link-label">Entrepôt</span>
         </a>
-        <a [routerLink]="'/userdashboard/userEmpotage'" routerLinkActive="active" class="nav-link">
+        <a [routerLink]="'/userdashboard/userEmpotage'" routerLinkActive="active" class="sidebar-link">
           <span class="material-symbols-outlined">inventory_2</span>
           <span class="link-label">Empotage</span>
         </a>
-        <!-- 
-        <a
-          [routerLink]="'/userdashboard/userhistorique'"
-          routerLinkActive="active"
-          class="nav-link"
-        >
-          <span class="material-symbols-outlined">history</span>
-          <p>Historique</p>
-        </a> -->
-      </nav>
-
-      <div class="sidebar-footer">
-        <a href="#" class="nav-link" (click)="$event.preventDefault()">
-          <span class="material-symbols-outlined">help</span>
-          <p>Aide</p>
-        </a>
-
-        <a href="#" class="nav-link nav-link--danger" (click)="$event.preventDefault(); logout()">
-          <span class="material-symbols-outlined">logout</span>
-          <p>Déconnexion</p>
-        </a>
       </div>
-    </aside>
+    </nav>
+      <div class="sidebar-footer">
+      <a href="#" class="sidebar-link secondary">
+        <span class="material-symbols-outlined">help</span>
+        <span class="link-label">Centre d'aide</span>
+      </a>
+      <div class="footer-divider"></div>
+      <a href="#" class="sidebar-link logout" (click)="$event.preventDefault(); logout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="link-label">Déconnexion</span>
+      </a>
+    </div>
+  </aside>
 
-    <!-- MAIN AREA -->
-    <div class="main">
-      <!-- TOP BAR -->
-      <header class="topbar">
-        <div class="topbar-actions">
-          <div
-            class="notification-wrapper"
-            (click)="toggleNotifications(); $event.stopPropagation()"
-            style="position: relative"
+  <!-- MAIN AREA: Contents & Topbar -->
+  <div class="content-wrapper">
+    <!-- TOPBAR: Glassmorphism & Profile -->
+    <header class="top-header">
+      <div class="top-header-left">
+        <!-- Breadcrumb or Search placeholder can go here -->
+      </div>
+
+      <div class="top-header-right">
+        <!-- NOTIFICATIONS -->
+        <div class="notification-container" (click)="$event.stopPropagation()">
+          <button
+            class="notif-button"
+            type="button"
+            (click)="toggleNotifications()"
+            [attr.aria-expanded]="showNotifDropdown"
           >
-            <button class="icon-button" type="button">
-              <span class="material-symbols-outlined">notifications</span>
+            <span class="material-symbols-outlined">notifications</span>
+            <span *ngIf="notifCount > 0" class="notif-badge-dot"></span>
+          </button>
 
-              <span *ngIf="notifCount > 0" class="notif-badge">
-                {{ notifCount }}
-              </span>
-            </button>
+          <!-- DROPDOWN PANEL -->
+          <div class="notif-popover" *ngIf="showNotifDropdown">
+            <div class="popover-header">
+              <h3 class="popover-title">Notifications</h3>
+              <span class="popover-count" *ngIf="notifCount > 0">{{ notifCount }}</span>
+            </div>
 
-            <div class="notif-dropdown" *ngIf="showNotifDropdown">
-              <p class="notif-title">Actions administrateur</p>
-
-              <div *ngIf="notifications.length === 0" class="notif-empty">Aucune notification.</div>
+            <div class="popover-scroll custom-scroll">
+              <div *ngIf="notifications.length === 0" class="popover-empty">
+                <span class="material-symbols-outlined">notifications_off</span>
+                <p>Aucune notification</p>
+              </div>
 
               <div
                 *ngFor="let n of notifications"
-                class="notif-item"
-                (click)="openNotification(n); $event.stopPropagation()"
+                class="notif-card-item"
+                (click)="openNotification(n)"
               >
-                <div class="notif-line-main">
-                  <span class="notif-immat">{{ n.immatriculation }}</span>
-                  <span class="notif-entrepot">{{ n.entrepotName }}</span>
+                <div class="notif-icon-circle">
+                  <span class="material-symbols-outlined">local_shipping</span>
                 </div>
-
-                <div class="notif-line-meta">
-                  <span>Statut : {{ n.statut }}</span>
+                <div class="notif-body">
+                  <div class="notif-row">
+                    <span class="notif-immat">{{ n.immatriculation }}</span>
+                  </div>
+                  <p class="notif-subtitle">{{ n.entrepotName }}</p>
+                  <p class="notif-subtitle" style="font-size:0.75rem; color: var(--primary);">{{ n.statut }}</p>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- ✅ User dynamique -->
-          <div class="user-block">
-            <div
-              class="user-avatar"
-              style="
-                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPHyHGMfTjg0KY3dZ-4D-csVv0_-YYCb8FAMEwxtDUIYrSr0qUlMlx9xc0kD5FdKoHfGT2TO7q3AfmgKtLEa3ZZSJssGPPp0WNOEjaBIbeeeOYdn3xAbxA5qOPiXRi5piRgZ9GB7GF8kudQYw8dkAAgGGYEsWT2DXaQ8m7QeeV5YTKpQb33QwQOQPF6tgTY0ZM5PfeTpb8NQByRdbDmwCCBSNPHz0CRZWMFIro1_4Unfqodv6iXWCL4YMw3aQxA9Y9MNpk4lnTUBoL');
-              "
-            ></div>
-
-            <div class="user-info">
-              <p class="user-name">{{ userName }}</p>
-              <p class="user-role">{{ userRoleLabel }}</p>
-            </div>
-
-            <button class="user-toggle" type="button">
-              <span class="material-symbols-outlined">expand_more</span>
-            </button>
-          </div>
         </div>
-      </header>
 
-      <!-- PAGE CONTENT -->
-      <main class="page">
-        <router-outlet></router-outlet>
-      </main>
-    </div>
+        <!-- USER PROFILE AREA -->
+        <div class="profile-block">
+          <div
+            class="profile-avatar"
+            style="
+              background-image: url('https://ui-avatars.com/api/?name={{userName}}&background=random');
+            "
+          ></div>
+          <div class="profile-info">
+            <p class="name">{{ userName }}</p>
+            <p class="role">{{ userRoleLabel }}</p>
+          </div>
+          <button class="profile-toggle">
+            <span class="material-symbols-outlined">expand_more</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE VIEWPORT -->
+    <main class="page-overflow admin-scroll">
+      <router-outlet></router-outlet>
+    </main>
   </div>
-</body>
+</div>

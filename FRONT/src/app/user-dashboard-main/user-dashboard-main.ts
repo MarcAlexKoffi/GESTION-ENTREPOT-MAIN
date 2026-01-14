@@ -103,31 +103,11 @@ export class UserDashboardMain implements OnInit {
   }
 
   applyFilters() {
-    let list = [...this.trucks];
-    const now = new Date();
-    
-    // Date utils
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const currentDay = now.getDay() || 7; 
-    const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-    if (this.period === 'specific' && this.filterDate) {
-      const target = new Date(this.filterDate).toDateString();
-      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee).toDateString() === target);
-    } else if (this.period === 'today') {
-      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee).toDateString() === now.toDateString());
-    } else if (this.period === 'week') {
-      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfWeek);
-    } else if (this.period === 'month') {
-      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfMonth);
-    } else if (this.period === 'year') {
-      list = list.filter(t => t.heureArrivee && new Date(t.heureArrivee) >= startOfYear);
-    }
-
-    this.filteredTrucks = list;
+    // Utilisation de la logique identique à UserEntrepot pour filtrer par date sur le bon champ (updatedAt, refusedAt...)
+    this.filteredTrucks = this.trucks.filter(t => {
+      const dateToFilter = this.getDateForPeriod(t);
+      return this.isInSelectedPeriod(dateToFilter);
+    });
   }
 
   onPeriodChange() {
@@ -148,6 +128,135 @@ export class UserDashboardMain implements OnInit {
   }
 
   // -------------------------
+  // HELPERS SYNCED WITH UserEntrepot
+  // -------------------------
+  private findHistoryDate(truck: Truck, event: string): string | undefined {
+    const list = truck.history || [];
+    // On cherche la dernière occurrence de cet event (plus récent)
+    for (let i = list.length - 1; i >= 0; i--) {
+      // @ts-ignore
+      if (list[i]?.event === event && list[i]?.date) return list[i].date;
+    }
+    return undefined;
+  }
+
+  private getDateForPeriod(truck: Truck): string {
+    try {
+      if (truck.statut === 'Annulé') {
+        const adv = (truck as any).advancedStatus;
+        if (adv === 'REFUSE_RENVOYE') {
+          return (
+            (truck as any).renvoyeAt ||
+            this.findHistoryDate(truck, 'Camion renvoyé par le gérant') ||
+            (truck as any).refusedAt ||
+            this.findHistoryDate(truck, 'Refus administrateur') ||
+            (truck as any).createdAt ||
+            truck.heureArrivee ||
+            ''
+          );
+        }
+
+        if (adv === 'REFUSE_EN_ATTENTE_GERANT') {
+          return (
+            (truck as any).refusedAt ||
+            this.findHistoryDate(truck, 'Refus administrateur') ||
+            (truck as any).createdAt ||
+            truck.heureArrivee ||
+            ''
+          );
+        }
+
+        return (
+          (truck as any).refusedAt ||
+          (truck as any).renvoyeAt ||
+          this.findHistoryDate(truck, 'Refus administrateur') ||
+          this.findHistoryDate(truck, 'Camion renvoyé par le gérant') ||
+          (truck as any).createdAt ||
+          truck.heureArrivee ||
+          ''
+        );
+      }
+
+      if ((truck as any).advancedStatus === 'ACCEPTE_FINAL') {
+        return (
+          (truck as any).finalAcceptedAt ||
+          this.findHistoryDate(truck, 'Détails produits renseignés — Camion accepté') ||
+          (truck as any).createdAt ||
+          truck.heureArrivee ||
+          ''
+        );
+      }
+
+      if ((truck as any).advancedStatus === 'REFUSE_REINTEGRE') {
+        return (
+          (truck as any).reintegratedAt ||
+          this.findHistoryDate(truck, 'Réintégration administrateur') ||
+          (truck as any).createdAt ||
+          truck.heureArrivee ||
+          ''
+        );
+      }
+
+      if (truck.statut === 'Validé') {
+        return (
+          (truck as any).validatedAt ||
+          this.findHistoryDate(truck, 'Validation administrateur') ||
+          (truck as any).createdAt ||
+          truck.heureArrivee ||
+          ''
+        );
+      }
+
+      if (truck.statut === 'En attente') {
+        return (
+          this.findHistoryDate(truck, 'Analyses envoyées à l’administrateur') ||
+          (truck as any).createdAt ||
+          truck.heureArrivee ||
+          ''
+        );
+      }
+
+      return (truck as any).createdAt || truck.heureArrivee || '';
+    } catch (e) {
+      return (truck as any).createdAt || truck.heureArrivee || '';
+    }
+  }
+
+  private isInSelectedPeriod(dateIso: string): boolean {
+    if (!dateIso) return false;
+    const d = new Date(dateIso);
+    const now = new Date();
+
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    if (this.period === 'specific') {
+      if (!this.filterDate) return true;
+      return d.toDateString() === new Date(this.filterDate).toDateString();
+    }
+
+    if (this.period === 'today') {
+      return d.toDateString() === now.toDateString();
+    }
+    if (this.period === 'week') {
+      return d >= startOfWeek;
+    }
+    if (this.period === 'month') {
+      return d >= startOfMonth;
+    }
+    if (this.period === 'year') {
+      return d >= startOfYear;
+    }
+
+    return true; 
+  }
+
+  // -------------------------
   // KPIs dynamiques
   // -------------------------
   get totalPresents(): number {
@@ -158,13 +267,14 @@ export class UserDashboardMain implements OnInit {
     return this.filteredTrucks.filter((t) => t.statut === 'En attente').length;
   }
 
-  // interprétation actuelle du flux UserEntrepot : "Validé" = en cours côté gérant
+  // interprétation UserEntrepot : "Validé" = en cours côté gérant
   get enDechargement(): number {
     return this.filteredTrucks.filter((t) => t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL')
       .length;
   }
 
   get decharges(): number {
+    // Corresponds a l'onglet "Acceptés"
     return this.filteredTrucks.filter((t) => t.advancedStatus === 'ACCEPTE_FINAL').length;
   }
 
@@ -172,7 +282,7 @@ export class UserDashboardMain implements OnInit {
     return this.filteredTrucks.filter((t) => t.statut === 'Annulé').length;
   }
 
-  // "Attente décision admin" : on s’appuie sur unreadForAdmin (déjà utilisé dans ton flux)
+  // "Attente décision admin" : unreadForAdmin (indépendant du statut parfois, mais souvent en cours)
   get attenteDecisionAdmin(): number {
     return this.filteredTrucks.filter((t) => t.unreadForAdmin === true).length;
   }

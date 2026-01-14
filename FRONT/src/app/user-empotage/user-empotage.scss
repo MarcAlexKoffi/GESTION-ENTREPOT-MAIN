@@ -18,18 +18,14 @@
     }
 }
 
-.pageMain {
-    min-height: 100vh;
-    background: var(--background-light);
-    padding: 2rem;
-    transition: background-color 0.3s ease;
-
-    body.dark & {
-        background: var(--background-dark);
-    }
+// Override global page-container to allow full width and smaller padding
+.page-container {
+    max-width: 100% !important;
+    padding: 1rem 1rem !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
-
-
 
 /* HEADER */
 .page-header {
@@ -81,6 +77,24 @@
         flex: 0 0 auto;
         min-width: auto;
     }
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+    pointer-events: none;
+    font-size: 1.25rem;
+}
+
+.search-input {
+    padding-left: 2.75rem !important;
 }
 
 .search-input, .status-select {

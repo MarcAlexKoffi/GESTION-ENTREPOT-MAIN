@@ -250,21 +250,47 @@ export class UserEmpotage implements OnInit {
     }
 
     const headers = ['Client', 'Booking', 'Conteneurs', 'Volume (m3)', 'Début', 'Fin', 'Statut'];
+    
+    // Helper to format date for CSV (DD/MM/YYYY HH:mm)
+    const fmtDate = (isoStr: string | undefined) => {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleString('fr-FR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    };
+
     const escape = (v: any) => {
       if (v === null || v === undefined) return '';
       const s = String(v);
-      // escape double quotes
-      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      // Escape for CSV (quotes)
+      if (s.includes(';') || s.includes('"') || s.includes('\n')) {
         return `"${s.replace(/"/g, '""')}"`;
       }
       return s;
     };
 
-    const csv = [headers.join(',')]
-      .concat(rows.map(r => [r.client, r.booking, r.conteneurs, r.volume, r.dateStart, r.dateEnd, r.status].map(escape).join(',')))
+    // Use semicolon for better Excel compatibility in FR regions
+    const separator = ';';
+    
+    const csvContent = [headers.join(separator)]
+      .concat(rows.map(r => [
+        r.client, 
+        r.booking, 
+        r.conteneurs, 
+        r.volume, 
+        fmtDate(r.dateStart), 
+        fmtDate(r.dateEnd), 
+        r.status
+      ].map(escape).join(separator)))
       .join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    // Add BOM for UTF-8 Excel support
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

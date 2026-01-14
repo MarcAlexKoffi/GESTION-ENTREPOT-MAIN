@@ -1,5 +1,4 @@
-<div class="pageMain">
-  <div class="page-container">
+<div class="page-container">
     <header class="page-header">
       <div>
         <h1 class="page-title">Gestion des Empotages</h1>
@@ -13,7 +12,8 @@
 
     <!-- CONTROLS: search, status filter, export -->
     <div class="controls-row">
-      <div class="control-item">
+      <div class="control-item search-wrapper">
+        <span class="material-symbols-outlined search-icon">search</span>
         <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search" (ngModelChange)="calculateStats()" class="search-input" />
       </div>
       <div class="control-item">
@@ -26,7 +26,7 @@
         />
       </div>
       <div class="control-item control-actions">
-        <button class="btn btn-primary" (click)="exportCsvServer()" [disabled]="loading">
+        <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
           <span class="material-symbols-outlined">file_download</span>
           <span>Exporter CSV</span>
         </button>
@@ -205,4 +205,3 @@
       </div>
     </section>
   </div>
-</div>
