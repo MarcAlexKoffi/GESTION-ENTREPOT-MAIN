@@ -122,35 +122,36 @@
               [class.active]="currentTab === 'pending'"
               (click)="setTab('pending')"
             >
-              En attente <span class="tab-badge">{{ nbPending }}</span>
+              En attente 
+              <!-- <span class="tab-badge">{{ nbPending }}</span> -->
             </button>
             <button
               class="tab-btn"
               [class.active]="currentTab === 'validated'"
               (click)="setTab('validated')"
             >
-              Validés <span class="tab-badge">{{ nbValidated }}</span>
+              Validés <!-- <span class="tab-badge">{{ nbValidated }}</span> -->
             </button>
             <button
               class="tab-btn"
               [class.active]="currentTab === 'accepted'"
               (click)="setTab('accepted')"
             >
-              Acceptés <span class="tab-badge">{{ nbAccepted }}</span>
+              Acceptés <!-- <span class="tab-badge">{{ nbAccepted }}</span> -->
             </button>
             <button
               class="tab-btn"
               [class.active]="currentTab === 'cancelled'"
               (click)="setTab('cancelled')"
             >
-              Refoulés <span class="tab-badge">{{ nbCancelled }}</span>
+              Refoulés <!-- <span class="tab-badge">{{ nbCancelled }}</span> -->
             </button>
             <button
               class="tab-btn"
               [class.active]="currentTab === 'renvoyes'"
               (click)="setTab('renvoyes')"
             >
-              Renvoyés <span class="tab-badge">{{ nbRenvoyes }}</span>
+              Renvoyés <!-- <span class="tab-badge">{{ nbRenvoyes }}</span> -->
             </button>
           </nav>
         </div>

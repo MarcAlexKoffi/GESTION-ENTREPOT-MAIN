@@ -3,7 +3,7 @@ import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
-import { TruckService } from '../services/truck.service';
+import { TruckService, Truck } from '../services/truck.service';
 
 interface CardInfo {
   id: number;
@@ -47,6 +47,9 @@ export class DashboardMain implements OnInit {
 
   // Cartes d'entrepôts
   cards: Array<CardInfo> = [];
+
+  // Stats chart
+  public stats: { day: string; count: number; height: string }[] = [];
 
   // Modale création / édition
   showWarehouseModal = false;
@@ -93,6 +96,8 @@ export class DashboardMain implements OnInit {
         // 2. Charger TOUS les camions pour calculer les stats
         this.truckService.getTrucks().subscribe({
           next: (allTrucks) => {
+            this.calculateWeeklyStats(allTrucks);
+
             this.cards = warehouses.map((w) => {
               let img = w.imageUrl;
               if (img && !img.startsWith('http') && !img.startsWith('data:')) {
@@ -191,6 +196,81 @@ export class DashboardMain implements OnInit {
   }
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // STATISTIQUES
+  // ---------------------------------------------------------------------------
+  calculateWeeklyStats(allTrucks: Truck[]) {
+    // Note: We need to cast allTrucks or use 'any' if types are tricky to import without circular deps or just use 'any[]'.
+    // The previous code had 'allTrucks' inferred. Let's assume it's any[] or StoredTruck[]/Truck[]. 
+    // Ideally we import Truck from truck.service.ts, but let's implement the logic safely.
+    
+    // We want stats for trucks with status 'Enregistré' (or matching user request)
+    // The user asked for "données de camions dans la catégorie 'enrégistrés' par semaine"
+    
+    // 1. Generate last 7 days
+    const days = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push(d);
+    }
+
+    // 2. Group counts
+    const counts = days.map(day => {
+      // Start/End of that day
+      const start = new Date(day); 
+      start.setHours(0,0,0,0);
+      const end = new Date(day); 
+      end.setHours(23,59,59,999);
+
+      // Filter trucks
+      const dayCount = (allTrucks as any[]).filter(t => {
+        // On compte tous les camions enregistrés (= créés/arrivés) ce jour-là, peu importe leur statut actuel
+        // if (t.statut !== 'Enregistré') return false; 
+        
+        // Parse date
+        const truckDate = new Date(t.heureArrivee); // or t.createdAt if available
+        return truckDate >= start && truckDate <= end;
+      }).length;
+
+      return {
+        date: day,
+        count: dayCount
+      };
+    });
+
+    // 3. Max value for scaling
+    const maxVal = Math.max(...counts.map(c => c.count));
+    
+    // 4. Transform to view model
+    const formatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
+
+    this.stats = counts.map(item => {
+      let height = '0%';
+      if (maxVal > 0) {
+        // Minimum visible height if count > 0 could be useful, but pure linear scale:
+        const pct = (item.count / maxVal) * 100;
+        height = `${Math.round(pct)}%`;
+      } else {
+          height = '0%';
+      }
+
+      // If count is 0, maybe show a tiny bar or just 0 height? 
+      // Existing UI has tooltips.
+      
+      const dayName = formatter.format(item.date);
+      // capitalize first letter: lun -> Lun
+      const label = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+
+      return {
+        day: label,
+        count: item.count,
+        height: height
+      };
+    });
+  }
+
   // MODIFICATION D'UN ENTREPÔT
   // ---------------------------------------------------------------------------
   onEditWarehouse(card: CardInfo): void {

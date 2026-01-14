@@ -111,7 +111,7 @@
             <div class="section-head">
               <h3 class="chart-title">Volume de camions sur les 7 derniers jours</h3>
               <div class="chart-legend">
-                <div class="legend-item"><span class="dot primary"></span> Camions déchargés</div>
+                <div class="legend-item"><span class="dot primary"></span> Camions enregistrés</div>
               </div>
             </div>
 
@@ -125,47 +125,11 @@
               </div>
 
               <div class="chart-bars">
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 60%">
-                    <div class="bar-tooltip">60%</div>
+                <div class="chart-day" *ngFor="let stat of stats">
+                  <div class="chart-bar" [style.height]="stat.height">
+                    <div class="bar-tooltip">{{ stat.count }}</div>
                   </div>
-                  <p>Lun</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 75%">
-                    <div class="bar-tooltip">75%</div>
-                  </div>
-                  <p>Mar</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 50%">
-                    <div class="bar-tooltip">50%</div>
-                  </div>
-                  <p>Mer</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 85%">
-                    <div class="bar-tooltip">85%</div>
-                  </div>
-                  <p>Jeu</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 95%">
-                    <div class="bar-tooltip">95%</div>
-                  </div>
-                  <p>Ven</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 40%">
-                    <div class="bar-tooltip">40%</div>
-                  </div>
-                  <p>Sam</p>
-                </div>
-                <div class="chart-day">
-                  <div class="chart-bar" style="height: 20%">
-                    <div class="bar-tooltip">20%</div>
-                  </div>
-                  <p>Dim</p>
+                  <p>{{ stat.day }}</p>
                 </div>
               </div>
             </div>
