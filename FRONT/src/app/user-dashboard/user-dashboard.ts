@@ -37,6 +37,9 @@ export class UserDashboard implements OnInit, OnDestroy {
   // notifications
   notifCount = 0;
   showNotifDropdown = false;
+  
+  // Logout confirmation
+  showLogoutConfirm = false;
 
   notifications: Array<{
     id: number;
@@ -100,7 +103,16 @@ export class UserDashboard implements OnInit, OnDestroy {
     }
   }
 
+  requestLogout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
   logout(): void {
+    this.showLogoutConfirm = false;
     this.authService.logout();
   }
 
