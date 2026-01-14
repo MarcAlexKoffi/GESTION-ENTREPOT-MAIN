@@ -2,14 +2,26 @@
     <!-- HEADER -->
     <header class="page-header">
       <div class="page-title-block">
-        <h1 class="page-title">
-          Supervision des Empotages 
-          <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
-        </h1>
-        <p class="page-subtitle">
-          <span class="material-symbols-outlined icon-subtitle">admin_panel_settings</span>
-          Vue administrateur - Monitoring temps réel des opérations
-        </p>
+        <div class="title-with-back">
+          <button
+            type="button"
+            class="btn-icon-back"
+            [routerLink]="['/dashboard/adminEmpotageMain']"
+            title="Retour"
+          >
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <div class="title-content">
+            <h1 class="page-title">
+              Supervision des Empotages 
+              <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
+            </h1>
+            <p class="page-subtitle">
+              <span class="material-symbols-outlined icon-subtitle">admin_panel_settings</span>
+              Vue administrateur - Monitoring temps réel des opérations
+            </p>
+          </div>
+        </div>
       </div>
       <button class="btn btn-primary">
         <span class="material-symbols-outlined">download</span>
@@ -21,107 +33,105 @@
     <section class="stats-grid">
       <!-- Total -->
       <article class="card stat-card">
-        <div class="stat-header">
-          <div class="icon-box bg-blue-100 text-blue-600">
-            <span class="material-symbols-outlined">inventory_2</span>
-          </div>
+        <div class="icon-box bg-blue-100 text-blue-600">
+          <span class="material-symbols-outlined">inventory_2</span>
         </div>
-        <p class="stat-label">Total</p>
-        <p class="stat-value">{{ stats.total | number }}</p>
+        <div class="stat-info">
+          <p class="stat-label">Total</p>
+          <p class="stat-value">{{ stats.total | number }}</p>
+        </div>
       </article>
 
       <!-- Aujourd'hui -->
       <article class="card stat-card">
-        <div class="stat-header">
-          <div class="icon-box bg-blue-100 text-blue-600">
-            <span class="material-symbols-outlined">today</span>
-          </div>
+        <div class="icon-box bg-blue-100 text-blue-600">
+          <span class="material-symbols-outlined">today</span>
         </div>
-        <p class="stat-label">Aujourd'hui</p>
-        <p class="stat-value">{{ stats.today }}</p>
+        <div class="stat-info">
+          <p class="stat-label">Aujourd'hui</p>
+          <p class="stat-value">{{ stats.today }}</p>
+        </div>
       </article>
 
       <!-- Cette semaine -->
       <article class="card stat-card">
-        <div class="stat-header">
-          <div class="icon-box bg-purple-100 text-purple-600">
-            <span class="material-symbols-outlined">date_range</span>
-          </div>
+        <div class="icon-box bg-purple-100 text-purple-600">
+          <span class="material-symbols-outlined">date_range</span>
         </div>
-        <p class="stat-label">Cette semaine</p>
-        <p class="stat-value">{{ stats.week }}</p>
+        <div class="stat-info">
+          <p class="stat-label">Cette semaine</p>
+          <p class="stat-value">{{ stats.week }}</p>
+        </div>
       </article>
 
       <!-- Ce mois -->
       <article class="card stat-card">
-        <div class="stat-header">
-          <div class="icon-box bg-green-100 text-green-600">
-            <span class="material-symbols-outlined">calendar_month</span>
-          </div>
+        <div class="icon-box bg-green-100 text-green-600">
+          <span class="material-symbols-outlined">calendar_month</span>
         </div>
-        <p class="stat-label">Ce mois</p>
-        <p class="stat-value">{{ stats.month }}</p>
+        <div class="stat-info">
+          <p class="stat-label">Ce mois</p>
+          <p class="stat-value">{{ stats.month }}</p>
+        </div>
       </article>
       
       <!-- Cette année -->
       <article class="card stat-card">
-        <div class="stat-header">
-          <div class="icon-box bg-orange-100 text-orange-600">
-            <span class="material-symbols-outlined">event</span>
-          </div>
+        <div class="icon-box bg-orange-100 text-orange-600">
+          <span class="material-symbols-outlined">event</span>
         </div>
-        <p class="stat-label">Cette année</p>
-        <p class="stat-value">{{ stats.year }}</p>
+        <div class="stat-info">
+          <p class="stat-label">Cette année</p>
+          <p class="stat-value">{{ stats.year }}</p>
+        </div>
       </article>
     </section>
 
     <!-- FILTERS -->
-    <section class="card filters-card">
-      <div class="filter-header">
-        <span class="material-symbols-outlined">filter_list</span>
-        <h3>FILTRES DE RECHERCHE</h3>
-      </div>
-      <div class="filters-row">
-        <div class="filter-group">
-          <label>Client</label>
-          <div class="select-wrapper">
-            <span class="material-symbols-outlined prefix-icon">person</span>
-            <select [(ngModel)]="filters.client">
-              <option value="all">Tous les clients</option>
-              <option value="cma">CMA CGM</option>
-              <option value="maersk">Maersk</option>
-            </select>
-            <span class="material-symbols-outlined suffix-icon">expand_more</span>
-          </div>
+    <section class="controls-area">
+      <div class="search-and-filters">
+        <!-- N° Booking Search -->
+        <div class="search-box">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input 
+            type="text" 
+            placeholder="Rechercher par N° Booking..." 
+            [(ngModel)]="filters.booking" 
+            (ngModelChange)="applyFilters()"
+          />
         </div>
 
-        <div class="filter-group">
-          <label>N° Booking</label>
-          <div class="input-wrapper">
-            <span class="prefix">#</span>
-            <input type="text" placeholder="Ex: BK-9283..." [(ngModel)]="filters.booking" />
-          </div>
-        </div>
+        <!-- Client Select -->
+         <div class="select-box">
+          <select [(ngModel)]="filters.client" (change)="applyFilters()" class="custom-select">
+            <option value="all">Tous les clients</option>
+            <option value="cma">CMA CGM</option>
+            <option value="maersk">Maersk</option>
+          </select>
+         </div>
 
-        <div class="filter-group">
-          <label>Période (Début)</label>
-          <div class="input-wrapper">
-            <span class="material-symbols-outlined prefix-icon">calendar_today</span>
-            <input type="date" [(ngModel)]="filters.dateDebut" />
-          </div>
-        </div>
+        <!-- Date Start -->
+        <input 
+          type="date" 
+          class="date-input" 
+          [(ngModel)]="filters.dateDebut" 
+          (ngModelChange)="applyFilters()"
+          title="Date de début"
+        />
 
-        <div class="filter-group">
-          <label>Période (Fin)</label>
-          <div class="input-wrapper">
-            <span class="material-symbols-outlined prefix-icon">calendar_today</span>
-            <input type="date" [(ngModel)]="filters.dateFin" />
-          </div>
-        </div>
+        <!-- Date End -->
+        <input 
+          type="date" 
+          class="date-input" 
+          [(ngModel)]="filters.dateFin" 
+          (ngModelChange)="applyFilters()"
+          title="Date de fin"
+        />
 
-        <button class="btn btn-icon" (click)="resetFilters()" title="Réinitialiser">
+        <!-- Reset Button -->
+        <!-- <button class="btn-icon-reset" (click)="resetFilters()" title="Réinitialiser">
           <span class="material-symbols-outlined">refresh</span>
-        </button>
+        </button> -->
       </div>
     </section>
 
@@ -130,11 +140,11 @@
       <div class="list-header">
         <div class="list-title-group">
           <h2>Liste des opérations</h2>
-          <span class="badge-count">{{ stats.total }} opérations</span>
+          <!-- <span class="badge-count">{{ stats.total }} opérations</span> -->
         </div>
-        <button class="btn btn-icon">
+        <!-- <button class="btn btn-icon">
           <span class="material-symbols-outlined">settings</span>
-        </button>
+        </button> -->
       </div>
 
       <section class="card table-card">

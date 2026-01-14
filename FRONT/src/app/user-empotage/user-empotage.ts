@@ -6,7 +6,6 @@ import { WarehouseService } from '../services/warehouse.service';
 interface Empotage {
   id?: number;
   client: string;
-  clientType: string;
   booking: string;
   conteneurs: number;
   volume: number;
@@ -55,7 +54,6 @@ export class UserEmpotage implements OnInit {
 
   newEmpotage: Empotage = {
     client: '',
-    clientType: '',
     booking: '',
     conteneurs: 1,
     volume: 0,
@@ -154,7 +152,7 @@ export class UserEmpotage implements OnInit {
     this.showCreateModal = true;
     // reset
     this.newEmpotage = {
-      client: '', clientType: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir',
+      client: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir',
       entrepotId: this.warehouses.length > 0 ? this.warehouses[0].id : undefined // Default to first
     };
   }

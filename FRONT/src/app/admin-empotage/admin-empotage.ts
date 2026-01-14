@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WarehouseService } from '../services/warehouse.service';
 
 interface EmpotageStats {
@@ -29,7 +29,7 @@ interface EmpotageOperation {
 @Component({
   selector: 'app-admin-empotage',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-empotage.html',
   styleUrl: './admin-empotage.scss',
 })
@@ -110,16 +110,62 @@ export class AdminEmpotage implements OnInit {
       const data = await res.json();
       
       // Filtre uniquement pour cet entrepôt
-      const filteredData = data.filter((op: any) => op.entrepotId === this.entrepotId);
+      this.rawOperations = data.filter((op: any) => op.entrepotId === this.entrepotId);
       
-      this.rawOperations = filteredData;
-      this.operations = filteredData.map((item: any) => this.mapToOperation(item));
       this.calculateStats();
+      this.applyFilters();
     } catch (e) {
       console.error('Erreur chargement empotages admin', e);
     } finally {
       this.loading = false;
     }
+  }
+
+  applyFilters() {
+    let filtered = [...this.rawOperations];
+
+    // 1. Filtre Booking
+    if (this.filters.booking) {
+      const search = this.filters.booking.toLowerCase().trim();
+      filtered = filtered.filter(op => (op.booking || '').toLowerCase().includes(search));
+    }
+
+    // 2. Filtre Client
+    if (this.filters.client !== 'all') {
+      const filterVal = this.filters.client.toLowerCase();
+      filtered = filtered.filter(op => {
+        const client = (op.client || '').toLowerCase();
+        // Si valeur spécifique comme 'cma' ou 'maersk'
+        if (filterVal === 'cma') return client.includes('cma');
+        if (filterVal === 'maersk') return client.includes('maersk');
+        return client.includes(filterVal);
+      });
+    }
+
+    // 3. Filtre Période Début
+    if (this.filters.dateDebut) {
+      const start = new Date(this.filters.dateDebut);
+      start.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(op => {
+        if (!op.dateStart) return false;
+        const d = new Date(op.dateStart);
+        return d >= start;
+      });
+    }
+
+    // 4. Filtre Période Fin
+    if (this.filters.dateFin) {
+      const end = new Date(this.filters.dateFin);
+      end.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(op => {
+        if (!op.dateStart) return false;
+        const d = new Date(op.dateStart);
+        return d <= end;
+      });
+    }
+
+    this.operations = filtered.map(item => this.mapToOperation(item));
+    this.currentPage = 1; // Reset pagination
   }
 
   mapToOperation(item: any): EmpotageOperation {
@@ -258,7 +304,6 @@ export class AdminEmpotage implements OnInit {
       dateDebut: '',
       dateFin: ''
     };
-    // Re-apply filters if we implement client-side filtering here
-    // For now it just resets the inputs
+    this.applyFilters();
   }
 }
