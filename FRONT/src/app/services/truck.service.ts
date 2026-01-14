@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../config';
 
 export interface Truck {
   id: number;
@@ -45,7 +46,7 @@ export interface Truck {
   providedIn: 'root',
 })
 export class TruckService {
-  private readonly apiUrl = 'http://localhost:3000/api/trucks';
+  private readonly apiUrl = `${environment.apiUrl}/trucks`;
 
   constructor(private http: HttpClient) {}
 

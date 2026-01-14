@@ -23,11 +23,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Database (MySQL Pool)
 // =======================
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'gestionentrepots',
-  port: 3306,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'gestionentrepots',
+  port: process.env.DB_PORT || 3306,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -115,6 +116,17 @@ console.log('Pool MySQL initialisé');
     } catch (e) {
       console.error("Erreur migration empotages:", e);
     }
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        message TEXT NOT NULL,
+        isRead BOOLEAN DEFAULT FALSE,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        relatedId INT NULL,
+        type VARCHAR(50) NULL
+      )
+    `);
 
     // Aggressive Migration: Fix ID 0 and enforce AUTO_INCREMENT
     try {
@@ -696,6 +708,12 @@ app.post('/api/empotages', async (req, res) => {
       [client, clientType, booking, conteneurs || 0, volume || 0, dateStart || null, dateEnd || null, status || 'A venir', entrepotId || null]
     );
 
+    // Notification
+    try {
+      const msg = `Nouvel empotage : ${client || '?'} / ${booking || '?'}`;
+      await db.query('INSERT INTO notifications (message, relatedId, type) VALUES (?, ?, ?)', [msg, result.insertId, 'empotage']);
+    } catch (e) { console.error("Erreur créa notif", e); }
+
     const [newRow] = await db.query('SELECT * FROM empotages WHERE id = ?', [result.insertId]);
     res.status(201).json(newRow[0]);
   } catch (err) {
@@ -797,7 +815,31 @@ app.get('/api/empotages/export', async (req, res) => {
   }
 });
 
-const PORT = 3000;
+// -----------------------
+// Notifications API
+// -----------------------
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM notifications WHERE isRead = 0 ORDER BY createdAt DESC LIMIT 50');
+    res.json(rows);
+  } catch (err) {
+    console.error('Erreur GET /api/notifications', err);
+    res.status(500).json({ message: 'Erreur notifications' });
+  }
+});
+
+app.put('/api/notifications/:id/read', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('UPDATE notifications SET isRead = 1 WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erreur PUT /api/notifications/:id/read', err);
+    res.status(500).json({ message: 'Erreur update notification' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur backend démarré sur http://localhost:${PORT}`);
 });

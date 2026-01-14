@@ -43,10 +43,10 @@
       </div>
     </nav>
       <div class="sidebar-footer">
-      <a href="#" class="sidebar-link secondary">
+      <!-- <a href="#" class="sidebar-link secondary">
         <span class="material-symbols-outlined">help</span>
         <span class="link-label">Centre d'aide</span>
-      </a>
+      </a> -->
       <div class="footer-divider"></div>
       <a href="#" class="sidebar-link logout" (click)="$event.preventDefault(); requestLogout()">
         <span class="material-symbols-outlined">logout</span>
@@ -114,14 +114,15 @@
                 (click)="openNotification(n)"
               >
                 <div class="notif-icon-circle">
-                  <span class="material-symbols-outlined">local_shipping</span>
+                  <span class="material-symbols-outlined" *ngIf="n.type === 'truck'">local_shipping</span>
+                  <span class="material-symbols-outlined" *ngIf="n.type === 'empotage'">inventory_2</span>
                 </div>
                 <div class="notif-body">
                   <div class="notif-row">
-                    <span class="notif-immat">{{ n.immatriculation }}</span>
-                    <span class="notif-clock">{{ n.heureArrivee | date : 'HH:mm' }}</span>
+                    <span class="notif-immat">{{ n.title }}</span>
+                    <span class="notif-clock">{{ n.time | date : 'HH:mm' }}</span>
                   </div>
-                  <p class="notif-subtitle">{{ n.entrepotName }}</p>
+                  <p class="notif-subtitle">{{ n.subtitle }}</p>
                 </div>
               </div>
             </div>
@@ -133,12 +134,12 @@
           <div
             class="profile-avatar"
             style="
-              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPHyHGMfTjg0KY3dZ-4D-csVv0_-YYCb8FAMEwxtDUIYrSr0qUlMlx9xc0kD5FdKoHfGT2TO7q3AfmgKtLEa3ZZSJssGPPp0WNOEjaBIbeeeOYdn3xAbxA5qOPiXRi5piRgZ9GB7GF8kudQYw8dkAAgGGYEsWT2DXaQ8m7QeeV5YTKpQb33QwQOQPF6tgTY0ZM5PfeTpb8NQByRdbDmwCCBSNPHz0CRZWMFIro1_4Unfqodv6iXWCL4YMw3aQxA9Y9MNpk4lnTUBoL');
+              background-image: url('https://ui-avatars.com/api/?name={{userName}}&background=random');
             "
           ></div>
           <div class="profile-info">
-            <p class="name">Marc Alex</p>
-            <p class="role">Administrateur</p>
+            <p class="name">{{ userName }}</p>
+            <p class="role">{{ userRoleLabel }}</p>
           </div>
           <button class="profile-toggle">
             <span class="material-symbols-outlined">expand_more</span>

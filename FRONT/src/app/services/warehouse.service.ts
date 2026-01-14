@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../config';
 
 export interface StoredWarehouse {
   id: number;
@@ -11,7 +12,7 @@ export interface StoredWarehouse {
 
 @Injectable({ providedIn: 'root' })
 export class WarehouseService {
-  private apiUrl = 'http://localhost:3000/api/warehouses';
+  private apiUrl = `${environment.apiUrl}/warehouses`;
 
   constructor(private http: HttpClient) {}
 

@@ -24,13 +24,17 @@ export class Dashboard implements OnInit, OnDestroy {
 
   notifications: Array<{
     id: number;
-    immatriculation: string;
-    entrepotId: number;
-    entrepotName: string;
-    statut: string;
-    advancedStatus?: string;
-    heureArrivee: string;
+    title: string;
+    subtitle: string;
+    time: string;
+    type: 'truck' | 'empotage';
+    sourceId: number;
+    original?: any;
   }> = [];
+
+  // User Info
+  userName = 'Marc Alex';
+  userRoleLabel = 'Administrateur';
 
   constructor(
     private router: Router,
@@ -58,9 +62,21 @@ export class Dashboard implements OnInit, OnDestroy {
   private pollingInterval: any;
 
   ngOnInit(): void {
+    this.loadCurrentUser();
     this.loadNotifications();
     // Polling toutes les 15 secondes
     this.pollingInterval = setInterval(() => this.loadNotifications(), 15000);
+  }
+
+  loadCurrentUser() {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) {
+          try {
+              const u = JSON.parse(raw);
+              this.userName = u.nom || 'Administrateur';
+              this.userRoleLabel = u.role === 'admin' ? 'Administrateur' : (u.role || 'Admin');
+          } catch(e) {}
+      }
   }
 
   ngOnDestroy(): void {
@@ -75,26 +91,48 @@ export class Dashboard implements OnInit, OnDestroy {
       next: (warehouses: StoredWarehouse[]) => {
         this.truckService.getTrucks().subscribe({
           next: (trucks: Truck[]) => {
-            // On charge :
-            // Tous les camions "En attente" (analyses envoyées)
-            // Tous les camions renvoyés vers l'admin (unreadForAdmin = true)
-            this.notifications = trucks
+            // 1. Truck Notifications
+            const truckNotifs = trucks
               .filter((t: Truck) => t.statut === 'En attente' || t.unreadForAdmin === true)
               .map((t: Truck) => {
                 const wh = warehouses.find((w: StoredWarehouse) => w.id === t.entrepotId);
                 return {
                   id: t.id,
-                  immatriculation: t.immatriculation,
-                  entrepotId: t.entrepotId,
-                  entrepotName: wh ? wh.name : 'Entrepôt inconnu',
-                  statut: t.statut,
-                  advancedStatus: t.advancedStatus,
-                  heureArrivee: t.heureArrivee,
+                  title: t.immatriculation,
+                  subtitle: wh ? wh.name : 'Entrepôt inconnu',
+                  time: t.heureArrivee,
+                  type: 'truck' as const,
+                  sourceId: t.id,
+                  original: t
                 };
               });
+            
+            // 2. Empotage Notifications
+            fetch('http://localhost:3000/api/notifications')
+                .then(r => r.json())
+                .then((apiNotifs: any[]) => {
+                    const empotageNotifs = apiNotifs.map((n: any) => ({
+                         id: n.id,
+                         title: 'Empotage',
+                         subtitle: n.message,
+                         time: n.createdAt,
+                         type: 'empotage' as const,
+                         sourceId: n.id,
+                         original: n
+                    }));
+                    
+                    // Merge & Sort
+                    this.notifications = [...truckNotifs, ...empotageNotifs]
+                        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-            // Nombre affiché sur le badge
-            this.notifCount = this.notifications.length;
+                    this.notifCount = this.notifications.length;
+                })
+                .catch(err => {
+                    console.error('Error fetching notifications', err);
+                    // Fallback to just trucks if error
+                    this.notifications = truckNotifs;
+                    this.notifCount = this.notifications.length;
+                });
           },
         });
       },
@@ -126,17 +164,24 @@ export class Dashboard implements OnInit, OnDestroy {
     // On ferme le dropdown
     this.showNotifDropdown = false;
 
-    // On marque cette notification comme lue via l'API
-    this.truckService.updateTruck(n.id, { unreadForAdmin: false }).subscribe({
-      next: () => {
-        // Recharger les notifications (mise à jour du badge)
-        this.loadNotifications();
-
-        // Navigation vers l'entrepôt concerné
-        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          this.router.navigate(['/dashboard/entrepot', n.entrepotId]);
+    if (n.type === 'truck') {
+        // On marque cette notification comme lue via l'API
+        this.truckService.updateTruck(n.sourceId, { unreadForAdmin: false }).subscribe({
+          next: () => {
+            this.loadNotifications();
+            // Navigation vers l'entrepôt concerné
+            this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+              this.router.navigate(['/dashboard/entrepot', n.original.entrepotId]);
+            });
+          },
         });
-      },
-    });
+    } else if (n.type === 'empotage') {
+        // Mark as read
+        fetch(`http://localhost:3000/api/notifications/${n.sourceId}/read`, { method: 'PUT' })
+             .then(() => {
+                 this.loadNotifications();
+                 this.router.navigate(['/dashboard/adminEmpotageMain']);
+             });
+    }
   }
 }

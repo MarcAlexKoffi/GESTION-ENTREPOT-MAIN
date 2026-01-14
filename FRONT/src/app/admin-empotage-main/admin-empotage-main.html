@@ -1,20 +1,7 @@
 <div class="page-container">
   <!-- HEADER SECTION -->
   <header class="header-section">
-    <h1 class="page-title">Sélection de l'entrepôt</h1>
-    
-    <!-- SEARCH BAR -->
-    <div class="search-wrapper">
-      <div class="search-input-container">
-        <span class="material-symbols-outlined search-icon">search</span>
-        <input 
-          type="text" 
-          placeholder="Rechercher par nom ou code..." 
-          [(ngModel)]="searchTerm"
-          class="search-input"
-        >
-      </div>
-    </div>
+    <h1 class="page-title">Sélection de l'entrepôt pour la supervision</h1>
   </header>
 
   <!-- GRID SECTION -->
@@ -34,7 +21,7 @@
              {{ w.status }}
         </span>
       </div>
-
+      
       <!-- CONTENT -->
       <div class="card-content">
         <div class="flex-between top-row">
