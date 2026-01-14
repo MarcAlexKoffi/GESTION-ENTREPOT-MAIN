@@ -309,8 +309,12 @@
       </div>
 
       <div class="modal-footer">
-        <div class="footer-left" *ngIf="selectedTruck?.statut === 'Annulé'">
-          <button class="btn-secondary danger" (click)="reintegrateTruck()">
+        <div class="footer-left" style="display: flex; gap: 0.75rem;">
+          <button class="btn-secondary" (click)="openHistoryModal(selectedTruck!)">
+            <span class="material-symbols-outlined">history</span> Historique
+          </button>
+
+          <button *ngIf="selectedTruck?.statut === 'Annulé'" class="btn-secondary danger" (click)="reintegrateTruck()">
             <span class="material-symbols-outlined">restore</span> Réintégré
           </button>
         </div>
