@@ -350,24 +350,17 @@
         </div>
         <div class="modal-body">
             <div style="margin-bottom:1rem; padding:1rem; background:#f0f9ff; border-radius:0.75rem; color:#0369a1; font-size:0.9rem;">
-                Veuillez saisir les résultats de l'analyse (TH, Impuretés, Grainage, etc.) pour envoyer le camion en validation Admin.
+                Veuillez saisir les résultats de l'analyse (KOR, TH) pour envoyer le camion en validation Admin.
             </div>
 
             <div class="truck-field">
-                <label class="truck-label">Taux d'Humidité (TH)</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.th" placeholder="Ex: 12.5">
+                <label class="truck-label">KOR</label>
+                <input type="number" class="truck-input" [(ngModel)]="analysisData.kor" placeholder="Ex: 11">
             </div>
-             <div class="truck-field">
-                <label class="truck-label">Impuretés</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.impurete" placeholder="Ex: 2.1">
-            </div>
-             <div class="truck-field">
-                <label class="truck-label">Grainage</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.grainage" placeholder="Ex: 180">
-            </div> 
+            
             <div class="truck-field">
-                <label class="truck-label">Taux de défectuosité</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.defaut" placeholder="Ex: 1.5">
+                <label class="truck-label">TH</label>
+                <input type="number" class="truck-input" [(ngModel)]="analysisData.th" placeholder="Ex: 12.5">
             </div>
 
             <div *ngIf="isAnalysisInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem;">
@@ -387,31 +380,39 @@
     <div class="modal-backdrop" (click)="closeProductsModal()"></div>
      <div class="modal-panel">
         <div class="modal-header">
-            <h2 class="modal-title">Détails produits</h2>
+            <h2 class="modal-title">Renseigner détails produits</h2>
             <button class="btn-close-icon" (click)="closeProductsModal()">
                 <span class="material-symbols-outlined" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body">
              <div class="truck-field">
-                <label class="truck-label">Poids (Kg)</label>
-                <input type="number" class="truck-input" [(ngModel)]="productsData.poids">
+                <label class="truck-label">Numéro du camion</label>
+                <input type="text" class="truck-input" [value]="productsData.numeroCamion" readonly disabled style="background:#f1f5f9; color:#64748b;">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Nombre de sacs</label>
-                <input type="number" class="truck-input" [(ngModel)]="productsData.sacs">
-            </div>
-             <div class="truck-field">
-                <label class="truck-label">Type de produit</label>
-                <select class="truck-select" [(ngModel)]="productsData.type">
-                    <option value="Cacao">Cacao</option>
-                    <option value="Café">Café</option>
-                    <option value="Anacarde">Anacarde</option>
-                </select>
+                <label class="truck-label">Numéro de la fiche de transfert</label>
+                <input type="text" class="truck-input" [(ngModel)]="productsData.numeroFicheTransfert">
             </div>
             <div class="truck-field">
-                <label class="truck-label">Commentaire (Facultatif)</label>
-                <textarea class="truck-input" [(ngModel)]="productsData.comment" style="height:80px; resize:none;"></textarea>
+                <label class="truck-label">Numéro de lot</label>
+                <input type="text" class="truck-input" [(ngModel)]="productsData.numeroLot" placeholder="Ex : LOT-4587">
+            </div>
+             <div class="truck-field">
+                <label class="truck-label">Nombre de sacs déchargés</label>
+                <input type="number" class="truck-input" [(ngModel)]="productsData.nombreSacsDecharges" placeholder="Ex: 120">
+            </div>
+             <div class="truck-field">
+                <label class="truck-label">Poids brut</label>
+                <input type="number" class="truck-input" [(ngModel)]="productsData.poidsBrut" placeholder="Ex: 3500">
+            </div>
+             <div class="truck-field">
+                <label class="truck-label">Poids net</label>
+                <input type="number" class="truck-input" [(ngModel)]="productsData.poidsNet" placeholder="Ex: 3400">
+            </div>
+             <div class="truck-field">
+                <label class="truck-label">KOR</label>
+                <input type="number" class="truck-input" [(ngModel)]="productsData.kor">
             </div>
         </div>
         <div class="modal-footer">
@@ -431,15 +432,27 @@
                 <span class="material-symbols-outlined" style="font-size:20px">close</span>
             </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="background:#f8fafc; padding: 1.5rem;">
             <div *ngIf="!selectedTruckForHistory?.history?.length" class="cell-muted" style="text-align:center;">
                 Aucun historique disponible.
             </div>
-            <div *ngFor="let h of selectedTruckForHistory?.history" style="padding:1rem; border-bottom:1px solid #f1f5f9;">
-                <div style="font-weight:700; color:#0f172a;">{{ h.action }}</div>
-                <div style="font-size:0.85rem; color:#64748b;">{{ h.date | date:'dd/MM/yyyy HH:mm' }} par {{ h.user }}</div>
-                <div *ngIf="h.details" style="margin-top:0.25rem; font-size:0.9rem; color:#334155;">{{ h.details }}</div>
+            
+            <div class="history-list" style="display:flex; flex-direction:column; gap:1rem;">
+                <div *ngFor="let h of selectedTruckForHistory?.history" class="history-card" 
+                     style="background:white; padding:1rem 1.5rem; border-radius:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.05); display:flex; border-left: 4px solid var(--primary);">
+                    <div class="history-content">
+                        <div style="font-weight:700; color:#0f172a; font-size:1rem; margin-bottom:0.25rem;">
+                            {{ h.event || h.action }}
+                        </div>
+                        <div style="font-size:0.85rem; color:var(--primary); font-weight:600;">
+                            {{ h.by | titlecase }} <span style="color:#94a3b8; font-weight:400;"> • {{ h.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="modal-footer" style="justify-content:center;">
+            <button class="truck-submit" (click)="closeHistoryModal()" style="max-width:200px;">Fermer</button>
         </div>
     </div>
 </div>
@@ -455,18 +468,46 @@
             </button>
         </div>
         <div class="modal-body">
-            <div class="truck-field">
-                <label class="truck-label">Produit</label>
-                <div style="font-weight:600">{{ selectedTruckForDetails?.products?.type }}</div>
+            <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Camion</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.immatriculation }}</span>
             </div>
-            <div class="truck-field">
-                <label class="truck-label">Poids</label>
-                <div style="font-weight:600">{{ selectedTruckForDetails?.products?.poidsBrut }} Kg</div>
+            <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Fiche de transfert</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.transfert }}</span>
             </div>
-            <div class="truck-field">
-                <label class="truck-label">Sacs</label>
-                <div style="font-weight:600">{{ selectedTruckForDetails?.products?.nombreSacsDecharges }}</div>
+             <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Numéro de lot</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.products?.numeroLot || '—' }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Sacs déchargés</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.products?.nombreSacsDecharges || '—' }}</span>
+            </div>
+             <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Poids Brut</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.products?.poidsBrut }} Kg</span>
+            </div>
+             <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">Poids Net</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.products?.poidsNet }} Kg</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid #f1f5f9;">
+                <span style="font-weight:600; color:#64748b;">KOR</span>
+                <span style="font-weight:700;">{{ selectedTruckForDetails?.kor }}</span>
+            </div>
+            
+             <div *ngIf="$any(selectedTruckForDetails?.products)?.comment" style="margin-top:1rem; padding:1rem; background:#f8fafc; border-radius:0.5rem;">
+                <span style="display:block; font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:0.25rem;">Commentaire</span>
+                <div>{{ $any(selectedTruckForDetails?.products)?.comment }}</div>
             </div>
         </div>
-    </div>
-</div>
+         <div class="modal-footer">
+            <button class="truck-submit" 
+                    style="background:white; color:var(--text-primary); border:1px solid var(--border-medium); width:auto; padding:0.75rem 1.5rem;" 
+                    (click)="printSelectedTruck()">
+                <span class="material-symbols-outlined" style="vertical-align:middle; font-size:18px; margin-right:4px;">print</span>
+                Imprimer
+            </button>
+            <button class="truck-submit" style="width:auto; padding:0.75rem 2.5rem;" (click)="closeDetailsModal()">Fermer</button>
+        </div>

@@ -19,7 +19,8 @@ export class Entrepot implements OnInit {
     lieu: '',
   };
   searchTerm: string = '';
-  selectedPeriod: 'today' | '7days' | '30days' | 'all' = 'today';
+  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
+  filterDate: string = '';
 
   // Ajout de la nouvelle catégorie RENVOYÉS
   currentTab: 'pending' | 'validated' | 'accepted' | 'cancelled' | 'renvoyes' = 'pending';
@@ -212,23 +213,48 @@ export class Entrepot implements OnInit {
   }
 
   private isInSelectedPeriod(dateIso: string): boolean {
-    if (this.selectedPeriod === 'all') return true;
+    if (!dateIso) return false;
+    // if selectedPeriod was previous 'all' or '7days' etc... 
+    // Wait, I changed the type above. I should logic here.
 
     const created = new Date(dateIso);
     const now = new Date();
 
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    if (this.selectedPeriod === 'specific' && this.filterDate) {
+      const target = new Date(this.filterDate);
+      return (
+        created.getFullYear() === target.getFullYear() &&
+        created.getMonth() === target.getMonth() &&
+        created.getDate() === target.getDate()
+      );
+    }
+
     if (this.selectedPeriod === 'today') {
       return created.toDateString() === now.toDateString();
     }
-
-    if (this.selectedPeriod === '7days') {
-      const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
-      return created.getTime() >= sevenDaysAgo;
+    if (this.selectedPeriod === 'week') {
+      return created >= startOfWeek;
     }
-    if (this.selectedPeriod === '30days') {
-      const thirtyDaysAgo = now.getTime() - 30 * 24 * 60 * 60 * 1000;
-      return created.getTime() >= thirtyDaysAgo;
+    if (this.selectedPeriod === 'month') {
+      return created >= startOfMonth;
     }
+    if (this.selectedPeriod === 'year') {
+      return created >= startOfYear;
+    }
+    
+    // fallthrough if 'all' or anything else, but I removed 'all' from type. 
+    // Let's add 'all' back to type if we want to keep it?
+    // User entrepot just has today/week/month/year/specific. It defaults to 'today'.
+    // It actually doesn't seem to have 'all'. 
+    
     return true;
   }
 
@@ -347,12 +373,14 @@ export class Entrepot implements OnInit {
     switch (this.selectedPeriod) {
       case 'today':
         return "Aujourd'hui";
-      case '7days':
-        return '7 derniers jours';
-      case '30days':
-        return '30 derniers jours';
-      case 'all':
-        return 'Toutes périodes';
+      case 'week':
+        return 'Cette semaine';
+      case 'month':
+        return 'Ce mois';
+      case 'year':
+        return 'Cette année';
+      case 'specific':
+        return 'Date spécifique';
       default:
         return 'Toutes périodes';
     }
@@ -728,8 +756,19 @@ export class Entrepot implements OnInit {
     this.showPeriodDropdown = false;
   }
 
-  setPeriod(value: 'today' | '7days' | '30days' | 'all'): void {
+  setPeriod(value: 'today' | 'week' | 'month' | 'year' | 'specific'): void {
     this.selectedPeriod = value;
+    if (value !== 'specific') {
+      this.filterDate = '';
+    }
     this.closePeriodDropdown();
+  }
+
+  onDateChange(): void {
+    if (this.filterDate) {
+      this.setPeriod('specific');
+    } else {
+      this.setPeriod('today');
+    }
   }
 }

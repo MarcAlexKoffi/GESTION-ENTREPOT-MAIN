@@ -16,26 +16,6 @@
         </div>
         <p class="page-desc">{{ entrepot.lieu }}</p>
       </div>
-
-      <div class="head-actions">
-        <!-- Period Filter Chip -->
-        <div class="filter-chip-wrap" (click)="togglePeriodDropdown()">
-          <span class="material-symbols-outlined">calendar_today</span>
-          <span class="chip-label">{{ selectedPeriodLabel }}</span>
-          <span class="material-symbols-outlined arrow">expand_more</span>
-
-          <div
-            class="filter-dropdown"
-            *ngIf="showPeriodDropdown"
-            (click)="$event.stopPropagation()"
-          >
-            <button class="dropdown-item" (click)="setPeriod('today')">Aujourd'hui</button>
-            <button class="dropdown-item" (click)="setPeriod('7days')">7 derniers jours</button>
-            <button class="dropdown-item" (click)="setPeriod('30days')">30 derniers jours</button>
-            <button class="dropdown-item" (click)="setPeriod('all')">Toutes périodes</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- STATS GRID -->
@@ -79,7 +59,57 @@
           <h3 class="stat-value">{{ nbAccepted }}</h3>
         </div>
       </div>
+
+       <div class="stat-card">
+        <div class="stat-icon cancelled">
+          <span class="material-symbols-outlined">cancel</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Refoulés</p>
+          <h3 class="stat-value">{{ nbCancelled }}</h3>
+        </div>
+      </div>
+
+       <div class="stat-card">
+        <div class="stat-icon renvoyes">
+          <span class="material-symbols-outlined">reply</span>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Renvoyés</p>
+          <h3 class="stat-value">{{ nbRenvoyes }}</h3>
+        </div>
+      </div>
     </div>
+
+    <!-- CONTROLS AREA (New) -->
+    <section class="controls-area">
+        <div class="search-and-filters">
+            <!-- SEARCH -->
+            <div class="search-box">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input type="text" placeholder="Rechercher un camion..." [(ngModel)]="searchTerm" />
+            </div>
+
+            <!-- PERIOD FILTER -->
+            <div class="filter-dropdown-wrapper">
+                <div class="filter-chip-wrap" (click)="togglePeriodDropdown()">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span class="chip-label">{{ selectedPeriodLabel }}</span>
+                    <span class="material-symbols-outlined arrow">expand_more</span>
+                </div>
+
+                <div class="filter-dropdown" *ngIf="showPeriodDropdown">
+                    <button type="button" class="dropdown-item" (click)="setPeriod('today')">Aujourd'hui</button>
+                    <button type="button" class="dropdown-item" (click)="setPeriod('week')">Cette semaine</button>
+                    <button type="button" class="dropdown-item" (click)="setPeriod('month')">Ce mois</button>
+                    <button type="button" class="dropdown-item" (click)="setPeriod('year')">Cette année</button>
+                </div>
+            </div>
+
+            <!-- DATE INPUT -->
+            <input type="date" class="date-input" [(ngModel)]="filterDate" (ngModelChange)="onDateChange()" />
+        </div>
+    </section>
 
     <!-- MAIN TABLE CARD -->
     <div class="card table-card">
@@ -123,11 +153,6 @@
               Renvoyés <span class="tab-badge">{{ nbRenvoyes }}</span>
             </button>
           </nav>
-        </div>
-
-        <div class="search-box">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un camion..." />
         </div>
       </div>
 

@@ -73,34 +73,8 @@ export class UserEntrepot implements OnInit {
     this.isAnalysisInvalid = false;
     this.analysisError = '';
 
-    // Note: The UI might use 'grainage', 'impurete', 'defaut' which are not in existing analysisData 
-    // but the user asked for "same style". I will assume analysisData in TS needs to be extended if we strictly follow the HTML.
-    // HTML uses analysisData.th, .impurete, .grainage, .defaut
-    // But existing TS uses kor, th. 
-    // Let's stick to what was visible in the code I read: TS had kor, th.
-    // HTML has th, impurete, grainage, defaut. 
-    // I should PROBABLY update TS to match HTML but I don't want to break backend types if Truck type doesn't support it.
-    // For now I'll just keep the TS logic consistent with itself but add loading.
-    
-    // WAIT. The HTML I wrote uses:
-    // analysisData.th
-    // analysisData.impurete
-    // analysisData.grainage
-    // analysisData.defaut
-    
-    // Existing TS has:
-    // analysisData = { kor: '', th: '' };
-    
-    // So the new HTML will break. I must update analysisData structure in TS.
-    
-    // However, I can't just change it blindly. Does the `Truck` interface support impurete, grainage, defaut? 
-    // I should check `../services/truck.service.ts` but I didn't read it.
-    // Safest bet is to map these new HTML fields back to whatever the backend supports OR just allow them if `Truck` is flexible (likely not strict if it's MongoDB/Firestone but TS is strict).
-    
-    // Let's assume for this "style" update, functionality might drift slightly.
-    // I will add the fields to analysisData in TS to satisfy the template.
-    
-    if (!h) {
+    // check both
+    if (!h || !k) {
        this.isAnalysisInvalid = true;
        return;
     }
@@ -174,9 +148,14 @@ export class UserEntrepot implements OnInit {
   };
 
   productsData = {
-    poids: '',
-    sacs: '',
-    type: 'Cacao', 
+    numeroCamion: '',
+    numeroFicheTransfert: '',
+    numeroLot: '',
+    nombreSacsDecharges: '',
+    poidsBrut: '',
+    poidsNet: '',
+    kor: '',
+    type: 'Cacao',
     comment: ''
   };
   loadingAnalysis = false;
@@ -294,20 +273,6 @@ export class UserEntrepot implements OnInit {
   applyFilters(): void {
     const base = this.getBaseListForTab();
     const search = this.filterSearch.trim().toLowerCase();
-    const now = new Date();
-
-    const isToday = (iso: string) => {
-      const d = new Date(iso);
-      return d.toDateString() === now.toDateString();
-    };
-
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const currentDay = now.getDay() || 7; 
-    const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
-
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
 
     this.filteredTrucks = base.filter((t) => {
       // 1) Recherche
@@ -331,28 +296,8 @@ export class UserEntrepot implements OnInit {
       }
 
       // 3) Période
-      const dateToFilter = t.heureArrivee || '';
-      if (!dateToFilter) return false;
-      const d = new Date(dateToFilter);
-
-      if (this.selectedPeriod === 'specific' && this.filterDate) {
-        return d.toDateString() === new Date(this.filterDate).toDateString();
-      }
-
-      if (this.selectedPeriod === 'today') {
-        return isToday(dateToFilter);
-      }
-      if (this.selectedPeriod === 'week') {
-        return d >= startOfWeek;
-      }
-      if (this.selectedPeriod === 'month') {
-        return d >= startOfMonth;
-      }
-      if (this.selectedPeriod === 'year') {
-        return d >= startOfYear;
-      }
-
-      return true;
+      const dateToFilter = this.getDateForPeriod(t);
+      return this.isInSelectedPeriod(dateToFilter);
     });
   }
 
@@ -912,8 +857,13 @@ export class UserEntrepot implements OnInit {
     this.selectedTruckForProducts = t;
 
     this.productsData = {
-      poids: t.products?.poidsBrut || '',
-      sacs: t.products?.nombreSacsDecharges || '',
+      numeroCamion: t.immatriculation || '',
+      numeroFicheTransfert: t.transfert || '',
+      numeroLot: t.products?.numeroLot || '',
+      nombreSacsDecharges: t.products?.nombreSacsDecharges || '',
+      poidsBrut: t.products?.poidsBrut || '',
+      poidsNet: t.products?.poidsNet || '',
+      kor: t.kor || '',
       type: (t.products as any)?.type || 'Cacao',
       comment: (t.products as any)?.comment || ''
     };
@@ -936,16 +886,19 @@ export class UserEntrepot implements OnInit {
     
     // Construct new products object
     const prod = {
-        poidsBrut: String(this.productsData.poids), 
-        nombreSacsDecharges: String(this.productsData.sacs),
+        poidsBrut: String(this.productsData.poidsBrut), 
+        poidsNet: String(this.productsData.poidsNet),
+        nombreSacsDecharges: String(this.productsData.nombreSacsDecharges),
+        numeroLot: String(this.productsData.numeroLot),
         type: this.productsData.type,
-        comment: this.productsData.comment,
-        // Keep existing if needed, or clear? Assuming overwrite or merge
-        numeroLot: t.products?.numeroLot || '',
-        poidsNet: String(this.productsData.poids) // Simplified assumption driven by UI
+        comment: this.productsData.comment
     };
 
     t.products = prod;
+    // Update simple properties if editable
+    t.transfert = this.productsData.numeroFicheTransfert;
+    t.kor = String(this.productsData.kor);
+
     t.advancedStatus = 'ACCEPTE_FINAL';
     t.finalAcceptedAt = new Date().toISOString();
     t.unreadForAdmin = true;
@@ -954,6 +907,8 @@ export class UserEntrepot implements OnInit {
 
     const updates: Partial<Truck> = {
       products: t.products,
+      transfert: t.transfert,
+      kor: t.kor,
       advancedStatus: 'ACCEPTE_FINAL',
       finalAcceptedAt: t.finalAcceptedAt,
       unreadForAdmin: true,
@@ -1043,8 +998,10 @@ export class UserEntrepot implements OnInit {
         <div class="row"><span class="label">Poids brut :</span> ${
           t.products?.poidsBrut ?? ''
         }</div>
-        <div class="row"><span class="label">Poids net :</span> ${t.products?.poidsNet ?? ''}</div>
+        <div class="row"><span class="label">Poids net :</span> ${t.products?.poidsNet ?? ''} Kg</div>
         <div class="row"><span class="label">KOR :</span> ${t.kor}</div>
+        <div class="row"><span class="label">Type produit :</span> ${(t.products as any)?.type ?? ''}</div>
+        <div class="row"><span class="label">Commentaire :</span> ${(t.products as any)?.comment ?? '—'}</div>
         <script>window.print()</script>
       </body>
     </html>
