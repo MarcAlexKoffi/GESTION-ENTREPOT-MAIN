@@ -200,20 +200,30 @@ export class DashboardMain implements OnInit {
   // STATISTIQUES
   // ---------------------------------------------------------------------------
   calculateWeeklyStats(allTrucks: Truck[]) {
-    // Note: We need to cast allTrucks or use 'any' if types are tricky to import without circular deps or just use 'any[]'.
-    // The previous code had 'allTrucks' inferred. Let's assume it's any[] or StoredTruck[]/Truck[]. 
-    // Ideally we import Truck from truck.service.ts, but let's implement the logic safely.
-    
-    // We want stats for trucks with status 'Enregistré' (or matching user request)
-    // The user asked for "données de camions dans la catégorie 'enrégistrés' par semaine"
-    
-    // 1. Generate last 7 days
+    // Calculer les stats pour la semaine en cours (Lundi à Dimanche)
     const days = [];
     const today = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      days.push(d);
+    
+    // Trouver le lundi de la semaine courante
+    // getDay(): 0=Dim, 1=Lun, ..., 6=Sam
+    // Si on est dimanche (0), on veut reculer de 6 jours.
+    // Si on est lundi (1), on recule de 0 jour.
+    // Si on est mardi (2), on recule de 1 jour.
+    const dayOfWeek = today.getDay(); 
+    // Nombre de jours à soustraire pour revenir au lundi
+    // (dayOfWeek + 6) % 7 est l'astuce classique :
+    // Dim(0) -> (0+6)%7 = 6
+    // Lun(1) -> (1+6)%7 = 0
+    // Mar(2) -> (2+6)%7 = 1
+    const dist = (dayOfWeek + 6) % 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - dist);
+
+    // Générer les 7 jours de la semaine (Lun -> Dim)
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        days.push(d);
     }
 
     // 2. Group counts
@@ -226,9 +236,6 @@ export class DashboardMain implements OnInit {
 
       // Filter trucks
       const dayCount = (allTrucks as any[]).filter(t => {
-        // On compte tous les camions enregistrés (= créés/arrivés) ce jour-là, peu importe leur statut actuel
-        // if (t.statut !== 'Enregistré') return false; 
-        
         // Parse date
         const truckDate = new Date(t.heureArrivee); // or t.createdAt if available
         return truckDate >= start && truckDate <= end;
@@ -241,27 +248,23 @@ export class DashboardMain implements OnInit {
     });
 
     // 3. Max value for scaling
-    const maxVal = Math.max(...counts.map(c => c.count));
+    // S'assurer qu'on a au moins une valeur max > 0 pour éviter la division par zéro
+    const maxVal = Math.max(...counts.map(c => c.count)) || 1;
     
     // 4. Transform to view model
     const formatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
 
     this.stats = counts.map(item => {
-      let height = '0%';
-      if (maxVal > 0) {
-        // Minimum visible height if count > 0 could be useful, but pure linear scale:
-        const pct = (item.count / maxVal) * 100;
-        height = `${Math.round(pct)}%`;
-      } else {
-          height = '0%';
-      }
-
-      // If count is 0, maybe show a tiny bar or just 0 height? 
-      // Existing UI has tooltips.
+      // Minimum height logic or purely proportional
+      const pct = (item.count / maxVal) * 100;
+      let height = `${Math.round(pct)}%`;
       
+      // Optionnel : fixer une hauteur minime pour look-and-feel si 0 ? 
+      // Ici on laisse 0% si 0.
+
       const dayName = formatter.format(item.date);
       // capitalize first letter: lun -> Lun
-      const label = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+      const label = dayName.charAt(0).toUpperCase() + dayName.slice(1).replace('.', '');
 
       return {
         day: label,

@@ -148,11 +148,11 @@
                 <th>VOLUME (M³)</th>
                 <th>DÉBUT PRÉVU</th>
                 <th>FIN ESTIMÉE</th>
-                <th>STATUT</th>
+                <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let op of operations">
+              <tr *ngFor="let op of paginatedOperations">
                 <td>
                   <div class="client-cell">
                     <div class="avatar-circle" [ngClass]="op.clientColor">
@@ -167,12 +167,9 @@
                 <td class="text-muted">{{ op.debutPrevu }}</td>
                 <td class="text-muted">{{ op.finEstimee }}</td>
                 <td>
-                  <span class="status-pill" [ngClass]="getStatusClass(op.statut)">
-                    <span class="material-symbols-outlined status-icon">
-                      {{ getStatusIcon(op.statut) }}
-                    </span>
-                    {{ op.statut }}
-                  </span>
+                  <button class="btn btn-icon" title="Imprimer" (click)="printOperation(op)">
+                    <span class="material-symbols-outlined">print</span>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -180,10 +177,14 @@
         </div>
         
         <div class="pagination-footer">
-          <span class="page-info">PAGE 1 DE 12</span>
+          <span class="page-info">PAGE {{ currentPage }} DE {{ totalPages }}</span>
           <div class="pagination-controls">
-            <button class="btn-page" disabled><span class="material-symbols-outlined">chevron_left</span></button>
-            <button class="btn-page"><span class="material-symbols-outlined">chevron_right</span></button>
+            <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
           </div>
         </div>
       </section>

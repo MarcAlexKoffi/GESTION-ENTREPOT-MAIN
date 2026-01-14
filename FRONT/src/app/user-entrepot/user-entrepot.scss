@@ -168,6 +168,8 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center; /* Centrer le contenu */
+  flex: 1;                 /* Prendre toute la largeur dispo */
   gap: 0.6rem;
   transition: var(--transition-normal);
   white-space: nowrap;

@@ -59,6 +59,27 @@ export class AdminEmpotage implements OnInit {
   rawOperations: any[] = [];
   loading = false;
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.operations.length / this.pageSize) || 1;
+  }
+
+  get paginatedOperations(): EmpotageOperation[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.operations.slice(start, start + this.pageSize);
+  }
+
+  nextPage() {
+     if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  prevPage() {
+     if (this.currentPage > 1) this.currentPage--;
+  }
+
   async ngOnInit() {
     this.route.params.subscribe(async (params) => {
       this.entrepotId = +params['id'];
@@ -163,7 +184,53 @@ export class AdminEmpotage implements OnInit {
       year: raw.filter(e => e.dateStart && new Date(e.dateStart) >= startOfYear).length
     };
   }
+  printOperation(op: EmpotageOperation) {
+    // Implémentation basique de l'impression
+    // Vous pourriez vouloir une modale ou une page dédiée
+    const printContent = `
+      <html>
+        <head>
+          <title>Impression Opération ${op.booking}</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; }
+            h1 { color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>Détails Opération d'Empotage</h1>
+          <p><strong>Client:</strong> ${op.clientName}</p>
+          <p><strong>Booking:</strong> ${op.booking}</p>
+          <p><strong>Statut:</strong> ${op.statut}</p>
+          
+          <table>
+            <tr>
+              <th>Conteneurs</th>
+              <th>Volume (m³)</th>
+              <th>Début Prévu</th>
+              <th>Fin Estimée</th>
+            </tr>
+            <tr>
+              <td>${op.conteneurs}</td>
+              <td>${op.volume}</td>
+              <td>${op.debutPrevu}</td>
+              <td>${op.finEstimee}</td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
 
+    const popupWin = window.open('', '_blank', 'width=600,height=600');
+    if (popupWin) {
+      popupWin.document.open();
+      popupWin.document.write(printContent);
+      popupWin.document.close();
+      popupWin.print();
+    }
+  }
   getStatusClass(statut: string): string {
     switch (statut) {
       case 'En cours': return 'status-pill--enregistre';

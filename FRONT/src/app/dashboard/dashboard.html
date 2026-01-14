@@ -48,12 +48,31 @@
         <span class="link-label">Centre d'aide</span>
       </a>
       <div class="footer-divider"></div>
-      <a href="#" class="sidebar-link logout" (click)="$event.preventDefault(); logout()">
+      <a href="#" class="sidebar-link logout" (click)="$event.preventDefault(); requestLogout()">
         <span class="material-symbols-outlined">logout</span>
         <span class="link-label">Déconnexion</span>
       </a>
     </div>
   </aside>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showLogoutConfirm" (click)="cancelLogout()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirmation</h2>
+        <button class="close-btn" (click)="cancelLogout()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir vous déconnecter ?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="cancelLogout()">Annuler</button>
+        <button class="btn-confirm" (click)="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MAIN AREA: Contents & Topbar -->
   <div class="content-wrapper">

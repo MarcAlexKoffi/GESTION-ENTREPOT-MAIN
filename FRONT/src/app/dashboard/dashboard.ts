@@ -18,6 +18,9 @@ export class Dashboard implements OnInit, OnDestroy {
   // ===============================================================
   notifCount = 0;
   showNotifDropdown = false;
+  
+  // Logout confirmation
+  showLogoutConfirm = false;
 
   notifications: Array<{
     id: number;
@@ -39,7 +42,16 @@ export class Dashboard implements OnInit, OnDestroy {
   // ===============================================================
   // SESSION: Déconnexion
   // ===============================================================
+  requestLogout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
+
   logout(): void {
+    this.showLogoutConfirm = false;
     this.authService.logout();
   }
 

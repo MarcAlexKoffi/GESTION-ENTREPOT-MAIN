@@ -35,11 +35,16 @@ export class Historique implements OnInit {
   // lignes après filtre (celles affichées dans le tableau)
   filteredRows: TruckHistoryRow[] = [];
 
+  // Pagination
+  paginatedRows: TruckHistoryRow[] = [];
+  currentPage = 1;
+  itemsPerPage = 10;
+
   // champs de filtre
   searchTerm = '';
   selectedWarehouseId: number | 'all' = 'all';
   selectedStatus: TruckStatus | 'all' = 'all';
-  selectedPeriod: 'today' | '7days' | '30days' | 'all' = 'all';
+  selectedDate: string = ''; // Format YYYY-MM-DD
 
   // options pour la liste des entrepôts
   warehousesOptions: StoredWarehouse[] = [];
@@ -134,17 +139,14 @@ export class Historique implements OnInit {
         }
       }
 
-      // 4) Filtre période
-      // 4) Filtre période (basé sur la date locale, plus fiable que UTC)
-      if (this.selectedPeriod !== 'all') {
+      // 4) Filtre par date exacte
+      if (this.selectedDate) {
         const created = new Date(row.createdAt);
 
-        // Si createdAt est invalide, on exclut la ligne (évite des filtres incohérents)
+        // Si createdAt est invalide, on exclut la ligne
         if (isNaN(created.getTime())) {
           return false;
         }
-
-        const now = new Date();
 
         // Date locale YYYY-MM-DD
         const toLocalYMD = (d: Date) => {
@@ -154,25 +156,40 @@ export class Historique implements OnInit {
           return `${y}-${m}-${day}`;
         };
 
-        if (this.selectedPeriod === 'today') {
-          if (toLocalYMD(created) !== toLocalYMD(now)) {
-            return false;
-          }
-        }
-
-        if (this.selectedPeriod === '7days' || this.selectedPeriod === '30days') {
-          const days = this.selectedPeriod === '7days' ? 7 : 30;
-          const cutoff = new Date(now);
-          cutoff.setDate(now.getDate() - days);
-
-          if (created.getTime() < cutoff.getTime()) {
-            return false;
-          }
+        if (toLocalYMD(created) !== this.selectedDate) {
+          return false;
         }
       }
 
       return true;
     });
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedRows = this.filteredRows.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredRows.length / this.itemsPerPage) || 1;
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
   }
 
   private formatDateTime(dateStr: string): string {

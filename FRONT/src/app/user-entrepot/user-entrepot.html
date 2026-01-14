@@ -58,28 +58,28 @@
                     [class.active]="currentTab === 'attente'"
                     (click)="currentTab = 'attente'; applyFilters()">
                     En attente
-                    <span class="tab-badge" *ngIf="nbAttenteByPeriod > 0">{{ nbAttenteByPeriod }}</span>
+                    <!-- <span class="tab-badge" *ngIf="nbAttenteByPeriod > 0">{{ nbAttenteByPeriod }}</span> -->
                 </button>
 
                 <button class="tab-btn" 
                     [class.active]="currentTab === 'valides'"
                     (click)="currentTab = 'valides'; applyFilters()">
                     Validés
-                    <span class="tab-badge" *ngIf="nbValidesByPeriod > 0">{{ nbValidesByPeriod }}</span>
+                   <!-- <span class="tab-badge" *ngIf="nbValidesByPeriod > 0">{{ nbValidesByPeriod }}</span> -->
                 </button>
 
                  <button class="tab-btn" 
                     [class.active]="currentTab === 'refoules'"
                     (click)="currentTab = 'refoules'; applyFilters()">
                     Refoulés
-                    <span class="tab-badge" *ngIf="nbRefoulesByPeriod > 0">{{ nbRefoulesByPeriod }}</span>
+                    <!-- <span class="tab-badge" *ngIf="nbRefoulesByPeriod > 0">{{ nbRefoulesByPeriod }}</span> -->
                 </button>
 
                 <button class="tab-btn" 
                     [class.active]="currentTab === 'acceptes'"
                     (click)="currentTab = 'acceptes'; applyFilters()">
                     Acceptés
-                <span class="tab-badge" *ngIf="nbAcceptesByPeriod > 0">{{ nbAcceptesByPeriod }}</span>
+                <!-- <span class="tab-badge" *ngIf="nbAcceptesByPeriod > 0">{{ nbAcceptesByPeriod }}</span> -->
                 </button>
                  <button class="tab-btn" 
                     [class.active]="currentTab === 'historique'"

@@ -53,17 +53,16 @@
                 </select>
               </div>
 
-              <div class="select-wrap">
-                <select
-                  aria-label="Filtrer par période"
-                  [(ngModel)]="selectedPeriod"
-                  (change)="applyFilters()"
-                >
-                  <option value="all">Toutes les périodes</option>
-                  <option value="today">Aujourd'hui</option>
-                  <option value="7days">7 derniers jours</option>
-                  <option value="30days">30 derniers jours</option>
-                </select>
+              <div class="field">
+                <span class="left-icon">
+                  <span class="material-symbols-outlined">calendar_today</span>
+                </span>
+                <input
+                  type="date"
+                  placeholder="Sélectionner une date"
+                  [(ngModel)]="selectedDate"
+                  (ngModelChange)="applyFilters()"
+                />
               </div>
 
               <div class="select-wrap">
@@ -111,7 +110,7 @@
                   </tr>
 
                   <!-- Lignes d'historique -->
-                  <tr *ngFor="let row of filteredRows">
+                  <tr *ngFor="let row of paginatedRows">
                     <td>
                       <div class="warehouse-display">
                         <span
@@ -153,6 +152,31 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination-footer" *ngIf="filteredRows.length > 0">
+              <span class="pagination-info">
+                PAGE {{ currentPage }} DE {{ totalPages }}
+              </span>
+              <div class="pagination-controls">
+                <button
+                  type="button"
+                  class="mini-btn"
+                  [disabled]="currentPage === 1"
+                  (click)="previousPage()"
+                >
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button
+                  type="button"
+                  class="mini-btn"
+                  [disabled]="currentPage >= totalPages"
+                  (click)="nextPage()"
+                >
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </div>
             </div>
           </section>
 

@@ -4,10 +4,10 @@
    ENTREPOT PAGE STYLES - STYLED TO MATCH USER-ENTREPOT
    ========================================================================== */
 
-:host {
-  /* Using variables consistent with user-entrepot if they were defined there, 
-     otherwise relying on styles.scss */
-}
+// :host {
+//   /* Using variables consistent with user-entrepot if they were defined there, 
+//      otherwise relying on styles.scss */
+// }
 
 /* --- Layout & Structure to match user-entrepot --- */
 .pageMain {
@@ -354,10 +354,12 @@
 
 .tabs-scroll {
   overflow-x: auto;
+  width: 100%; /* Take full width */
 
   .tabs-nav {
     display: flex;
     gap: 0.5rem;
+    width: 100%; /* Take full width */
   }
 }
 
@@ -371,6 +373,8 @@
   border-radius: 0.75rem;
   cursor: pointer;
   display: flex;
+  justify-content: center;
+  flex: 1;
   align-items: center;
   gap: 0.6rem;
   transition: all 0.2s;
@@ -597,16 +601,15 @@ td {
   margin: 0;
   color: var(--text-primary);
 }
-
 .modal-subtitle {
   font-size: 0.9rem;
   color: var(--text-secondary);
   margin: 0;
 }
-.btn-close,
-.btn-close-modal {
-  /* Common reset */
-}
+// .btn-close,
+// .btn-close-modal {
+//   /* Common reset */
+// }
 /* Close button icon style */
 .btn-close {
   background: #f1f5f9;
