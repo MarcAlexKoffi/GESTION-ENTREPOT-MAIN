@@ -1207,20 +1207,20 @@ export class UserEntrepot implements OnInit {
 
   getStatusClass(t: UITruck): string {
     const s = t.statut;
-    if (!s) return 'status-badge--unknown';
+    if (!s) return 'status-pill status-pill--renvoye';
 
     switch (s) {
       case 'Enregistré':
-        return 'status-badge--enregistre status-pill--enregistre';
+        return 'status-pill status-pill--enregistre';
       case 'En attente':
-        return 'status-badge--pending status-pill--pending';
+        return 'status-pill status-pill--pending';
       case 'Validé':
-        return 'status-badge--validated status-pill--validated';
+        return 'status-pill status-pill--validated';
       case 'Refoulé':
       case 'Annulé':
-        return 'status-badge--cancelled status-pill--cancelled';
+        return 'status-pill status-pill--refoule';
       default:
-        return 'status-badge--unknown';
+        return 'status-pill status-pill--renvoye';
     }
   }
 

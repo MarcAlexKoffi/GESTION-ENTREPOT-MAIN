@@ -1,11 +1,11 @@
 <div class="pageMain">
-  <div class="page-shell">
+  <div class="page-container">
     <header class="page-header">
-      <div class="page-title-block">
+      <div>
         <h1 class="page-title">Gestion des Empotages</h1>
         <p class="page-subtitle">Suivez et gérez l'ensemble de vos opérations de chargement.</p>
       </div>
-      <button class="btn-primary-main" (click)="openCreateModal()">
+      <button class="btn btn-primary" (click)="openCreateModal()">
         <span class="material-symbols-outlined">add</span>
         <span>Nouveau empotage</span>
       </button>
@@ -26,7 +26,7 @@
         />
       </div>
       <div class="control-item control-actions">
-        <button class="btn-primary-main" (click)="exportCsvServer()" [disabled]="loading">
+        <button class="btn btn-primary" (click)="exportCsvServer()" [disabled]="loading">
           <span class="material-symbols-outlined">file_download</span>
           <span>Exporter CSV</span>
         </button>
@@ -34,99 +34,99 @@
     </div>
 
     <!-- CREATE MODAL -->
-    <div class="modal-backdrop" *ngIf="showCreateModal">
-      <div class="modal-card">
-        <div class="modal-header">
-          <h3>{{ isEditing ? 'Modifier empotage' : 'Créer un nouvel empotage' }}</h3>
-          <button class="btn-close-modal" (click)="closeCreateModal()">
+    <div class="modal" *ngIf="showCreateModal">
+      <div class="modal__backdrop" (click)="closeCreateModal()"></div>
+      <div class="modal__panel">
+        <div class="truck-modal-header">
+          <h2 class="truck-modal-title">{{ isEditing ? 'Modifier empotage' : 'Créer un nouvel empotage' }}</h2>
+          <button class="truck-modal-close" (click)="closeCreateModal()">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <form (submit)="saveEmpotage(); $event.preventDefault();">
-          <div class="form-row">
-            <label>Client</label>
-            <input type="text" [(ngModel)]="newEmpotage.client" name="client" required />
-          </div>
-
-          <div class="form-row">
-            <label>Type client</label>
-            <input type="text" [(ngModel)]="newEmpotage.clientType" name="clientType" />
-          </div>
-
-          <div class="form-row">
-            <label>Booking</label>
-            <input type="text" [(ngModel)]="newEmpotage.booking" name="booking" required />
-          </div>
-
-          <div class="form-row">
-            <label>Entrepôt</label>
-            <select [(ngModel)]="newEmpotage.entrepotId" name="entrepotId">
-              <option [ngValue]="undefined">-- Aucun --</option>
-              <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>
-            </select>
-          </div>
-
-          <div class="form-row two-cols">
-            <div>
-              <label>Conteneurs</label>
-              <input type="number" min="1" [(ngModel)]="newEmpotage.conteneurs" name="conteneurs" />
+        
+        <div class="truck-modal-body">
+            <div class="form-row">
+                <label>Client</label>
+                <input type="text" [(ngModel)]="newEmpotage.client" name="client" required />
             </div>
-            <div>
-              <label>Volume (m³)</label>
-              <input type="number" step="0.1" [(ngModel)]="newEmpotage.volume" name="volume" />
-            </div>
-          </div>
 
-          <div class="form-row two-cols">
-            <div>
-              <label>Début</label>
-              <input type="datetime-local" [(ngModel)]="newEmpotage.dateStart" name="dateStart" />
+            <div class="form-row">
+                <label>Type client</label>
+                <input type="text" [(ngModel)]="newEmpotage.clientType" name="clientType" />
             </div>
-            <div>
-              <label>Fin</label>
-              <input type="datetime-local" [(ngModel)]="newEmpotage.dateEnd" name="dateEnd" />
+
+            <div class="form-row">
+                <label>Booking</label>
+                <input type="text" [(ngModel)]="newEmpotage.booking" name="booking" required />
             </div>
-          </div>
 
-          <div class="form-row">
-            <label>Statut</label>
-            <select [(ngModel)]="newEmpotage.status" name="status">
-              <option value="A venir">A venir</option>
-              <option value="En cours">En cours</option>
-              <option value="Terminé">Terminé</option>
-            </select>
-          </div>
+            <div class="form-row two-cols">
+                <div>
+                <label>Conteneurs</label>
+                <input type="number" min="1" [(ngModel)]="newEmpotage.conteneurs" name="conteneurs" />
+                </div>
+                <div>
+                <label>Volume (m³)</label>
+                <input type="number" step="0.1" [(ngModel)]="newEmpotage.volume" name="volume" />
+                </div>
+            </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn-secondary" (click)="closeCreateModal()" [disabled]="saving">Annuler</button>
-            <button type="submit" class="btn-primary-main" [disabled]="saving">
-              <span *ngIf="!saving">{{ isEditing ? 'Enregistrer' : 'Créer' }}</span>
-              <span *ngIf="saving">En cours...</span>
+            <div class="form-row two-cols">
+                <div>
+                <label>Début</label>
+                <input type="datetime-local" [(ngModel)]="newEmpotage.dateStart" name="dateStart" />
+                </div>
+                <div>
+                <label>Fin</label>
+                <input type="datetime-local" [(ngModel)]="newEmpotage.dateEnd" name="dateEnd" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Statut</label>
+                <select [(ngModel)]="newEmpotage.status" name="status">
+                <option value="A venir">A venir</option>
+                <option value="En cours">En cours</option>
+                <option value="Terminé">Terminé</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="truck-modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeCreateModal()" [disabled]="saving">Annuler</button>
+            <button type="button" class="btn btn-primary" (click)="saveEmpotage()" [disabled]="saving">
+                <span *ngIf="!saving">{{ isEditing ? 'Enregistrer' : 'Créer' }}</span>
+                <span *ngIf="saving">En cours...</span>
             </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
 
     <!-- DELETE CONFIRMATION MODAL -->
-    <div class="modal-backdrop" *ngIf="showDeleteModal">
-      <div class="modal-card" style="max-width: 400px;">
-        <div class="modal-header">
-          <h3>Confirmer la suppression</h3>
-          <button class="btn-close-modal" (click)="cancelDelete()">
+    <div class="modal" *ngIf="showDeleteModal">
+      <div class="modal__backdrop" (click)="cancelDelete()"></div>
+      <div class="modal__panel">
+        <div class="truck-modal-header">
+          <h2 class="truck-modal-title">Confirmer la suppression</h2>
+          <button class="truck-modal-close" (click)="cancelDelete()">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div style="margin-bottom: 2rem; color: var(--text-secondary); line-height: 1.5;">
-          <p>Êtes-vous sûr de vouloir supprimer cet empotage ?</p>
-          <p *ngIf="itemToDelete" style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem;">
-            {{ itemToDelete.client }} ({{ itemToDelete.booking }})
-          </p>
-          <p style="margin-top: 0.5rem; font-size: 0.9em;">Cette action est irréversible.</p>
+        <div class="truck-modal-body">
+            <div style="color: var(--text-secondary); line-height: 1.5;">
+                <p>Êtes-vous sûr de vouloir supprimer cet empotage ?</p>
+                <p *ngIf="itemToDelete" style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem;">
+                    {{ itemToDelete.client }} ({{ itemToDelete.booking }})
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.9em; color: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+                    Cette action est irréversible.
+                </p>
+            </div>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="cancelDelete()">Annuler</button>
-          <button type="button" class="btn-primary-main" style="background: #ef4444; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);" (click)="confirmDelete()">
+        <div class="truck-modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Annuler</button>
+          <button type="button" class="btn btn-primary" style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border: none;" (click)="confirmDelete()">
             Supprimer
           </button>
         </div>
@@ -191,10 +191,10 @@
               </td>
               <td class="text-right">
                 <div class="actions">
-                  <button class="actions-menu-button" title="Modifier" (click)="editEmpotage(item)">
+                  <button class="btn-icon" title="Modifier" (click)="editEmpotage(item)">
                     <span class="material-symbols-outlined">edit</span>
                   </button>
-                  <button class="actions-menu-button delete-btn" title="Supprimer" (click)="deleteEmpotage(item)">
+                  <button class="btn-icon delete-btn" title="Supprimer" (click)="deleteEmpotage(item)">
                     <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>

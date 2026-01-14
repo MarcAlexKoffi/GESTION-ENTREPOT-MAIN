@@ -10,14 +10,14 @@
               <p class="page-desc">Bonjour, Marc. Bienvenue sur votre tableau de bord.</p>
             </div>
 
-            <button class="btn-primary" type="button" (click)="openWarehouseModal()">
+            <button class="btn btn-primary" type="button" (click)="openWarehouseModal()">
               <span class="material-symbols-outlined">add</span>
               <span>Nouvel enregistrement</span>
             </button>
           </div>
 
           <!-- FILTERS (MATCHING SCREENSHOT) -->
-          <section class="filters-chips-section" aria-label="Filtres">
+          <!-- <section class="filters-chips-section" aria-label="Filtres">
             <div class="filter-chip-wrap">
               <span class="material-symbols-outlined chip-icon">location_on</span>
               <select aria-label="Filtrer par région">
@@ -35,7 +35,7 @@
               </select>
               <span class="material-symbols-outlined chip-arrow">expand_more</span>
             </div>
-          </section>
+          </section> -->
 
           <!-- Warehouses Grid (MATCHING SCREENSHOT) -->
           <div class="warehouse-grid">
@@ -256,11 +256,11 @@
               </div>
 
               <div class="truck-modal-footer">
-                <button type="button" class="mini-btn cancel-btn" (click)="closeWarehouseModal()">
+                <button type="button" class="btn btn-secondary" (click)="closeWarehouseModal()">
                   Annuler
                 </button>
 
-                <button class="btn-primary" (click)="saveWarehouse()" [disabled]="isLoading">
+                <button class="btn btn-primary" (click)="saveWarehouse()" [disabled]="isLoading">
                   <span *ngIf="isLoading">Enregistrement...</span>
                   <span *ngIf="!isLoading">
                     {{ editingWarehouseId ? 'Enregistrer' : 'Créer l’entrepôt' }}
@@ -303,12 +303,12 @@
               </div>
 
               <div class="truck-modal-footer">
-                <button type="button" class="mini-btn cancel-btn" (click)="closeDeleteModal()">
+                <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
                   Annuler
                 </button>
                 <button 
                   type="button" 
-                  class="btn-primary" 
+                  class="btn btn-primary" 
                   style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border: none;"
                   (click)="confirmDelete()"
                 >

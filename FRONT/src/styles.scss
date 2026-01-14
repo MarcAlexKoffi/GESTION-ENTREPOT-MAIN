@@ -1,14 +1,58 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
+  /* Brand Colors */
   --primary: #2b8cee;
-  --background-light: #f6f7f8;
-  --background-dark: #101922;
+  --primary-hover: #1d4ed8;
   --primary-subtle: #e7edf3;
+  
+  /* Semantic Colors */
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --success-border: #dcfce7;
+
+  --warning-bg: #fffbeb;
+  --warning-text: #b45309;
+  --warning-border: #fef3c7;
+
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+  --danger-border: #fecaca;
+  --danger-solid: #ef4444;
+
+  --info-bg: #e0f2fe;
+  --info-text: #0284c7;
+
+  /* Neutral / Grays */
+  --background-light: #f6f7f8;
+  --background-white: #ffffff;
+  --background-dark: #101922;
+  
   --text-primary: #0d141b;
   --text-secondary: #4c739a;
+  --text-tertiary: #94a3b8;
+
   --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
   --border-dark: #1f2933;
+
+  /* UI Tokens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout */
+  --header-height: 72px;
+  --sidebar-width: 280px;
 }
 
 * {
@@ -45,6 +89,137 @@ video {
   height: auto;
 }
 
+/* --- LAYOUT UTILITIES --- */
+.page-container {
+    min-height: 100vh;
+    background-color: var(--background-light);
+    padding: 2rem 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.page-title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-shadow: 0 2px 10px rgba(43, 140, 238, 0.1);
+    letter-spacing: -0.025em;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* --- COMPONENTS --- */
+
+/* Cards */
+.card {
+    background: var(--background-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(0,0,0,0.03);
+    padding: 1.5rem;
+    transition: var(--transition-normal);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    border: none;
+    outline: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    color: white;
+    box-shadow: 0 4px 12px rgba(43, 140, 238, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(43, 140, 238, 0.4);
+}
+
+.btn-secondary {
+    background: var(--background-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: #f1f5f9;
+    border-color: var(--border-medium);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.btn-icon:hover {
+    background: var(--background-light);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* --- UTILITIES --- */
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-sm { font-size: 0.875rem; }
+.font-bold { font-weight: 700; }
+
+.w-full { width: 100%; }
+
+.hidden { display: none !important; }
+
 /* Utilitaire pour les tables si besoin */
 .responsive-scroll {
   overflow-x: auto;
@@ -79,7 +254,7 @@ video {
   outline-offset: 2px !important;
 }
 
-/* ==========================
+/* ========================== 
    Unified status-pill styles
    Defined globally so all components share the same look
    ========================== */
@@ -94,7 +269,7 @@ video {
   line-height: 1;
   min-height: 1.8rem;
   box-sizing: border-box;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .status-pill .status-icon {
@@ -104,30 +279,30 @@ video {
 
 /* Color Variants based on User Requests */
 .status-pill--enregistre {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #dbeafe;
+  background: var(--info-bg);
+  color: var(--info-text);
+  border: 1px solid var(--info-bg);
 }
 
 /* Bleu */
 .status-pill--pending {
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fef3c7;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border);
 }
 
 /* Jaune */
 .status-pill--validated {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #dcfce7;
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 /* Vert */
 .status-pill--accepted {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #dcfce7;
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 /* Vert */
@@ -153,9 +328,9 @@ video {
 
 /* Turquoise / Olive */
 .status-pill--refoule {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fee2e2;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 /* Rouge */
@@ -212,3 +387,161 @@ body.dark .status-pill--refoule {
   color: #fca5a5;
   border-color: rgba(153, 27, 27, 0.3);
 }
+/* --- Shared Modals (Standardized) --- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+  }
+
+  &__panel {
+    position: relative;
+    background: #ffffff;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.truck-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .truck-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-primary);
+  }
+}
+
+.truck-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+}
+
+.truck-modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-light);
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Dark mode for modals */
+body.dark {
+  .modal__backdrop {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modal__panel {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .truck-modal-header {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+   
+  .truck-modal-title {
+      color: white;
+  }
+
+  .truck-modal-body {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .truck-modal-footer {
+    background: #0f172a;
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+
+/* Modal Form Fields */
+.truck-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .truck-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .truck-input {
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-light);
+    font-size: 0.9375rem;
+    transition: var(--transition-normal);
+    width: 100%;
+
+    &:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(43, 140, 238, 0.1);
+      outline: none;
+    }
+  }
+
+  .truck-help {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+}
+
+body.dark .truck-field {
+  .truck-label { color: #94a3b8; }
+  
+  .truck-input {
+    background: #0f172a;
+    border-color: rgba(255,255,255,0.1);
+    color: white;
+    
+    &:focus {
+        border-color: var(--primary);
+    }
+  }
+}
+

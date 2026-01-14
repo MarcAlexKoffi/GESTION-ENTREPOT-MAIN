@@ -1,13 +1,12 @@
-<div class="pageMain">
-    <div class="content">
-
+<div class="page-container">
+    
         <!-- HEADER -->
-        <header class="page-head">
+        <header class="page-header">
             <div class="header-left">
                 <h1 class="page-title">{{ entrepot.nom }}</h1>
                 <p class="page-subtitle">{{ entrepot.lieu }}</p>
             </div>
-            <button type="button" class="btn-primary-action" (click)="openModal()">
+            <button type="button" class="btn btn-primary" (click)="openModal()">
                 <span class="material-symbols-outlined">add</span>
                 <span>Enregistrer un camion</span>
             </button>
@@ -203,43 +202,107 @@
         </div>
 
     </div>
-</div>
 
 <!-- ================= MODALES ================= -->
 
-<!-- CREATE MODAL -->
-<div class="modal-root" *ngIf="showModal">
+ <!-- MODALE ENREGISTREMENT CAMION -->
+  <div class="modal-root" *ngIf="showModal">
     <div class="modal-backdrop" (click)="closeModal()"></div>
     <div class="modal-panel">
-        <div class="modal-header">
-            <h2 class="modal-title">Enregistrer un camion</h2>
-            <button class="btn-close-icon" (click)="closeModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
-            </button>
+      
+      <div class="modal-header">
+        <h2 class="modal-title">Enregistrer un nouveau camion</h2>
+        <button type="button" class="btn-close-icon" aria-label="Fermer" (click)="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Entrepôt -->
+        <div class="truck-field">
+          <label class="truck-label" for="entrepot">Entrepôt</label>
+          <select id="entrepot" class="truck-select" disabled>
+            <option selected>{{ entrepot.nom }}</option>
+          </select>
         </div>
-        <div class="modal-body">
-            <div class="truck-field">
-                <label class="truck-label">Immatriculation</label>
-                <input class="truck-input" [(ngModel)]="newTruck.immatriculation" placeholder="Ex: AA-123-BB">
-            </div>
-            <div class="truck-field">
-                <label class="truck-label">Transporteur</label>
-                <input class="truck-input" [(ngModel)]="newTruck.transporteur" placeholder="Nom du chauffeur">
-            </div>
-             <div class="truck-field">
-                <label class="truck-label">Transfert (Optionnel)</label>
-                <input class="truck-input" [(ngModel)]="newTruck.transfert" placeholder="Info transfert">
-            </div>
-             <div class="truck-field">
-                <label class="truck-label">Coopérative (Optionnel)</label>
-                <input class="truck-input" [(ngModel)]="newTruck.cooperative" placeholder="Nom coopérative">
-            </div>
+
+        <!-- Immatriculation -->
+        <div class="truck-field">
+          <label class="truck-label" for="immatriculation"> Immatriculation du camion </label>
+          <input
+            id="immatriculation"
+            type="text"
+            class="truck-input"
+            placeholder="Ex : AB-123-CD"
+            [(ngModel)]="newTruck.immatriculation"
+            name="immatriculation"
+            required
+          />
         </div>
-        <div class="modal-footer">
-            <button class="truck-submit" (click)="submitTruck()">Enregistrer</button>
+
+        <!-- Transporteur -->
+        <div class="truck-field">
+          <label class="truck-label" for="transporteur"> Transporteur / Chauffeur </label>
+          <input
+            id="transporteur"
+            type="text"
+            class="truck-input"
+            placeholder="Nom du transporteur ou du chauffeur"
+            [(ngModel)]="newTruck.transporteur"
+            name="transporteur"
+            required
+          />
         </div>
+
+        <!-- N° fiche de transfert -->
+        <div class="truck-field">
+          <label class="truck-label" for="transfert"> N° fiche de transfert </label>
+          <input
+            id="transfert"
+            type="text"
+            class="truck-input"
+            placeholder="Ex : FT-2025-001"
+            [(ngModel)]="newTruck.transfert"
+            name="transfert"
+          />
+        </div>
+
+        <!-- Coopérative -->
+        <div class="truck-field">
+          <label class="truck-label" for="cooperative"> Nom coopérative </label>
+          <input
+            id="cooperative"
+            type="text"
+            class="truck-input"
+            placeholder="Ex : AMIAN"
+            [(ngModel)]="newTruck.cooperative"
+            name="cooperative"
+          />
+        </div>
+
+        <!-- Confirmation / Footer area inside body for this specific layout or strictly footer? 
+             The original had them inside body/flow. Let's move button to a real footer if we want rigorous design, 
+             but looking at the original code, the 'truck-modal-footer' was just a div at the bottom.
+             I'll use a semantic modal-footer.
+        -->
+      </div>
+
+      <div class="modal-footer" style="display:block">
+          <div class="truck-confirm" *ngIf="showSuccessBanner" style="margin-bottom: 1rem; padding: 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.75rem; color: #166534;">
+            <span class="material-symbols-outlined">check_circle</span>
+            <div>
+              <p style="margin:0; font-weight:700">Camion enregistré</p>
+              <p style="margin:0; font-size:0.875rem">Statut : {{ lastSavedStatutLabel }}</p>
+            </div>
+          </div>
+
+          <button type="button" class="truck-submit" (click)="saveTruck()">
+            Enregistrer l’arrivée
+          </button>
+      </div>
+
     </div>
-</div>
+  </div>
 
 <!-- EDIT MODAL -->
 <div class="modal-root" *ngIf="showEditModal">

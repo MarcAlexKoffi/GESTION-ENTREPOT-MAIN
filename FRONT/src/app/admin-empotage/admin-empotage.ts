@@ -166,11 +166,11 @@ export class AdminEmpotage implements OnInit {
 
   getStatusClass(statut: string): string {
     switch (statut) {
-      case 'En cours': return 'status-encours';
-      case 'Terminé': return 'status-termine';
+      case 'En cours': return 'status-pill--enregistre';
+      case 'Terminé': return 'status-pill--validated';
       case 'A venir': 
-      case 'Prévu': return 'status-prevu';
-      default: return 'status-default';
+      case 'Prévu': return 'status-pill--pending';
+      default: return 'status-pill--pending';
     }
   }
 

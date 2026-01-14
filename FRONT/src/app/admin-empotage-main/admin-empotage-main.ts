@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { WarehouseService } from '../services/warehouse.service';
 
 interface WarehouseUI {
@@ -23,6 +23,7 @@ interface WarehouseUI {
 })
 export class AdminEmpotageMain implements OnInit {
   private warehouseService = inject(WarehouseService);
+  private router = inject(Router);
 
   searchTerm = '';
   warehouses: WarehouseUI[] = [];
@@ -68,6 +69,10 @@ export class AdminEmpotageMain implements OnInit {
     }
   }
 
+  selectWarehouse(id: number) {
+    this.router.navigate(['/dashboard', 'adminEmpotage', id]);
+  }
+
   private fixImageUrl(url: string): string {
     if (!url) return ''; // Le CSS gérera le fallback couleur
     if (url.startsWith('http')) return url;
@@ -98,13 +103,13 @@ export class AdminEmpotageMain implements OnInit {
   getStatusClass(status: string) {
     switch (status) {
       case 'ACTIF':
-        return 'badge-active';
+        return 'status-pill status-pill--validated';
       case 'SATURÉ':
-        return 'badge-warning';
+        return 'status-pill status-pill--pending';
       case 'MAINTENANCE':
-        return 'badge-neutral';
+        return 'status-pill status-pill--renvoye';
       default:
-        return '';
+        return 'status-pill status-pill--renvoye';
     }
   }
 }

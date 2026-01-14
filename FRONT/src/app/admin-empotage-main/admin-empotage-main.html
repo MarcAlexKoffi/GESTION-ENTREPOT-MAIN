@@ -1,18 +1,15 @@
 <div class="page-container">
   <!-- HEADER SECTION -->
   <header class="header-section">
-    <h1 class="page-title">Sélection de l'entrepôt pour la supervision </h1>
-    <!-- <p class="page-subtitle">
-      Choisissez un entrepôt pour accéder à sa supervision détaillée des opérations d'empotage en temps réel.
-    </p> -->
-
+    <h1 class="page-title">Sélection de l'entrepôt</h1>
+    
     <!-- SEARCH BAR -->
     <div class="search-wrapper">
       <div class="search-input-container">
         <span class="material-symbols-outlined search-icon">search</span>
         <input 
           type="text" 
-          placeholder="Rechercher par nom ou code d'entrepôt..." 
+          placeholder="Rechercher par nom ou code..." 
           [(ngModel)]="searchTerm"
           class="search-input"
         >
@@ -23,26 +20,34 @@
   <!-- GRID SECTION -->
   <section class="warehouses-grid">
     <article 
-      class="warehouse-card" 
+      class="card warehouse-card" 
       *ngFor="let w of filteredWarehouses"
       [routerLink]="['/dashboard/adminEmpotage', w.id]" 
     >
       <!-- IMAGE & BADGE -->
       <div class="card-image-wrapper">
-        <!-- Utilisation d'une div background pour l'image ou img tag -->
         <div class="card-image" [style.backgroundImage]="'url(' + w.imageUrl + '), linear-gradient(to bottom right, #f1f5f9, #cbd5e1)'"></div>
-        <span class="status-badge" [ngClass]="getStatusClass(w.status)">{{ w.status }}</span>
+        <!-- Status Pill Positioned -->
+        <span class="status-pill absolute-pill" [ngClass]="getStatusClass(w.status)">
+             <span class="material-symbols-outlined status-icon" *ngIf="w.status==='ACTIF'">check_circle</span>
+             <span class="material-symbols-outlined status-icon" *ngIf="w.status==='SATURÉ'">warning</span>
+             {{ w.status }}
+        </span>
       </div>
 
       <!-- CONTENT -->
       <div class="card-content">
-        <h3 class="card-title">{{ w.name }}</h3>
-        <p class="card-stats">
-          <span class="stats-label">Enregistrés Aujourd'hui:</span>
-          <span class="stats-value">{{ w.todayCount }}</span>
-        </p>
+        <div class="flex-between top-row">
+             <h3 class="card-title">{{ w.name }}</h3>
+             <span class="code-badge">{{ w.code }}</span>
+        </div>
         
-        <div class="card-footer">
+        <div class="stat-row">
+            <span class="stat-label">Enregistrés Aujourd'hui</span>
+            <span class="stat-value">{{ w.todayCount }}</span>
+        </div>
+        
+        <div class="card-footer-custom">
           <span class="location-wrapper">
             <span class="material-symbols-outlined location-icon">location_on</span>
             {{ w.location }}
@@ -54,7 +59,7 @@
   
   <!-- EMPTY STATE -->
   <div class="empty-state" *ngIf="filteredWarehouses.length === 0">
-    <span class="material-symbols-outlined empty-icon">location_off</span>
+    <span class="material-symbols-outlined empty-icon">warehouse</span>
     <p>Aucun entrepôt trouvé pour cette recherche.</p>
   </div>
 </div>
