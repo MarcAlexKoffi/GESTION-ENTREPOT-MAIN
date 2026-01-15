@@ -56,9 +56,9 @@ export class AuthService {
         return false;
       }),
       catchError((error) => {
-        // Only logout if explicit authorization failure (401/403)
-        // If server is down (0 or 500), keep session alive to avoid annoyance
-        if (error.status === 401 || error.status === 403) {
+        // Logout on 401 (Unauthorized), 403 (Forbidden), or 404 (User Not Found)
+        // Keep session for 0 (Network Error) or 500 (Server Error) to retry later
+        if (error.status === 401 || error.status === 403 || error.status === 404) {
             this.logout();
         }
         return of(false);
