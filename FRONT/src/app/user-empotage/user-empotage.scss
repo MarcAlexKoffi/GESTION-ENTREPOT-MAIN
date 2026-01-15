@@ -318,7 +318,7 @@ tbody tr:hover td {
 
 .client-info strong { display: block; font-weight: 600; color: var(--text-primary); body.dark & { color: #fff; } }
 .client-info small { color: var(--text-secondary); font-size: 0.8rem; }
-.booking-link { color: var(--primary); text-decoration: none; font-weight: 500; &:hover { text-decoration: underline; } }
+.booking-link { color: var(--primary); text-decoration: none; font-weight: 500; }
 
 .text-center { text-align: center; }
 .text-right { text-align: right; }
