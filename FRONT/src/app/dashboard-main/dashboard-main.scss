@@ -122,8 +122,30 @@
 /* --- Warehouse Cards (Matching Image 2) --- */
 .warehouse-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  /* Allow cards to shrink down to 260px on small screens */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
+}
+
+@media (max-width: 640px) {
+  .warehouse-grid {
+    grid-template-columns: 1fr; /* 1 column on phones */
+    gap: 1.5rem;
+  }
+  
+  .page-head {
+      flex-direction: column;
+      align-items: stretch;
+      
+      .page-title {
+          font-size: 1.75rem;
+      }
+      
+      button.btn-primary {
+          width: 100%;
+          justify-content: center;
+      }
+  }
 }
 
 .warehouse-card {

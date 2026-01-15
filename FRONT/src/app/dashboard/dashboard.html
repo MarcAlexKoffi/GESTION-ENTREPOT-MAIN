@@ -1,6 +1,9 @@
 <div class="app-shell">
+  <!-- Mobile Sidebar Overlay -->
+  <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="closeSidebar()"></div>
+
   <!-- SIDEBAR: Refined Navigation -->
-  <aside class="sidebar-container" role="navigation">
+  <aside class="sidebar-container" [class.mobile-open]="isSidebarOpen" role="navigation">
     <div class="sidebar-header">
       <div class="logo-wrapper">
         <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -75,6 +78,10 @@
     <!-- TOPBAR: Glassmorphism & Profile -->
     <header class="top-header">
       <div class="top-header-left">
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-btn" (click)="toggleSidebar()">
+           <span class="material-symbols-outlined">menu</span>
+        </button>
         <!-- Breadcrumb or Search placeholder can go here -->
       </div>
 

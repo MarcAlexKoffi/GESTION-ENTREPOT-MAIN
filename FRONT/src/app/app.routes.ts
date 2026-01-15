@@ -6,7 +6,6 @@ import { Historique } from './historique/historique';
 import { Entrepot } from './entrepot/entrepot';
 import { Register } from './register/register';
 import { Enregistrement } from './enregistrement/enregistrement';
-import { Statistique } from './statistique/statistique';
 import { UserDashboard } from './user-dashboard/user-dashboard';
 import { UserDashboardMain } from './user-dashboard-main/user-dashboard-main';
 import { UserHistorique } from './user-historique/user-historique';
@@ -46,10 +45,6 @@ export const routes: Routes = [
             {
                 path: 'entrepot/:id',
                 component: Entrepot,
-            },
-            {
-                path: 'statistique',
-                component: Statistique,
             },
             {
                 path: 'userManager',

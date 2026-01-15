@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +14,9 @@ import { AuthService } from '../services/auth.service';
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit, OnDestroy {
+  // Mobile Sidebar State
+  isSidebarOpen = false;
+
   // ===============================================================
   // NOTIFICATIONS
   // ===============================================================
@@ -43,6 +47,14 @@ export class Dashboard implements OnInit, OnDestroy {
     private authService: AuthService
   ) {}
 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
+  }
+
   // ===============================================================
   // SESSION: Déconnexion
   // ===============================================================
@@ -66,6 +78,13 @@ export class Dashboard implements OnInit, OnDestroy {
     this.loadNotifications();
     // Polling toutes les 15 secondes
     this.pollingInterval = setInterval(() => this.loadNotifications(), 15000);
+
+    // Close sidebar on route change (mobile)
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.closeSidebar();
+    });
   }
 
   loadCurrentUser() {
