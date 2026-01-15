@@ -1,13 +1,13 @@
 <div class="page-container">
   <!-- HEADER SECTION -->
   <header class="header-section">
-    <h1 class="page-title">Sélection de l'entrepôt pour la supervision</h1>
+    <h1 class="page-title">Sï¿½lection de l'entrepï¿½t pour la supervision</h1>
   </header>
 
   <div class="search-wrapper">
     <div class="search-input-container">
       <span class="material-symbols-outlined notranslate search-icon">search</span>
-      <input type="text" class="search-input" placeholder="Rechercher un entrepôt..." [(ngModel)]="searchTerm">
+      <input type="text" class="search-input" placeholder="Rechercher un entrepï¿½t..." [(ngModel)]="searchTerm">
     </div>
   </div>
 
@@ -26,11 +26,11 @@
         <span class="status-pill" [ngClass]="{
             'status-actif': w.status === 'ACTIF',
             'status-inactif': w.status === 'INACTIF',
-            'status-sature': w.status === 'SATURÉ'
+            'status-sature': w.status === 'SATURÃ‰'
         }">
              <span class="material-symbols-outlined notranslate status-icon" *ngIf="w.status==='ACTIF'">check_circle</span>
              <span class="material-symbols-outlined notranslate status-icon" *ngIf="w.status==='INACTIF'">do_not_disturb_on</span>
-             <span class="material-symbols-outlined notranslate status-icon" *ngIf="w.status==='SATURÉ'">warning</span>
+             <span class="material-symbols-outlined notranslate status-icon" *ngIf="w.status==='SATURÃ‰'">warning</span>
              {{ w.status }}
         </span>
       </div>
@@ -61,6 +61,6 @@
   <!-- EMPTY STATE -->
   <div class="empty-state" *ngIf="filteredWarehouses.length === 0">
     <span class="material-symbols-outlined notranslate empty-icon">warehouse</span>
-    <p>Aucun entrepôt trouvé pour cette recherche.</p>
+    <p>Aucun entrepï¿½t trouvï¿½ pour cette recherche.</p>
   </div>
 </div>
