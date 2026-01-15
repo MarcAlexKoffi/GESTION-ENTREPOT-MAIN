@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WarehouseService } from '../services/warehouse.service';
+import { AuthService } from '../services/auth.service';
 
 interface Empotage {
   id?: number;
@@ -24,6 +25,7 @@ interface Empotage {
 })
 export class UserEmpotage implements OnInit {
   private warehouseService = inject(WarehouseService);
+  private authService = inject(AuthService);
   
   warehouses: any[] = []; // List to select from
 
@@ -41,12 +43,14 @@ export class UserEmpotage implements OnInit {
   search: string = '';
   filterDate: string = '';
   loading = false;
+  selectedWarehouseId: number | null = null;
   
   // Modal state
   showCreateModal = false;
   saving = false;
   isEditing = false;
   currentId: number | null = null;
+  errorMessage: string = '';
   
   // Delete Modal State
   showDeleteModal = false;
@@ -67,26 +71,36 @@ export class UserEmpotage implements OnInit {
 
   // --- Server integration ---
   ngOnInit(): void {
-    this.loadEmpotages();
+    const user = this.authService.getCurrentUser();
+    if (user && user.entrepotId) {
+      this.selectedWarehouseId = user.entrepotId;
+    }
     this.loadWarehouses();
   }
 
   loadWarehouses() {
     this.warehouseService.getWarehouses().subscribe({
-        next: (res) => this.warehouses = res,
+        next: (res) => {
+          this.warehouses = res;
+          if (this.warehouses.length > 0 && !this.selectedWarehouseId) {
+            this.selectedWarehouseId = this.warehouses[0].id;
+            this.loadEmpotages();
+          } else if (this.selectedWarehouseId) {
+            this.loadEmpotages();
+          }
+        },
         error: (err) => console.error('Erreur loading warehouses', err)
     });
   }
 
   async loadEmpotages() {
+    if (!this.selectedWarehouseId) return;
     this.loading = true;
     try {
-      const params = new URLSearchParams();
-      // On backend, q and status are handled, but we filter client-side for reactivity too
-      // if (this.search && this.search.trim() !== '') params.set('q', this.search.trim());
-      // if (this.filterStatus) params.set('status', this.filterStatus);
-      const url = `http://localhost:3000/api/empotages`;
-      const res = await fetch(url, { method: 'GET' });
+      const url = new URL('http://localhost:3000/api/empotages');
+      url.searchParams.set('entrepotId', this.selectedWarehouseId.toString());
+      
+      const res = await fetch(url.toString(), { method: 'GET' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       this.empotages = data;
@@ -150,10 +164,11 @@ export class UserEmpotage implements OnInit {
     this.isEditing = false;
     this.currentId = null;
     this.showCreateModal = true;
+    this.errorMessage = '';
     // reset
     this.newEmpotage = {
       client: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir',
-      entrepotId: this.warehouses.length > 0 ? this.warehouses[0].id : undefined // Default to first
+      entrepotId: this.selectedWarehouseId || undefined
     };
   }
   get filteredEmpotages(): Empotage[] {
@@ -307,9 +322,19 @@ export class UserEmpotage implements OnInit {
   }
 
   async saveEmpotage() {
+    this.errorMessage = '';
     // Basic validation
-    if (!this.newEmpotage.client || !this.newEmpotage.booking) {
-      alert('Veuillez renseigner au minimum le client et le booking');
+    if (!this.newEmpotage.entrepotId) {
+       this.errorMessage = 'Erreur interne: aucun entrepôt sélectionné.';
+       return;
+    }
+    if (!this.newEmpotage.client || 
+        !this.newEmpotage.booking || 
+        !this.newEmpotage.conteneurs || 
+        !this.newEmpotage.volume || 
+        !this.newEmpotage.dateStart || 
+        !this.newEmpotage.dateEnd) {
+      this.errorMessage = 'Veuillez remplir tous les champs obligatoires.';
       return;
     }
     this.saving = true;

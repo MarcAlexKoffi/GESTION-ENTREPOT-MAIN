@@ -649,12 +649,17 @@ app.delete('/api/warehouses/:id', async (req, res) => {
 // Empotages API
 // -----------------------
 
-// GET /api/empotages - list with optional filters: q, status
+// GET /api/empotages - list with optional filters: q, status, entrepotId
 app.get('/api/empotages', async (req, res) => {
-  const { q = '', status } = req.query;
+  const { q = '', status, entrepotId } = req.query;
   try {
     let query = 'SELECT * FROM empotages WHERE 1=1';
     const params = [];
+
+    if (entrepotId) {
+      query += ' AND entrepotId = ?';
+      params.push(entrepotId);
+    }
 
     if (status && String(status).trim() !== '') {
       query += ' AND status = ?';

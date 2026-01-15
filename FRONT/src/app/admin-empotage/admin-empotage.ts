@@ -102,15 +102,16 @@ export class AdminEmpotage implements OnInit {
   async loadOperations() {
     this.loading = true;
     try {
-      // Pour l'instant on récupère tout et on filtre côté client
-      // Idéalement : /api/empotages?entrepotId=...
-      const url = `http://localhost:3000/api/empotages`;
-      const res = await fetch(url);
+      const url = new URL('http://localhost:3000/api/empotages');
+      if (this.entrepotId) {
+        url.searchParams.set('entrepotId', this.entrepotId.toString());
+      }
+      
+      const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       
-      // Filtre uniquement pour cet entrepôt
-      this.rawOperations = data.filter((op: any) => op.entrepotId === this.entrepotId);
+      this.rawOperations = data;
       
       this.calculateStats();
       this.applyFilters();

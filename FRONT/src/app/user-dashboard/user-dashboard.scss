@@ -451,108 +451,8 @@
   scrollbar-width: none;
 }
 
-/* --- RESPONSIVE OPTIMIZATION --- */
+/* --- RESPONSIVE OPTIMIZATION REMOVED (Replaced by new logic at bottom) --- */
 
-@media (max-width: 1024px) {
-  :host {
-    --sidebar-width: 88px;
-  }
-
-  .logo-title,
-  .section-label,
-  .sidebar-link .link-label,
-  .profile-info,
-  .sidebar-footer .link-label {
-    display: none;
-  }
-
-  .sidebar-header {
-    justify-content: center;
-    padding: 2rem 0;
-  }
-
-  .sidebar-link {
-    justify-content: center;
-    padding: 1.125rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .sidebar-footer {
-    align-items: center;
-
-    .footer-divider {
-      width: 40px;
-    }
-  }
-}
-
-@media (max-width: 600px) {
-  .app-shell {
-    flex-direction: column;
-  }
-
-  .sidebar-container {
-    width: 100%;
-    height: 72px;
-    flex-direction: row;
-    border-right: none;
-    border-top: 1px solid var(--sidebar-border);
-    order: 2;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-
-    .sidebar-header,
-    .section-label,
-    .footer-divider,
-    .sidebar-link.secondary {
-      display: none;
-    }
-
-    .sidebar-nav {
-      padding: 0;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      flex-direction: row;
-    }
-
-    .sidebar-link {
-      padding: 0.75rem;
-      margin: 0;
-      border-radius: 12px;
-
-      &.active {
-        box-shadow: none;
-
-        &::after {
-          display: none;
-        }
-      }
-    }
-
-    .sidebar-footer {
-      padding: 0 1rem;
-      border: none;
-      justify-content: center;
-      margin: 0;
-    }
-  }
-
-  .content-wrapper {
-    order: 1;
-    height: calc(100vh - 72px);
-  }
-
-  .top-header {
-    padding: 0 1.25rem;
-    height: 64px;
-  }
-
-  .page-overflow {
-    padding-bottom: 1rem;
-  }
-}
 
 /* --- DARK MODE PRESERVATION --- */
 body.dark {
@@ -751,4 +651,88 @@ body.dark {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT (Mobile & Tablet)
+   ========================================================================== */
+
+/* Initially hide mobile menu button on Desktop */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0,0,0,0.05);
+  }
+
+  .material-symbols-outlined {
+    font-size: 24px;
+  }
+}
+
+.sidebar-overlay {
+  display: none; /* Hidden by default */
+}
+
+@media (max-width: 1024px) {
+  /* 1. Sidebar becomes off-canvas */
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 9999;
+    transform: translateX(-100%);
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* When open class is applied via [class.mobile-open] */
+    &.mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  /* 2. Show Mobile toggle button */
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+  }
+
+  /* 3. Overlay for closing sidebar */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.5); /* Semi-transparent black */
+    z-index: 9998; /* Just below sidebar */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  
+  .sidebar-overlay {
+      pointer-events: auto;
+      opacity: 1;
+      backdrop-filter: blur(2px);
+  }
+
+  /* 4. Adjust Header spacing */
+  .top-header {
+    padding: 0 1rem;
+    height: 64px;
+    
+    .top-header-left {
+      flex: 1;
+    }
+  }
+}
+
 

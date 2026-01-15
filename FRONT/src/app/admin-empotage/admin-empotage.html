@@ -136,67 +136,61 @@
     </section>
 
     <!-- TABLE LIST -->
-    <div class="list-section">
-      <div class="list-header">
-        <div class="list-title-group">
-          <h2>Liste des opérations</h2>
-          <!-- <span class="badge-count">{{ stats.total }} opérations</span> -->
-        </div>
-        <!-- <button class="btn btn-icon">
-          <span class="material-symbols-outlined">settings</span>
-        </button> -->
-      </div>
-
-      <section class="card table-card">
+    <section class="card" style="margin-top: 2rem;">
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
                 <th>CLIENT</th>
                 <th>BOOKING</th>
-                <th>CONTENEURS</th>
-                <th>VOLUME (M³)</th>
-                <th>DÉBUT PRÉVU</th>
-                <th>FIN ESTIMÉE</th>
-                <th>ACTION</th>
+                <th class="text-center">CONTENEURS</th>
+                <th class="text-center">VOLUME (M³)</th>
+                <th>DÉBUT</th>
+                <th>FIN</th>
+                <th class="text-right">ACTION</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let op of paginatedOperations">
                 <td>
-                  <div class="client-cell">
-                    <div class="avatar-circle" [ngClass]="op.clientColor">
-                      {{ op.clientInitials }}
-                    </div>
-                    <span class="client-name">{{ op.clientName }}</span>
+                  <div class="client-info">
+                    <strong>{{ op.clientName }}</strong>
+                    <!-- <small>Init: {{ op.clientInitials }}</small> -->
                   </div>
                 </td>
-                <td class="font-medium">{{ op.booking }}</td>
-                <td class="font-medium">{{ op.conteneurs }}</td>
-                <td class="font-bold">{{ op.volume }}</td>
-                <td class="text-muted">{{ op.debutPrevu }}</td>
-                <td class="text-muted">{{ op.finEstimee }}</td>
                 <td>
-                  <button class="btn btn-icon" title="Imprimer" (click)="printOperation(op)">
-                    <span class="material-symbols-outlined">print</span>
-                  </button>
+                    <span class="booking-link">{{ op.booking }}</span>
+                </td>
+                <td class="text-center">{{ op.conteneurs }}</td>
+                <td class="text-center">{{ op.volume }}</td>
+                <td>
+                   <span style="font-size: 0.9rem; color: #64748b;">{{ op.debutPrevu }}</span>
+                </td>
+                <td>
+                   <span style="font-size: 0.9rem; color: #64748b;">{{ op.finEstimee }}</span>
+                </td>
+                <td class="text-right">
+                  <div class="actions">
+                    <button class="btn-icon" title="Imprimer" (click)="printOperation(op)">
+                        <span class="material-symbols-outlined">print</span>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         
-        <div class="pagination-footer">
-          <span class="page-info">PAGE {{ currentPage }} DE {{ totalPages }}</span>
-          <div class="pagination-controls">
-            <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()">
+        <div class="pagination-footer" *ngIf="totalPages > 1" style="padding: 1rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+          <span class="page-info" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">PAGE {{ currentPage }} DE {{ totalPages }}</span>
+          <div class="pagination-controls" style="display: flex; gap: 0.5rem;">
+            <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
               <span class="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
         </div>
       </section>
-    </div>
 </div>

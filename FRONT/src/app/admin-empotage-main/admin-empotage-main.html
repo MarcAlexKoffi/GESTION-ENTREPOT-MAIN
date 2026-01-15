@@ -1,44 +1,58 @@
-<div class="page-container">
+﻿<div class="page-container">
   <!-- HEADER SECTION -->
   <header class="header-section">
     <h1 class="page-title">Sélection de l'entrepôt pour la supervision</h1>
   </header>
 
+  <div class="search-wrapper">
+    <div class="search-input-container">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" class="search-input" placeholder="Rechercher un entrepôt..." [(ngModel)]="searchTerm">
+    </div>
+  </div>
+
   <!-- GRID SECTION -->
-  <section class="warehouses-grid">
+  <section class="warehouse-grid">
     <article 
-      class="card warehouse-card" 
+      class="warehouse-card card" 
       *ngFor="let w of filteredWarehouses"
       [routerLink]="['/dashboard/adminEmpotage', w.id]" 
     >
-      <!-- IMAGE & BADGE -->
-      <div class="card-image-wrapper">
-        <div class="card-image" [style.backgroundImage]="'url(' + w.imageUrl + '), linear-gradient(to bottom right, #f1f5f9, #cbd5e1)'"></div>
-        <!-- Status Pill Positioned -->
-        <span class="status-pill absolute-pill" [ngClass]="getStatusClass(w.status)">
+      <!-- IMAGE -->
+      <div 
+         class="warehouse-image" 
+         [style.background-image]="'url(' + w.imageUrl + ')'"
+      >
+        <span class="status-pill" [ngClass]="{
+            'status-actif': w.status === 'ACTIF',
+            'status-inactif': w.status === 'INACTIF',
+            'status-sature': w.status === 'SATURÉ'
+        }">
              <span class="material-symbols-outlined status-icon" *ngIf="w.status==='ACTIF'">check_circle</span>
+             <span class="material-symbols-outlined status-icon" *ngIf="w.status==='INACTIF'">do_not_disturb_on</span>
              <span class="material-symbols-outlined status-icon" *ngIf="w.status==='SATURÉ'">warning</span>
              {{ w.status }}
         </span>
       </div>
       
       <!-- CONTENT -->
-      <div class="card-content">
-        <div class="flex-between top-row">
-             <h3 class="card-title">{{ w.name }}</h3>
-             <span class="code-badge">{{ w.code }}</span>
+      <div class="warehouse-content">
+        <div class="warehouse-info">
+             <h3 class="warehouse-name">{{ w.name }}</h3>
+             <p class="warehouse-location">
+                 <span class="material-symbols-outlined">location_on</span>
+                 {{ w.location }}
+             </p>
         </div>
         
-        <div class="stat-row">
-            <span class="stat-label">Enregistrés Aujourd'hui</span>
-            <span class="stat-value">{{ w.todayCount }}</span>
-        </div>
+        <div class="card-divider"></div>
         
-        <div class="card-footer-custom">
-          <span class="location-wrapper">
-            <span class="material-symbols-outlined location-icon">location_on</span>
-            {{ w.location }}
-          </span>
+        <div class="warehouse-footer">
+             <div class="status-block">
+                 <span class="status-label">AUJOURD'HUI</span>
+                 <span class="status-count">{{ w.todayCount }}</span>
+             </div>
+             <span class="material-symbols-outlined footer-arrow">arrow_forward</span>
         </div>
       </div>
     </article>

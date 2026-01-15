@@ -16,6 +16,15 @@
         <span class="material-symbols-outlined search-icon">search</span>
         <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search" (ngModelChange)="calculateStats()" class="search-input" />
       </div>
+      
+      <!-- Warehouse Selector -->
+      <div class="control-item">
+        <select [(ngModel)]="selectedWarehouseId" (change)="loadEmpotages()" class="status-select" style="padding: 0.75rem; color: #64748b; font-family: inherit;">
+          <option [ngValue]="null" disabled>Choisir un entrepôt</option>
+          <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>
+        </select>
+      </div>
+
       <div class="control-item">
         <input 
           type="date" 
@@ -45,6 +54,11 @@
         </div>
         
         <div class="truck-modal-body">
+            <div *ngIf="errorMessage" style="background-color: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+               <span class="material-symbols-outlined" style="font-size: 18px;">error</span>
+               {{ errorMessage }}
+            </div>
+
             <div class="form-row">
                 <label>Client</label>
                 <input type="text" [(ngModel)]="newEmpotage.client" name="client" required placeholder="Ex: Marcus Koné" />

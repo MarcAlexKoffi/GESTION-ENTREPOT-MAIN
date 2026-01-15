@@ -219,43 +219,18 @@
     }
 }
 
-/* --- 4. LIST & TABLE --- */
-.list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
+/* --- 4. LIST & TABLE (Styles matched from user-empotage) --- */
 
-.list-title-group {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    h2 {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: var(--text-primary);
-        margin: 0;
-    }
-
-    .badge-count {
-        background: var(--border-light);
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        font-weight: 700;
-        padding: 0.25rem 0.75rem;
-        border-radius: 6px;
-    }
-}
-
-.table-card {
-    padding: 0; /* Flush table */
+/* TABLE CARD & STYLES */
+.card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     overflow: hidden;
 }
 
 .table-wrapper {
-    width: 100%;
     overflow-x: auto;
 }
 
@@ -263,76 +238,75 @@ table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-
-    thead {
-        tr {
-            background: #f8fafc; /* Keep subtle header bg */
-
-            th {
-                padding: 1.25rem 1.5rem;
-                text-align: left;
-                font-size: 0.75rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                color: var(--text-secondary);
-                border-bottom: 1px solid var(--border-light);
-                white-space: nowrap;
-            }
-        }
-    }
-
-    tbody {
-        tr {
-            background: var(--background-white);
-            transition: var(--transition-normal);
-
-            &:hover {
-                background: rgba(43, 140, 238, 0.04);
-            }
-
-            &:last-child td {
-                border-bottom: none;
-            }
-
-            td {
-                padding: 1.25rem 1.5rem;
-                border-bottom: 1px solid var(--border-light);
-                vertical-align: middle;
-                font-size: 0.9375rem;
-                color: var(--text-primary);
-            }
-        }
-    }
 }
 
-/* Client Cell & Avatars */
-.client-cell {
+th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-light);
+    z-index: 10;
+}
+
+td {
+    padding: 1rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+    transition: background-color 0.15s;
+}
+
+tbody tr:hover td {
+    background: #f8fafc;
+}
+
+.client-info strong { display: block; font-weight: 600; color: var(--text-primary); }
+.client-info small { color: var(--text-secondary); font-size: 0.8rem; }
+.booking-link { color: var(--primary); text-decoration: none; font-weight: 500; &:hover { text-decoration: underline; } }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.actions {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    justify-content: flex-end;
+    gap: 0.25rem;
 }
 
-.avatar-circle {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #64748b;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f1f5f9;
+        color: var(--primary);
+    }
+    
+    .material-symbols-outlined { font-size: 20px; }
 }
 
-.client-name {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* Helpers */
+/* Helpers from previous file if needed, or remove if unused */
 .font-medium { font-weight: 600; }
 .font-bold { font-weight: 700; }
 .text-muted { color: var(--text-secondary); font-size: 0.9rem; }
+
 
 /* Pagination */
 .pagination-footer {

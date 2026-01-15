@@ -1,20 +1,37 @@
-@import '../../styles.scss';
+﻿@import '../../styles.scss';
 
 /* ==========================================================================
    ADMIN EMPOTAGE MAIN / WAREHOUSE SELECTION
    ========================================================================== */
 
+:host {
+  --row-hover: rgba(43, 140, 238, 0.04);
+  --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  --card-border: 1px solid rgba(0, 0, 0, 0.05);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --notification-red: #ef4444;
+  --chip-text: #4c739a;
+  --chip-border: #e2e8f0;
+}
+
+/* --- Layout Overrides --- */
+.page-container {
+    padding-top: 1rem;
+    gap: 0.5rem;
+}
+
 /* --- Header Section --- */
 .header-section {
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
 }
 
 /* SEARCH BAR (Matching user-entrepot style) */
 .search-wrapper {
     display: flex;
     justify-content: center;
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .search-input-container {
@@ -55,129 +72,147 @@
 }
 
 
-/* --- Grid Layout --- */
-.warehouses-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
+/* --- Grid Layout (From Dashboard Main) --- */
+.warehouse-grid {
+  display: grid;
+  /* Allow cards to shrink down to 280px on small screens */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
-/* --- Card Customization --- */
+@media (max-width: 640px) {
+  .warehouse-grid {
+    grid-template-columns: 1fr; /* 1 column on phones */
+    gap: 1.5rem;
+  }
+}
+
+/* --- Warehouse Cards (From Dashboard Main) --- */
 .warehouse-card {
-    /* Inherits .card styles from global */
-    padding: 0; /* Remove default padding because we have an image */
-    overflow: hidden;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    transition: var(--transition-normal);
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: var(--card-border);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
 
-    &:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-float);
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+
+    .footer-arrow {
+      transform: translateX(4px);
+      color: var(--primary);
     }
-}
+  }
 
-.card-image-wrapper {
-    position: relative;
-    height: 180px;
-    background: #f1f5f9;
-}
-
-.card-image {
+  .warehouse-image {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 16 / 10;
     background-size: cover;
     background-position: center;
-    transition: transform 0.5s ease;
-}
+    position: relative;
+    border-radius: 1.5rem 1.5rem 0 0;
+    
+    /* Status Pill Styles (Adapted) */
+    .status-pill {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 2;
+        padding: 0.4rem 0.8rem;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
 
-.warehouse-card:hover .card-image {
-    transform: scale(1.05);
-}
+        &.status-actif {
+             color: #10b981; /* Green */
+             .status-icon { color: #10b981; }
+        }
+        &.status-inactif {
+             color: #94a3b8; /* Grey */
+             .status-icon { color: #94a3b8; }
+        }
+        &.status-sature {
+             color: #ef4444; /* Red */
+             .status-icon { color: #ef4444; }
+        }
+    }
+  }
 
-/* Status Pill Positioning */
-.absolute-pill {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: white; /* Fallback */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    z-index: 2;
-}
-
-.card-content {
+  .warehouse-content {
     padding: 1.5rem;
-    flex: 1;
     display: flex;
     flex-direction: column;
-}
+    gap: 1.25rem;
+  }
 
-.top-row {
-    margin-bottom: 0.5rem;
-    align-items: flex-start;
-}
-
-.card-title {
-    font-size: 1.25rem;
+  .warehouse-name {
+    font-size: 1.35rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: #0f172a;
     margin: 0;
-    line-height: 1.2;
-}
+  }
 
-.code-badge {
-    font-size: 0.75rem;
-    font-family: 'Monaco', monospace;
-    color: var(--text-secondary);
-    background: #f1f5f9;
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-    border: 1px solid var(--border-light);
-}
-
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8fafc;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-sm);
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--border-light);
-
-    .stat-label {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-    
-    .stat-value {
-        color: var(--primary);
-        font-weight: 800;
-        font-size: 1.25rem;
-    }
-}
-
-.card-footer-custom {
-    margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-light);
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.location-wrapper {
+  .warehouse-location {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
-    .location-icon {
-        font-size: 18px;
-        color: var(--text-tertiary);
+    color: #64748b;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    margin-top: 0.4rem;
+
+    .material-symbols-outlined {
+      font-size: 18px;
+      color: #94a3b8;
     }
+  }
+
+  .card-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 0 -1.5rem;
+    opacity: 0.6;
+  }
+
+  .warehouse-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .status-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+
+      .status-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .status-count {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--primary);
+      }
+    }
+
+    .footer-arrow {
+      font-size: 24px;
+      color: #94a3b8;
+      transition: var(--transition);
+    }
+  }
 }
 
 
@@ -211,19 +246,4 @@ body.dark {
         border-color: #334155;
         color: white;
     }
-    
-    .code-badge {
-        background: #1e293b;
-        border-color: #334155;
-    }
-    
-    .stat-row {
-        background: #1e293b;
-        border-color: #334155;
-    }
-    
-    .card-footer-custom {
-        border-color: #334155;
-    }
 }
-

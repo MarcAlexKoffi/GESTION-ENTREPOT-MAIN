@@ -9,7 +9,7 @@ interface WarehouseUI {
   name: string;
   code: string;
   location: string;
-  status: 'ACTIF' | 'SATURÉ' | 'MAINTENANCE';
+  status: 'ACTIF' | 'SATURÉ' | 'MAINTENANCE' | 'INACTIF';
   imageUrl: string;
   todayCount: number;
 }
@@ -58,7 +58,7 @@ export class AdminEmpotageMain implements OnInit {
                 name: w.name,
                 location: w.location,
                 code: this.generateCode(w.name, w.id),
-                status: 'ACTIF',
+                status: count > 0 ? 'ACTIF' : 'INACTIF',
                 imageUrl: this.fixImageUrl(w.imageUrl),
                 todayCount: count
             };

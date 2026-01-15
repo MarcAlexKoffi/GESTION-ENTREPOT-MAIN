@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
+import { filter } from 'rxjs/operators';
 
 type UserRole = 'admin' | 'operator' | 'driver' | 'security';
 type UserStatus = 'Actif' | 'Inactif' | 'En attente';
@@ -28,6 +29,9 @@ interface StoredUser {
   styleUrl: './user-dashboard.scss',
 })
 export class UserDashboard implements OnInit, OnDestroy {
+  // Mobile Sidebar State
+  isSidebarOpen = false;
+
   // session user
   currentUser: StoredUser | null = null;
   userName = '—';
@@ -56,6 +60,14 @@ export class UserDashboard implements OnInit, OnDestroy {
     private authService: AuthService
   ) {}
 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
+  }
+  
   private pollingInterval: any;
 
   ngOnInit(): void {
@@ -63,6 +75,13 @@ export class UserDashboard implements OnInit, OnDestroy {
     this.loadNotifications();
     // Polling toutes les 15 secondes
     this.pollingInterval = setInterval(() => this.loadNotifications(), 15000);
+    
+    // Close sidebar on route change (mobile)
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.closeSidebar();
+    });
   }
 
   ngOnDestroy(): void {
