@@ -107,7 +107,18 @@
             </div>
 
             <!-- DATE INPUT -->
-            <input type="date" class="date-input" [(ngModel)]="filterDate" (ngModelChange)="onDateChange()" />
+            <div class="calendar-wrapper">
+                <span class="material-symbols-outlined input-icon">event</span>
+                <input 
+                    type="text" 
+                    class="date-input" 
+                    [(ngModel)]="filterDate" 
+                    (ngModelChange)="onDateChange()"
+                    placeholder="Filtrer par date"
+                    onfocus="(this.type='date')"
+                    onblur="(this.value ? this.type='date' : this.type='text')"
+                />
+            </div>
         </div>
     </section>
 

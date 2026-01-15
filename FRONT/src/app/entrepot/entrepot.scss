@@ -83,6 +83,26 @@
   position: relative;
 }
 
+.calendar-wrapper {
+  position: relative;
+  
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--primary);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .date-input {
+    width: 100%;
+    padding-left: 2.75rem !important;
+  }
+}
+
 .date-input {
   padding: 0.65rem 1rem;
   background: white;
@@ -98,6 +118,46 @@
     outline: none;
   }
 }
+
+@media (max-width: 992px) {
+  .controls-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-and-filters {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Assuming filter-chip-wrap exists or will be styled similar to user-entrepot. 
+     If it's just filter-dropdown-wrapper containing it, we might need to target that.
+     Checking html, it is inside filter-dropdown-wrapper.
+  */
+  .filter-dropdown-wrapper {
+      width: 100%;
+  }
+
+  .filter-chip-wrap {
+    width: 100%;
+    justify-content: center;
+    /* Ensure it behaves like a block/flex container matching the width */
+    display: flex; 
+  }
+
+  .calendar-wrapper {
+    width: 100%;
+  }
+}
+
 
 /* --- Header Section --- */
 .page-head {
