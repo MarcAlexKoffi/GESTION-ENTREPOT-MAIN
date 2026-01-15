@@ -18,29 +18,18 @@
         type="text"
         placeholder="Recherche client ou booking..."
         [(ngModel)]="search"
-        (ngModelChange)="calculateStats()"
+        (ngModelChange)="onFiltersChange(); calculateStats();"
         class="search-input"
       />
     </div>
 
     <!-- Warehouse Selector -->
-    <div class="control-item">
-      <select
-        [(ngModel)]="selectedWarehouseId"
-        (change)="loadEmpotages()"
-        class="status-select"
-        style="padding: 0.75rem; color: #64748b; font-family: inherit"
-      >
-        <option [ngValue]="null" disabled>Choisir un entrepôt</option>
-        <option *ngFor="let w of warehouses" [ngValue]="w.id">{{ w.name }}</option>
-      </select>
-    </div>
-
+    
     <div class="control-item">
       <input
         type="date"
         [(ngModel)]="filterDate"
-        (ngModelChange)="calculateStats()"
+        (ngModelChange)="onFiltersChange(); calculateStats();"
         class="status-select"
         style="padding: 0.75rem; color: #64748b; font-family: inherit"
       />
@@ -148,7 +137,6 @@
               type="datetime-local"
               [(ngModel)]="newEmpotage.dateEnd"
               name="dateEnd"
-              required
             />
           </div>
         </div>
@@ -257,7 +245,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of filteredEmpotages">
+          <tr *ngFor="let item of paginatedEmpotages">
             <td>
               <div class="client-info">
                 <strong>{{ item.client }}</strong>
@@ -295,6 +283,29 @@
           </tr>
         </tbody>
       </table>
+    </div>
+    
+    <!-- Table Footer with Pagination -->
+    <div class="table-footer" *ngIf="filteredEmpotages.length > 0">
+      <div class="pagination-info">PAGE {{ currentPage }} DE {{ totalPages }}</div>
+      <div class="pagination-controls">
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === 1"
+          (click)="prevPage()" 
+          title="Page précédente"
+        >
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <button 
+          class="page-btn" 
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()" 
+          title="Page suivante"
+        >
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
     </div>
   </section>
 </div>

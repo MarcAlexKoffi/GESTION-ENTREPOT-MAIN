@@ -164,10 +164,13 @@
 
 .sidebar-footer {
   padding: 1.5rem 1rem;
+  /* Safe area for mobile devices */
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   border-top: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex-shrink: 0; /* Prevent squashing */
 
   .footer-divider {
     height: 1px;
@@ -685,6 +688,7 @@ body.dark {
     top: 0;
     left: 0;
     height: 100vh;
+    height: 100dvh; /* Fix for mobile browsers */
     z-index: 9999;
     transform: translateX(-100%);
     box-shadow: 0 0 20px rgba(0,0,0,0.2);

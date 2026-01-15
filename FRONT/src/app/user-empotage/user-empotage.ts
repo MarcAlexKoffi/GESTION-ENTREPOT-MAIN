@@ -56,6 +56,27 @@ export class UserEmpotage implements OnInit {
   // Delete Modal State
   showDeleteModal = false;
   itemToDelete: Empotage | null = null;
+  
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredEmpotages.length / this.pageSize) || 1;
+  }
+
+  get paginatedEmpotages(): Empotage[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredEmpotages.slice(start, start + this.pageSize);
+  }
+
+  nextPage() {
+     if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  prevPage() {
+     if (this.currentPage > 1) this.currentPage--;
+  }
 
   newEmpotage: Empotage = {
     client: '',
@@ -106,6 +127,7 @@ export class UserEmpotage implements OnInit {
       const data = await res.json();
       this.empotages = data;
       this.calculateStats();
+      this.currentPage = 1; // RESET PAGE on load
     } catch (e) {
       console.error('Erreur chargement empotages', e);
       // alert('Erreur chargement empotages (voir console)');
@@ -194,6 +216,12 @@ export class UserEmpotage implements OnInit {
       );
     });
   }
+
+  // When filters change, reset pagination
+  onFiltersChange() {
+      this.currentPage = 1;
+  }
+
 
   getStatusClass(status: string): string {
     switch (status) {
@@ -333,9 +361,8 @@ export class UserEmpotage implements OnInit {
         !this.newEmpotage.booking || 
         !this.newEmpotage.conteneurs || 
         !this.newEmpotage.volume || 
-        !this.newEmpotage.dateStart || 
-        !this.newEmpotage.dateEnd) {
-      this.errorMessage = 'Veuillez remplir tous les champs obligatoires.';
+        !this.newEmpotage.dateStart) {
+      this.errorMessage = 'Veuillez remplir tous les champs obligatoires (Client, Booking, Booking, Volume, Date de début).';
       return;
     }
     this.saving = true;
