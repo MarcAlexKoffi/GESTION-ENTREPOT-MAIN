@@ -138,6 +138,26 @@
     }
 }
 
+
+.calendar-wrapper {
+  position: relative;
+  
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--primary);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .date-input {
+    padding-left: 2.75rem !important;
+  }
+}
+
 /* --- Card & Tabs --- */
 .card.table-card {
   padding: 0; 

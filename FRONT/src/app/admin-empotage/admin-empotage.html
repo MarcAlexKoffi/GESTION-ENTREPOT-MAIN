@@ -111,22 +111,32 @@
          </div> -->
 
         <!-- Date Start -->
-        <input 
-          type="date" 
-          class="date-input" 
-          [(ngModel)]="filters.dateDebut" 
-          (ngModelChange)="applyFilters()"
-          title="Date de début"
-        />
+        <div class="date-wrapper">
+          <span class="material-symbols-outlined left-icon">event</span>
+          <input 
+            type="text" 
+            class="date-input" 
+            [(ngModel)]="filters.dateDebut" 
+            (ngModelChange)="applyFilters()"
+            placeholder="Date de début"
+            onfocus="(this.type='date')"
+            onblur="(this.value ? this.type='date' : this.type='text')"
+          />
+        </div>
 
         <!-- Date End -->
-        <input 
-          type="date" 
-          class="date-input" 
-          [(ngModel)]="filters.dateFin" 
-          (ngModelChange)="applyFilters()"
-          title="Date de fin"
-        />
+        <div class="date-wrapper">
+          <span class="material-symbols-outlined left-icon">event</span>
+          <input 
+            type="text" 
+            class="date-input" 
+            [(ngModel)]="filters.dateFin" 
+            (ngModelChange)="applyFilters()"
+            placeholder="Date de fin"
+            onfocus="(this.type='date')"
+            onblur="(this.value ? this.type='date' : this.type='text')"
+          />
+        </div>
 
         <!-- Reset Button -->
         <!-- <button class="btn-icon-reset" (click)="resetFilters()" title="Réinitialiser">

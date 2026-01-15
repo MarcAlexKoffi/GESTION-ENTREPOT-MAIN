@@ -72,7 +72,31 @@
 }
 
 
-/* --- 2. STATS GRID --- */
+
+/* --- Date Filter Wrapper for Mobile Icon/Placeholder --- */
+.date-wrapper {
+  position: relative;
+  /* Ensure it doesn't shrink too small */
+  min-width: 150px; 
+
+  .left-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--primary);
+    pointer-events: none; /* Allows clicking input 'through' the icon */
+    z-index: 2;
+  }
+
+  .date-input {
+    width: 100%;
+    padding-left: 2.75rem !important; /* Space for the icon */
+    /* Ensure height matches other inputs if needed */
+  }
+}
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

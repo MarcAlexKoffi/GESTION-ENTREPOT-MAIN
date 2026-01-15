@@ -58,7 +58,9 @@
                   <span class="material-symbols-outlined">calendar_today</span>
                 </span>
                 <input
-                  type="date"
+                  type="text"
+                  onfocus="(this.type='date')"
+                  onblur="(this.value ? this.type='date' : this.type='text')"
                   placeholder="Sélectionner une date"
                   [(ngModel)]="selectedDate"
                   (ngModelChange)="applyFilters()"
