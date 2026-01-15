@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
 import { TruckService, Truck } from '../services/truck.service';
+import { environment } from '../config';
 
 interface CardInfo {
   id: number;
@@ -101,7 +102,8 @@ export class DashboardMain implements OnInit {
             this.cards = warehouses.map((w) => {
               let img = w.imageUrl;
               if (img && !img.startsWith('http') && !img.startsWith('data:')) {
-                img = `http://localhost:3000${img}`;
+                 const baseUrl = environment.apiUrl.replace('/api', '');
+                 img = `${baseUrl}${img}`;
               }
 
               // Filtrer les camions pour cet entrepôt

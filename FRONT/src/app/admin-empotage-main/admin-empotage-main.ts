@@ -13,7 +13,7 @@ interface WarehouseUI {
   imageUrl: string;
   todayCount: number;
 }
-
+import { environment } from '../config';
 @Component({
   selector: 'app-admin-empotage-main',
   standalone: true,
@@ -76,8 +76,9 @@ export class AdminEmpotageMain implements OnInit {
   private fixImageUrl(url: string): string {
     if (!url) return ''; // Le CSS gérera le fallback couleur
     if (url.startsWith('http')) return url;
-    // On suppose que le backend est sur le port 3000
-    return `http://localhost:3000${url}`;
+    
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    return `${baseUrl}${url}`;
   }
 
   private generateCode(name: string, id: number): string {
