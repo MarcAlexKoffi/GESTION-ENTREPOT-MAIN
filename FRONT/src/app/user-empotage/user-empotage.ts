@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WarehouseService } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../config';
 
 interface Empotage {
   id?: number;
@@ -97,7 +98,7 @@ export class UserEmpotage implements OnInit {
     if (!this.selectedWarehouseId) return;
     this.loading = true;
     try {
-      const url = new URL('http://localhost:3000/api/empotages');
+      const url = new URL(`${environment.apiUrl}/empotages`);
       url.searchParams.set('entrepotId', this.selectedWarehouseId.toString());
       
       const res = await fetch(url.toString(), { method: 'GET' });
@@ -157,7 +158,7 @@ export class UserEmpotage implements OnInit {
   exportCsvServer() {
     const params = new URLSearchParams();
     if (this.search) params.append('q', this.search);
-    window.location.href = `http://localhost:3000/api/empotages/export?${params.toString()}`;
+    window.location.href = `${environment.apiUrl}/empotages/export?${params.toString()}`;
   }
 
   openCreateModal() {
@@ -219,7 +220,7 @@ export class UserEmpotage implements OnInit {
     if (!this.itemToDelete || !this.itemToDelete.id) return;
     
     try {
-      const res = await fetch(`http://localhost:3000/api/empotages/${this.itemToDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       // refresh
@@ -339,11 +340,11 @@ export class UserEmpotage implements OnInit {
     }
     this.saving = true;
     try {
-      let url = 'http://localhost:3000/api/empotages';
+      let url = `${environment.apiUrl}/empotages`;
       let method = 'POST';
 
       if (this.isEditing && this.currentId) {
-        url = `http://localhost:3000/api/empotages/${this.currentId}`;
+        url = `${environment.apiUrl}/empotages/${this.currentId}`;
         method = 'PUT';
       }
 

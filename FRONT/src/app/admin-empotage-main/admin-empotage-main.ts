@@ -40,7 +40,7 @@ export class AdminEmpotageMain implements OnInit {
         });
 
         // 2. Get All Empotages (to calculate stats)
-        const res = await fetch('http://localhost:3000/api/empotages');
+        const res = await fetch(`${environment.apiUrl}/empotages`);
         const allEmpotages = await res.json();
         const now = new Date();
         const todayStr = now.toDateString();

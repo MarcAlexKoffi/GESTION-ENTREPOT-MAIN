@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WarehouseService } from '../services/warehouse.service';
+import { environment } from '../config';
 
 interface EmpotageStats {
   total: number;
@@ -102,7 +103,7 @@ export class AdminEmpotage implements OnInit {
   async loadOperations() {
     this.loading = true;
     try {
-      const url = new URL('http://localhost:3000/api/empotages');
+      const url = new URL(`${environment.apiUrl}/empotages`);
       if (this.entrepotId) {
         url.searchParams.set('entrepotId', this.entrepotId.toString());
       }

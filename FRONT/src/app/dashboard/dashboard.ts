@@ -5,6 +5,7 @@ import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
 import { filter } from 'rxjs/operators';
+import { environment } from '../config';
 
 @Component({
   selector: 'app-dashboard',
@@ -127,7 +128,7 @@ export class Dashboard implements OnInit, OnDestroy {
               });
             
             // 2. Empotage Notifications
-            fetch('http://localhost:3000/api/notifications')
+            fetch(`${environment.apiUrl}/notifications`)
                 .then(r => r.json())
                 .then((apiNotifs: any[]) => {
                     const empotageNotifs = apiNotifs.map((n: any) => ({
@@ -196,7 +197,7 @@ export class Dashboard implements OnInit, OnDestroy {
         });
     } else if (n.type === 'empotage') {
         // Mark as read
-        fetch(`http://localhost:3000/api/notifications/${n.sourceId}/read`, { method: 'PUT' })
+        fetch(`${environment.apiUrl}/notifications/${n.sourceId}/read`, { method: 'PUT' })
              .then(() => {
                  this.loadNotifications();
                  this.router.navigate(['/dashboard/adminEmpotageMain']);
