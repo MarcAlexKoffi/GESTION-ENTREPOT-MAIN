@@ -17,6 +17,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "dist/gestion-entrepot",
             "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
