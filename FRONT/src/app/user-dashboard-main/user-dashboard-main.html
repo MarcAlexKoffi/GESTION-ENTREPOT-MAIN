@@ -1,104 +1,194 @@
-<div class="pageMain">
-  <div class="page-container">
-    <!-- TITRE PAGE -->
-    <header class="page-header">
-      <div>
-        <h1 class="page-title">Tableau de bord — {{ entrepotName }}</h1>
-        <p class="page-subtitle">
-          Indicateurs clés de performance (filtrés selon votre entrepôt).
+<div class="dashboard-wrapper">
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-titles">
+        <h1>Tableau de bord — {{ entrepotName }}</h1>
+        <p class="subtitle">
+           Bienvenue{{ currentUser?.nom ? ', ' + currentUser?.nom : '' }}.
+           <span *ngIf="trucks.length > 0">{{ trucks.length }} camions total enregistrés.</span>
         </p>
       </div>
-    </header>
-
-    <!-- FILTRES -->
-    <div class="controls-row">
-      <div class="control-item">
-        <select class="search-input" [(ngModel)]="period" (change)="onPeriodChange()">
-            <option value="today">Aujourd'hui</option>
-            <option value="week">Cette semaine</option>
-            <option value="month">Ce mois</option>
-            <option value="year">Cette année</option>
-            <option value="specific" disabled>Choisir une date...</option>
-        </select>
+      
+      <div class="header-actions">
+        <!-- Période Tabs -->
+        <div class="period-selector">
+          <button 
+            [class.active]="period === 'today'" 
+            (click)="period='today'; onPeriodChange()"
+          >Aujourd'hui</button>
+          <button 
+            [class.active]="period === 'week'" 
+            (click)="period='week'; onPeriodChange()"
+          >Semaine</button>
+          <button 
+            [class.active]="period === 'month'" 
+            (click)="period='month'; onPeriodChange()"
+          >Mois</button>
+          <button 
+            [class.active]="period === 'year'" 
+            (click)="period='year'; onPeriodChange()"
+          >Année</button>
+        </div>
+        
+        <!-- Date Picker -->
+         <div class="date-input-wrapper">
+          <span class="material-symbols-outlined input-icon">calendar_today</span>
+          <input 
+            type="date" 
+            [(ngModel)]="filterDate" 
+            (ngModelChange)="onDateChange()"
+            placeholder="Date spécifique"
+          >
+        </div>
       </div>
-      <div class="control-item">
-        <input 
-          type="date" 
-          class="search-input"
-          [(ngModel)]="filterDate"
-          (ngModelChange)="onDateChange()"
-        >
+    </div>
+  </header>
+
+  <!-- MAIN KPI SUMMARY Section -->
+  <section class="kpi-summary">
+    <!-- Total Présents -->
+    <div class="summary-card primary">
+      <div class="card-icon">
+        <span class="material-symbols-outlined">local_shipping</span>
+      </div>
+      <div class="card-data">
+        <span class="card-label">Total Présents</span>
+        <span class="card-value">{{ totalPresents }}</span>
       </div>
     </div>
 
-    <!-- KPI CARDS GRID -->
-    <section aria-label="Indicateurs clés">
-      
-      <div class="stats-grid">
-        <article class="stat-card card-blue">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">local_shipping</span>
-            <span>Total présents</span>
-          </div>
-          <p class="stat-value">{{ totalPresents }}</p>
-        </article>
-
-        <article class="stat-card card-info">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">hourglass_top</span>
-            <span>En attente</span>
-          </div>
-          <p class="stat-value">{{ enAttente }}</p>
-        </article>
-
-        <article class="stat-card card-yellow">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">move_down</span>
-            <span>Validés en attente</span>
-          </div>
-          <p class="stat-value">{{ enDechargement }}</p>
-        </article>
-
-        <article class="stat-card card-success">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">task_alt</span>
-            <span>Acceptés</span>
-          </div>
-          <p class="stat-value">{{ decharges }}</p>
-        </article>
-
-        <article class="stat-card card-orange">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">pending_actions</span>
-            <span>Attente décision admin</span>
-          </div>
-          <p class="stat-value">{{ attenteDecisionAdmin }}</p>
-        </article>
-
-        <article class="stat-card card-danger">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">report</span>
-            <span>Refusés (attente gérant)</span>
-          </div>
-          <p class="stat-value">{{ refusesAttenteGerant }}</p>
-        </article>
-
-        <article class="stat-card card-purple">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">undo</span>
-            <span>Refusés (renvoyés)</span>
-          </div>
-          <p class="stat-value">{{ refusesRenvoyes }}</p>
-        </article>
-
-        <article class="stat-card card-teal">
-          <div class="stat-header">
-            <span class="material-symbols-outlined stat-icon">published_with_changes</span>
-            <span>Réintégrés</span>
-          </div>
-          <p class="stat-value">{{ refusesRintegres }}</p>
-        </article>
+    <!-- En cours global (En attente + Validés en attente + Attente Décision) -->
+    <div class="summary-card info">
+      <div class="card-icon">
+        <span class="material-symbols-outlined">hourglass_top</span>
       </div>
-    </section>
-  </div>
+      <div class="card-data">
+        <span class="card-label">En Traitement</span>
+        <span class="card-value">{{ enAttente + enDechargement + attenteDecisionAdmin }}</span>
+      </div>
+    </div>
+
+    <!-- Terminé (Accepté) -->
+    <div class="summary-card success">
+      <div class="card-icon">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <div class="card-data">
+        <span class="card-label">Acceptés / Déchargés</span>
+        <span class="card-value">{{ decharges }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DETAILED STATS GRID -->
+  <section class="details-section">
+    <h2 class="section-title">Détails des statuts</h2>
+    <div class="details-grid">
+      
+      <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot info"></span>
+            <span class="title">En attente</span>
+        </div>
+        <div class="detail-value">{{ enAttente }}</div>
+      </div>
+
+       <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot warning"></span>
+            <span class="title">Validés (Attente)</span>
+        </div>
+        <div class="detail-value">{{ enDechargement }}</div>
+      </div>
+
+       <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot orange"></span>
+            <span class="title">Décision Admin</span>
+        </div>
+        <div class="detail-value">{{ attenteDecisionAdmin }}</div>
+      </div>
+
+       <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot danger"></span>
+            <span class="title">Refusés (Gérant)</span>
+        </div>
+        <div class="detail-value">{{ refusesAttenteGerant }}</div>
+      </div>
+
+       <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot purple"></span>
+            <span class="title">Refusés (Renvoyés)</span>
+        </div>
+        <div class="detail-value">{{ refusesRenvoyes }}</div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-header">
+            <span class="dot teal"></span>
+            <span class="title">Réintégrés</span>
+        </div>
+        <div class="detail-value">{{ refusesRintegres }}</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RECENT ACTIVITY TABLE -->
+  <section class="activity-section">
+    <div class="section-header">
+        <h2 class="section-title">Activité Récente</h2>
+        <button class="btn-refresh" (click)="loadTrucks()">
+            <span class="material-symbols-outlined">refresh</span>
+            Actualiser
+        </button>
+    </div>
+    
+    <div class="table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Immatriculation</th>
+            <th>Transporteur</th>
+            <th>Type Produit</th>
+            <th>Statut</th>
+            <th>Date / Heure</th>
+            <th class="text-right">Poids (Net)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let truck of filteredTrucks | slice:0:10">
+            <td class="fw-bold">{{ truck.immatriculation }}</td>
+            <td>{{ truck.transporteur || '-' }}</td>
+            <td>
+                <span class="badge-product">{{ truck.products?.type || 'Non spécifié' }}</span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="{
+                'status-success': truck.advancedStatus === 'ACCEPTE_FINAL',
+                'status-warning': truck.statut === 'En attente' || truck.statut === 'Validé',
+                'status-danger': truck.statut === 'Annulé' || truck.statut === 'Refoulé'
+              }">
+                {{ truck.statut }}
+              </span>
+            </td>
+            <td>{{ (truck.heureArrivee | date:'dd/MM/yy HH:mm') || '-' }}</td>
+            <td class="text-right monospace">{{ truck.products?.poidsNet ? (truck.products?.poidsNet + ' kg') : '-' }}</td>
+          </tr>
+          <tr *ngIf="filteredTrucks.length === 0">
+            <td colspan="6" class="empty-cell">
+               <div class="empty-state">
+                   <span class="material-symbols-outlined">inbox</span>
+                   <p>Aucune donnée pour la période sélectionnée.</p>
+               </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
 </div>

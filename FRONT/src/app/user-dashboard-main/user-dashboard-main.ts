@@ -85,7 +85,7 @@ export class UserDashboardMain implements OnInit {
     });
   }
 
-  private loadTrucks(): void {
+  loadTrucks(): void {
     if (!this.entrepotId) {
       console.warn('loadTrucks: No entrepotId available');
       this.trucks = [];
