@@ -55,9 +55,12 @@ export class AuthService {
         this.logout();
         return false;
       }),
-      catchError(() => {
-        // If DB is down or user deleted
-        this.logout();
+      catchError((error) => {
+        // Only logout if explicit authorization failure (401/403)
+        // If server is down (0 or 500), keep session alive to avoid annoyance
+        if (error.status === 401 || error.status === 403) {
+            this.logout();
+        }
         return of(false);
       })
     );
