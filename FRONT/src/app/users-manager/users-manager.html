@@ -9,7 +9,7 @@
               <p class="page-desc">Gérez les accès et affectez les entrepôts aux opérateurs.</p>
             </div>
             <button class="btn-primary" type="button" (click)="openCreateUser()">
-              <span class="material-symbols-outlined">person_add</span>
+              <span class="material-symbols-outlined notranslate">person_add</span>
               <span>Créer un utilisateur</span>
             </button>
           </div>
@@ -27,7 +27,7 @@
             "
           >
             <div style="display: flex; align-items: center; gap: 0.75rem">
-              <span class="material-symbols-outlined">info</span>
+              <span class="material-symbols-outlined notranslate">info</span>
               {{ toastMessage }}
             </div>
           </div>
@@ -37,7 +37,7 @@
             <div class="filters-row">
               <div class="field">
                 <span class="left-icon">
-                  <span class="material-symbols-outlined">search</span>
+                  <span class="material-symbols-outlined notranslate">search</span>
                 </span>
                 <input
                   type="text"
@@ -81,7 +81,7 @@
                   <tr *ngIf="filteredUsers.length === 0">
                     <td colspan="5" class="sub" style="text-align: center; padding: 3rem">
                       <span
-                        class="material-symbols-outlined"
+                        class="material-symbols-outlined notranslate"
                         style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem"
                         >person_off</span
                       >
@@ -102,7 +102,7 @@
 
                     <td>
                       <span class="badge">
-                        <span class="material-symbols-outlined">{{ roleIcon(u.role) }}</span>
+                        <span class="material-symbols-outlined notranslate">{{ roleIcon(u.role) }}</span>
                         {{ roleLabel(u.role) }}
                       </span>
                     </td>
@@ -110,7 +110,7 @@
                     <td class="hide-md">
                       <div class="warehouse-display" *ngIf="u.role === 'operator'">
                         <span
-                          class="material-symbols-outlined"
+                          class="material-symbols-outlined notranslate"
                           style="font-size: 18px; color: var(--text-secondary); opacity: 0.7"
                           >domain</span
                         >
@@ -153,7 +153,7 @@
                           type="button"
                           (click)="openEditUser(u)"
                         >
-                          <span class="material-symbols-outlined">edit</span>
+                          <span class="material-symbols-outlined notranslate">edit</span>
                         </button>
 
                         <button
@@ -162,7 +162,7 @@
                           type="button"
                           (click)="deleteUser(u)"
                         >
-                          <span class="material-symbols-outlined">delete</span>
+                          <span class="material-symbols-outlined notranslate">delete</span>
                         </button>
                       </div>
                     </td>
@@ -187,7 +187,7 @@
                   aria-label="Fermer"
                   (click)="closeUserModal()"
                 >
-                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined notranslate">close</span>
                 </button>
               </div>
 
@@ -300,7 +300,7 @@
                   aria-label="Fermer"
                   (click)="cancelDelete()"
                 >
-                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined notranslate">close</span>
                 </button>
               </div>
 
@@ -318,7 +318,7 @@
                     </p>
                  </div>
                  <p style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+                    <span class="material-symbols-outlined notranslate" style="font-size: 18px;">warning</span>
                     Cette action est irréversible.
                  </p>
               </div>

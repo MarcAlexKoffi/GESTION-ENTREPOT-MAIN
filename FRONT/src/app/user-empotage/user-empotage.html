@@ -5,7 +5,7 @@
       <p class="page-subtitle">Suivez et gérez l'ensemble de vos opérations de chargement.</p>
     </div>
     <button class="btn btn-primary" (click)="openCreateModal()">
-      <span class="material-symbols-outlined">add</span>
+      <span class="material-symbols-outlined notranslate">add</span>
       <span>Nouveau empotage</span>
     </button>
   </header>
@@ -13,7 +13,7 @@
   <!-- CONTROLS: search, status filter, export -->
   <div class="controls-row">
     <div class="control-item search-wrapper">
-      <span class="material-symbols-outlined search-icon">search</span>
+      <span class="material-symbols-outlined notranslate search-icon">search</span>
       <input
         type="text"
         placeholder="Recherche client ou booking..."
@@ -36,7 +36,7 @@
     </div>
     <div class="control-item control-actions">
       <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
-        <span class="material-symbols-outlined">file_download</span>
+        <span class="material-symbols-outlined notranslate">file_download</span>
         <span>Exporter CSV</span>
       </button>
     </div>
@@ -51,7 +51,7 @@
           {{ isEditing ? 'Modifier empotage' : 'Créer un nouvel empotage' }}
         </h2>
         <button class="truck-modal-close" (click)="closeCreateModal()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
 
@@ -70,7 +70,7 @@
             gap: 0.5rem;
           "
         >
-          <span class="material-symbols-outlined" style="font-size: 18px">error</span>
+          <span class="material-symbols-outlined notranslate" style="font-size: 18px">error</span>
           {{ errorMessage }}
         </div>
 
@@ -166,7 +166,7 @@
       <div class="truck-modal-header">
         <h2 class="truck-modal-title">Confirmer la suppression</h2>
         <button class="truck-modal-close" (click)="cancelDelete()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
       <div class="truck-modal-body">
@@ -188,7 +188,7 @@
               gap: 0.5rem;
             "
           >
-            <span class="material-symbols-outlined" style="font-size: 18px">warning</span>
+            <span class="material-symbols-outlined notranslate" style="font-size: 18px">warning</span>
             Cette action est irréversible.
           </p>
         </div>
@@ -269,14 +269,14 @@
             <td class="text-right">
               <div class="actions">
                 <button class="btn-icon" title="Modifier" (click)="editEmpotage(item)">
-                  <span class="material-symbols-outlined">edit</span>
+                  <span class="material-symbols-outlined notranslate">edit</span>
                 </button>
                 <button
                   class="btn-icon delete-btn"
                   title="Supprimer"
                   (click)="deleteEmpotage(item)"
                 >
-                  <span class="material-symbols-outlined">delete</span>
+                  <span class="material-symbols-outlined notranslate">delete</span>
                 </button>
               </div>
             </td>
@@ -295,7 +295,7 @@
           (click)="prevPage()" 
           title="Page précédente"
         >
-          <span class="material-symbols-outlined">chevron_left</span>
+          <span class="material-symbols-outlined notranslate">chevron_left</span>
         </button>
         <button 
           class="page-btn" 
@@ -303,7 +303,7 @@
           (click)="nextPage()" 
           title="Page suivante"
         >
-          <span class="material-symbols-outlined">chevron_right</span>
+          <span class="material-symbols-outlined notranslate">chevron_right</span>
         </button>
       </div>
     </div>

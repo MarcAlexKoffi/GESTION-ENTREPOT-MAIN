@@ -17,7 +17,7 @@
               (click)="exporterCSV()"
               [disabled]="filteredRows.length === 0"
             >
-              <span class="material-symbols-outlined">download</span>
+              <span class="material-symbols-outlined notranslate">download</span>
               <span>Exporter en CSV</span>
             </button>
           </div>
@@ -28,7 +28,7 @@
               <!-- Recherche -->
               <div class="field">
                 <span class="left-icon">
-                  <span class="material-symbols-outlined">search</span>
+                  <span class="material-symbols-outlined notranslate">search</span>
                 </span>
                 <input
                   type="text"
@@ -54,7 +54,7 @@
 
               <div class="field">
                 <span class="left-icon">
-                  <span class="material-symbols-outlined">calendar_today</span>
+                  <span class="material-symbols-outlined notranslate">calendar_today</span>
                 </span>
                 <input
                   type="text"
@@ -102,7 +102,7 @@
                   <tr *ngIf="filteredRows.length === 0">
                     <td colspan="7" class="sub" style="text-align: center; padding: 3rem">
                       <span
-                        class="material-symbols-outlined"
+                        class="material-symbols-outlined notranslate"
                         style="font-size: 3rem; opacity: 0.1; display: block; margin-bottom: 1rem"
                         >history_toggle_off</span
                       >
@@ -115,7 +115,7 @@
                     <td>
                       <div class="warehouse-display">
                         <span
-                          class="material-symbols-outlined"
+                          class="material-symbols-outlined notranslate"
                           style="font-size: 18px; color: var(--text-secondary); opacity: 0.7"
                           >domain</span
                         >
@@ -132,7 +132,7 @@
                     <td>{{ formatHeure(row.createdAt) }}</td>
                     <td>
                       <span class="status-pill" [ngClass]="getStatusCssClass(row.statut)">
-                        <span class="material-symbols-outlined status-icon">{{
+                        <span class="material-symbols-outlined notranslate status-icon">{{
                           getStatusIcon(row.statut)
                         }}</span>
                         {{ row.statut }}
@@ -146,7 +146,7 @@
                           title="Voir le détail"
                           (click)="openDetailsModal(row)"
                         >
-                          <span class="material-symbols-outlined">visibility</span>
+                          <span class="material-symbols-outlined notranslate">visibility</span>
                         </button>
                       </div>
                     </td>
@@ -167,7 +167,7 @@
                   [disabled]="currentPage === 1"
                   (click)="previousPage()"
                 >
-                  <span class="material-symbols-outlined">chevron_left</span>
+                  <span class="material-symbols-outlined notranslate">chevron_left</span>
                 </button>
                 <button
                   type="button"
@@ -175,7 +175,7 @@
                   [disabled]="currentPage >= totalPages"
                   (click)="nextPage()"
                 >
-                  <span class="material-symbols-outlined">chevron_right</span>
+                  <span class="material-symbols-outlined notranslate">chevron_right</span>
                 </button>
               </div>
             </div>
@@ -193,7 +193,7 @@
                   aria-label="Fermer"
                   (click)="closeDetailsModal()"
                 >
-                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined notranslate">close</span>
                 </button>
               </div>
 
@@ -228,7 +228,7 @@
                     <div class="summary-key">Statut</div>
                     <div class="summary-value">
                       <span class="status-pill" [ngClass]="getStatusCssClass(selectedRow.statut)">
-                        <span class="material-symbols-outlined status-icon">{{
+                        <span class="material-symbols-outlined notranslate status-icon">{{
                           getStatusIcon(selectedRow.statut)
                         }}</span>
                         {{ selectedRow.statut }}

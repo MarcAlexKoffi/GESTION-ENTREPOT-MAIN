@@ -10,7 +10,7 @@
             [routerLink]="'/dashboard/dashboard-main'"
             title="Retour"
           >
-            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="material-symbols-outlined notranslate">arrow_back</span>
           </button>
           <h2 class="page-title">{{ entrepot.nom }}</h2>
         </div>
@@ -22,7 +22,7 @@
     <div class="stats-overview">
       <div class="stat-card">
         <div class="stat-icon total">
-          <span class="material-symbols-outlined">local_shipping</span>
+          <span class="material-symbols-outlined notranslate">local_shipping</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Total camions</p>
@@ -32,7 +32,7 @@
 
       <div class="stat-card">
         <div class="stat-icon pending">
-          <span class="material-symbols-outlined">hourglass_empty</span>
+          <span class="material-symbols-outlined notranslate">hourglass_empty</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">En attente</p>
@@ -42,7 +42,7 @@
 
       <div class="stat-card">
         <div class="stat-icon validated">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-outlined notranslate">check_circle</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Validés</p>
@@ -52,7 +52,7 @@
 
       <div class="stat-card">
         <div class="stat-icon accepted">
-          <span class="material-symbols-outlined">assignment_turned_in</span>
+          <span class="material-symbols-outlined notranslate">assignment_turned_in</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Acceptés</p>
@@ -62,7 +62,7 @@
 
        <div class="stat-card">
         <div class="stat-icon cancelled">
-          <span class="material-symbols-outlined">cancel</span>
+          <span class="material-symbols-outlined notranslate">cancel</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Refoulés</p>
@@ -72,7 +72,7 @@
 
        <div class="stat-card">
         <div class="stat-icon renvoyes">
-          <span class="material-symbols-outlined">reply</span>
+          <span class="material-symbols-outlined notranslate">reply</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Renvoyés</p>
@@ -86,16 +86,16 @@
         <div class="search-and-filters">
             <!-- SEARCH -->
             <div class="search-box">
-                <span class="material-symbols-outlined search-icon">search</span>
+                <span class="material-symbols-outlined notranslate search-icon">search</span>
                 <input type="text" placeholder="Rechercher un camion..." [(ngModel)]="searchTerm" />
             </div>
 
             <!-- PERIOD FILTER -->
             <div class="filter-dropdown-wrapper">
                 <div class="filter-chip-wrap" (click)="togglePeriodDropdown()">
-                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span class="material-symbols-outlined notranslate">calendar_today</span>
                     <span class="chip-label">{{ selectedPeriodLabel }}</span>
-                    <span class="material-symbols-outlined arrow">expand_more</span>
+                    <span class="material-symbols-outlined notranslate arrow">expand_more</span>
                 </div>
 
                 <div class="filter-dropdown" *ngIf="showPeriodDropdown">
@@ -108,7 +108,7 @@
 
             <!-- DATE INPUT -->
             <div class="calendar-wrapper">
-                <span class="material-symbols-outlined input-icon">event</span>
+                <span class="material-symbols-outlined notranslate input-icon">event</span>
                 <input 
                     type="text" 
                     class="date-input" 
@@ -182,7 +182,7 @@
           <tbody>
             <tr *ngIf="filteredTrucks.length === 0">
               <td colspan="6" class="empty-state">
-                <span class="material-symbols-outlined">info</span>
+                <span class="material-symbols-outlined notranslate">info</span>
                 Aucun camion trouvé pour ce statut.
               </td>
             </tr>
@@ -201,35 +201,35 @@
               </td>
               <td>
                 <span *ngIf="t.statut === 'Enregistré'" class="status-pill status-pill--enregistre">
-                    <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> Enregistré
+                    <span class="material-symbols-outlined notranslate" style="font-size:16px">check_circle</span> Enregistré
                 </span>
                 <span *ngIf="t.statut === 'En attente'" class="status-pill status-pill--pending">
-                    <span class="material-symbols-outlined" style="font-size:16px">hourglass_empty</span> En attente
+                    <span class="material-symbols-outlined notranslate" style="font-size:16px">hourglass_empty</span> En attente
                 </span>
                 <span *ngIf="t.statut === 'Validé'" class="status-pill status-pill--validated">
-                    <span class="material-symbols-outlined" style="font-size:16px">verified</span> Validé
+                    <span class="material-symbols-outlined notranslate" style="font-size:16px">verified</span> Validé
                 </span>
                 <span *ngIf="t.statut === 'Refoulé' || (t.statut === 'Annulé' && (t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT' || t.advancedStatus === 'REFUSE_RENVOYE'))" class="status-pill status-pill--refoule">
-                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Refoulé
+                    <span class="material-symbols-outlined notranslate" style="font-size:16px">cancel</span> Refoulé
                 </span>
                 <span *ngIf="t.statut === 'Annulé' && !t.advancedStatus" class="status-pill status-pill--refoule">
-                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Annulé
+                    <span class="material-symbols-outlined notranslate" style="font-size:16px">cancel</span> Annulé
                 </span>
               </td>
               <!-- STATUT AVANCÉ -->
               <td>
                  <ng-container [ngSwitch]="t.advancedStatus">
                      <span *ngSwitchCase="'REFUSE_EN_ATTENTE_GERANT'" class="status-pill status-pill--pending">
-                         <span class="material-symbols-outlined" style="font-size:16px">pending</span> En attente gérant
+                         <span class="material-symbols-outlined notranslate" style="font-size:16px">pending</span> En attente gérant
                      </span>
                      <span *ngSwitchCase="'REFUSE_RENVOYE'" class="status-pill status-pill--renvoye">
-                          <span class="material-symbols-outlined" style="font-size:16px">reply</span> Renvoyé
+                          <span class="material-symbols-outlined notranslate" style="font-size:16px">reply</span> Renvoyé
                      </span>
                      <span *ngSwitchCase="'REFUSE_REINTEGRE'" class="status-pill status-pill--reintegre">
-                          <span class="material-symbols-outlined" style="font-size:16px">autorenew</span> Réintégré
+                          <span class="material-symbols-outlined notranslate" style="font-size:16px">autorenew</span> Réintégré
                      </span>
                      <span *ngSwitchCase="'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
-                          <span class="material-symbols-outlined" style="font-size:16px">assignment_turned_in</span> Accepté déf.
+                          <span class="material-symbols-outlined notranslate" style="font-size:16px">assignment_turned_in</span> Accepté déf.
                      </span>
                      <span *ngSwitchDefault class="cell-muted"> — </span>
                  </ng-container>
@@ -237,7 +237,7 @@
               <td>
                 <button class="btn-view" (click)="openDetailsModal(t)">
                   <span>Voir plus</span>
-                  <span class="material-symbols-outlined">chevron_right</span>
+                  <span class="material-symbols-outlined notranslate">chevron_right</span>
                 </button>
               </td>
             </tr>
@@ -259,7 +259,7 @@
           </p>
         </div>
         <button class="btn-close" (click)="closeDetailsModal()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
 
@@ -322,11 +322,11 @@
       <div class="modal-footer">
         <div class="footer-left" style="display: flex; gap: 0.75rem;">
           <button class="btn-secondary" (click)="openHistoryModal(selectedTruck!)">
-            <span class="material-symbols-outlined">history</span> Historique
+            <span class="material-symbols-outlined notranslate">history</span> Historique
           </button>
 
           <button *ngIf="selectedTruck?.statut === 'Annulé'" class="btn-secondary danger" (click)="reintegrateTruck()">
-            <span class="material-symbols-outlined">restore</span> Réintégré
+            <span class="material-symbols-outlined notranslate">restore</span> Réintégré
           </button>
         </div>
 
@@ -338,7 +338,7 @@
 
           <ng-container *ngIf="isAcceptedFinal(selectedTruck!)">
             <button class="btn-secondary" (click)="printSelectedTruck()">
-              <span class="material-symbols-outlined">print</span> Imprimer
+              <span class="material-symbols-outlined notranslate">print</span> Imprimer
             </button>
           </ng-container>
 
@@ -361,7 +361,7 @@
       <div class="modal-header">
         <h3 class="modal-title">Historique</h3>
         <button class="btn-close" (click)="closeHistoryModal()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
       <div class="modal-body">

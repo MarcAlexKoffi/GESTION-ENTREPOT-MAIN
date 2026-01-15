@@ -24,7 +24,7 @@
           routerLinkActive="active"
           class="sidebar-link"
         >
-          <span class="material-symbols-outlined">dashboard</span>
+          <span class="material-symbols-outlined notranslate">dashboard</span>
           <span class="link-label">Tableau de bord</span>
         </a>
         <a 
@@ -33,23 +33,23 @@
           routerLinkActive="active" 
           class="sidebar-link"
         >
-          <span class="material-symbols-outlined">warehouse</span>
+          <span class="material-symbols-outlined notranslate">warehouse</span>
           <span class="link-label">Entrepôt</span>
         </a>
         <a [routerLink]="'/userdashboard/userEmpotage'" routerLinkActive="active" class="sidebar-link">
-          <span class="material-symbols-outlined">inventory_2</span>
+          <span class="material-symbols-outlined notranslate">inventory_2</span>
           <span class="link-label">Empotage</span>
         </a>
       </div>
     </nav>
       <div class="sidebar-footer">
       <!-- <a href="#" class="sidebar-link secondary">
-        <span class="material-symbols-outlined">help</span>
+        <span class="material-symbols-outlined notranslate">help</span>
         <span class="link-label">Centre d'aide</span>
       </a> -->
       <div class="footer-divider"></div>
       <a href="#" class="sidebar-link logout" (click)="$event.preventDefault(); requestLogout()">
-        <span class="material-symbols-outlined">logout</span>
+        <span class="material-symbols-outlined notranslate">logout</span>
         <span class="link-label">Déconnexion</span>
       </a>
     </div>
@@ -61,7 +61,7 @@
       <div class="modal-header">
         <h2 class="modal-title">Confirmation</h2>
         <button class="close-btn" (click)="cancelLogout()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
       <div class="modal-body">
@@ -81,7 +81,7 @@
       <div class="top-header-left">
         <!-- Mobile Menu Toggle -->
         <button class="mobile-menu-btn" (click)="toggleSidebar()">
-           <span class="material-symbols-outlined">menu</span>
+           <span class="material-symbols-outlined notranslate">menu</span>
         </button>
         <!-- Breadcrumb or Search placeholder can go here -->
       </div>
@@ -95,7 +95,7 @@
             (click)="toggleNotifications()"
             [attr.aria-expanded]="showNotifDropdown"
           >
-            <span class="material-symbols-outlined">notifications</span>
+            <span class="material-symbols-outlined notranslate">notifications</span>
             <span *ngIf="notifCount > 0" class="notif-badge-dot"></span>
           </button>
 
@@ -108,7 +108,7 @@
 
             <div class="popover-scroll custom-scroll">
               <div *ngIf="notifications.length === 0" class="popover-empty">
-                <span class="material-symbols-outlined">notifications_off</span>
+                <span class="material-symbols-outlined notranslate">notifications_off</span>
                 <p>Aucune notification</p>
               </div>
 
@@ -118,7 +118,7 @@
                 (click)="openNotification(n)"
               >
                 <div class="notif-icon-circle">
-                  <span class="material-symbols-outlined">local_shipping</span>
+                  <span class="material-symbols-outlined notranslate">local_shipping</span>
                 </div>
                 <div class="notif-body">
                   <div class="notif-row">
@@ -145,7 +145,7 @@
             <p class="role">{{ userRoleLabel }}</p>
           </div>
           <button class="profile-toggle">
-            <span class="material-symbols-outlined">expand_more</span>
+            <span class="material-symbols-outlined notranslate">expand_more</span>
           </button>
         </div>
       </div>

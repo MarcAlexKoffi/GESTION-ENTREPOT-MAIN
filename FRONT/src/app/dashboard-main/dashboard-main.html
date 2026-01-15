@@ -11,7 +11,7 @@
             </div>
 
             <button class="btn btn-primary" type="button" (click)="openWarehouseModal()">
-              <span class="material-symbols-outlined">add</span>
+              <span class="material-symbols-outlined notranslate">add</span>
               <span>Nouvel enregistrement</span>
             </button>
           </div>
@@ -19,21 +19,21 @@
           <!-- FILTERS (MATCHING SCREENSHOT) -->
           <!-- <section class="filters-chips-section" aria-label="Filtres">
             <div class="filter-chip-wrap">
-              <span class="material-symbols-outlined chip-icon">location_on</span>
+              <span class="material-symbols-outlined notranslate chip-icon">location_on</span>
               <select aria-label="Filtrer par région">
                 <option value="">Toutes les régions</option>
                 <option value="nord">Nord</option>
                 <option value="sud">Sud</option>
               </select>
-              <span class="material-symbols-outlined chip-arrow">expand_more</span>
+              <span class="material-symbols-outlined notranslate chip-arrow">expand_more</span>
             </div>
 
             <div class="filter-chip-wrap">
-              <span class="material-symbols-outlined chip-icon">factory</span>
+              <span class="material-symbols-outlined notranslate chip-icon">factory</span>
               <select aria-label="Filtrer par site">
                 <option value="">Tous les sites</option>
               </select>
-              <span class="material-symbols-outlined chip-arrow">expand_more</span>
+              <span class="material-symbols-outlined notranslate chip-arrow">expand_more</span>
             </div>
           </section> -->
 
@@ -63,7 +63,7 @@
                   (click)="openActionsMenu(card, $event)"
                   title="Actions"
                 >
-                  <span class="material-symbols-outlined">more_vert</span>
+                  <span class="material-symbols-outlined notranslate">more_vert</span>
                 </button>
 
                 <!-- Dropdown Menu -->
@@ -73,11 +73,11 @@
                   (click)="$event.stopPropagation()"
                 >
                   <button type="button" (click)="onEditWarehouse(card)">
-                    <span class="material-symbols-outlined">edit</span>
+                    <span class="material-symbols-outlined notranslate">edit</span>
                     Modifier
                   </button>
                   <button type="button" class="danger" (click)="onDeleteWarehouse(card)">
-                    <span class="material-symbols-outlined">delete</span>
+                    <span class="material-symbols-outlined notranslate">delete</span>
                     Supprimer
                   </button>
                 </div>
@@ -88,7 +88,7 @@
                 <div class="warehouse-info">
                   <h3 class="warehouse-name">{{ card.name }}</h3>
                   <p class="warehouse-location">
-                    <span class="material-symbols-outlined">location_on</span>
+                    <span class="material-symbols-outlined notranslate">location_on</span>
                     {{ card.location }}
                   </p>
                 </div>
@@ -100,7 +100,7 @@
                     <span class="status-label">EN ATTENTE</span>
                     <span class="status-count">{{ card.pending }}</span>
                   </div>
-                  <span class="material-symbols-outlined footer-arrow">arrow_forward</span>
+                  <span class="material-symbols-outlined notranslate footer-arrow">arrow_forward</span>
                 </div>
               </div>
             </article>
@@ -150,7 +150,7 @@
                   aria-label="Fermer"
                   (click)="closeWarehouseModal()"
                 >
-                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined notranslate">close</span>
                 </button>
               </div>
 
@@ -199,7 +199,7 @@
                     <!-- Premium Custom Trigger -->
                     <div class="upload-controls">
                       <button type="button" class="file-upload-btn" (click)="fileInput.click()">
-                        <span class="material-symbols-outlined">cloud_upload</span>
+                        <span class="material-symbols-outlined notranslate">cloud_upload</span>
                         {{ selectedImageFile ? "Changer l'image" : 'Choisir une image' }}
                       </button>
 
@@ -245,7 +245,7 @@
                   aria-label="Fermer"
                   (click)="closeDeleteModal()"
                 >
-                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined notranslate">close</span>
                 </button>
               </div>
 
@@ -260,7 +260,7 @@
                     </p>
                  </div>
                  <p style="color: #ef4444; font-size: 0.85rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+                    <span class="material-symbols-outlined notranslate" style="font-size: 18px;">warning</span>
                     Cette action est irréversible.
                  </p>
               </div>

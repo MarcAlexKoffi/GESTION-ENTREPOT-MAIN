@@ -7,7 +7,7 @@
                 <p class="page-subtitle">{{ entrepot.lieu }}</p>
             </div>
             <button type="button" class="btn btn-primary" (click)="openModal()">
-                <span class="material-symbols-outlined">add</span>
+                <span class="material-symbols-outlined notranslate">add</span>
                 <span>Enregistrer un camion</span>
             </button>
         </header>
@@ -17,7 +17,7 @@
             <div class="search-and-filters">
                 <!-- SEARCH -->
                 <div class="search-box">
-                    <span class="material-symbols-outlined search-icon">search</span>
+                    <span class="material-symbols-outlined notranslate search-icon">search</span>
                     <input type="text" placeholder="Rechercher un camion..." [(ngModel)]="filterSearch"
                         (ngModelChange)="applyFilters()" />
                 </div>
@@ -25,9 +25,9 @@
                 <!-- PERIOD FILTER -->
                 <div class="filter-dropdown-wrapper">
                     <div class="filter-chip-wrap" (click)="togglePeriodMenu()">
-                        <span class="material-symbols-outlined">calendar_today</span>
+                        <span class="material-symbols-outlined notranslate">calendar_today</span>
                         <span class="chip-label">{{ periodLabel }}</span>
-                        <span class="material-symbols-outlined">arrow_drop_down</span>
+                        <span class="material-symbols-outlined notranslate">arrow_drop_down</span>
                     </div>
 
                      <div class="filter-dropdown" *ngIf="showPeriodMenu">
@@ -40,7 +40,7 @@
 
                  <!-- DATE INPUT -->
                  <div class="calendar-wrapper">
-                    <span class="material-symbols-outlined input-icon">event</span>
+                    <span class="material-symbols-outlined notranslate input-icon">event</span>
                     <input 
                         type="text" 
                         class="date-input" 
@@ -116,7 +116,7 @@
                         <tr *ngIf="filteredTrucks.length === 0">
                             <td colspan="6" style="padding: 0;">
                                 <div class="empty-state-content">
-                                    <span class="material-symbols-outlined">info</span>
+                                    <span class="material-symbols-outlined notranslate">info</span>
                                     <p>Aucun camion trouvé pour ce statut.</p>
                                 </div>
                             </td>
@@ -136,35 +136,35 @@
                              <!-- STATUT -->
                              <td>
                                 <span *ngIf="t.statut === 'Enregistré'" class="status-pill status-pill--enregistre">
-                                    <span class="material-symbols-outlined" style="font-size:16px">save_as</span> Enregistré
+                                    <span class="material-symbols-outlined notranslate" style="font-size:16px">save_as</span> Enregistré
                                 </span>
                                 <span *ngIf="t.statut === 'En attente'" class="status-pill status-pill--pending">
-                                    <span class="material-symbols-outlined" style="font-size:16px">hourglass_empty</span> En attente
+                                    <span class="material-symbols-outlined notranslate" style="font-size:16px">hourglass_empty</span> En attente
                                 </span>
                                 <span *ngIf="t.statut === 'Validé'" class="status-pill status-pill--validated">
-                                    <span class="material-symbols-outlined" style="font-size:16px">check_circle</span> Validé
+                                    <span class="material-symbols-outlined notranslate" style="font-size:16px">check_circle</span> Validé
                                 </span>
                                 <span *ngIf="t.statut === 'Refoulé' || (t.statut === 'Annulé' && (t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT' || t.advancedStatus === 'REFUSE_RENVOYE'))" class="status-pill status-pill--refoule">
-                                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Refoulé
+                                    <span class="material-symbols-outlined notranslate" style="font-size:16px">cancel</span> Refoulé
                                 </span>
                                 <span *ngIf="t.statut === 'Annulé' && !t.advancedStatus" class="status-pill status-pill--refoule">
-                                    <span class="material-symbols-outlined" style="font-size:16px">cancel</span> Annulé
+                                    <span class="material-symbols-outlined notranslate" style="font-size:16px">cancel</span> Annulé
                                 </span>
                              </td>
                              <!-- STATUT AVANCÉ -->
                              <td>
                                 <ng-container [ngSwitch]="t.advancedStatus">
                                     <span *ngSwitchCase="'REFUSE_EN_ATTENTE_GERANT'" class="status-pill status-pill--pending">
-                                        <span class="material-symbols-outlined" style="font-size:16px">pending</span> En attente gérant
+                                        <span class="material-symbols-outlined notranslate" style="font-size:16px">pending</span> En attente gérant
                                     </span>
                                     <span *ngSwitchCase="'REFUSE_RENVOYE'" class="status-pill status-pill--renvoye">
-                                         <span class="material-symbols-outlined" style="font-size:16px">reply</span> Renvoyé
+                                         <span class="material-symbols-outlined notranslate" style="font-size:16px">reply</span> Renvoyé
                                     </span>
                                     <span *ngSwitchCase="'REFUSE_REINTEGRE'" class="status-pill status-pill--reintegre">
-                                         <span class="material-symbols-outlined" style="font-size:16px">autorenew</span> Réintégré
+                                         <span class="material-symbols-outlined notranslate" style="font-size:16px">autorenew</span> Réintégré
                                     </span>
                                     <span *ngSwitchCase="'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
-                                         <span class="material-symbols-outlined" style="font-size:16px">assignment_turned_in</span> Accepté déf.
+                                         <span class="material-symbols-outlined notranslate" style="font-size:16px">assignment_turned_in</span> Accepté déf.
                                     </span>
                                     <span *ngSwitchDefault class="cell-muted"> — </span>
                                 </ng-container>
@@ -175,10 +175,10 @@
                                     <!-- ENREGISTRÉ -->
                                     <ng-container *ngIf="t.statut === 'Enregistré'">
                                         <button class="action-btn btn-edit" title="Modifier" (click)="openEditModal(t)">
-                                            <span class="material-symbols-outlined">edit</span>
+                                            <span class="material-symbols-outlined notranslate">edit</span>
                                         </button>
                                         <button class="action-btn btn-science" title="Analyses" (click)="openAnalysisModal(t)">
-                                            <span class="material-symbols-outlined">science</span>
+                                            <span class="material-symbols-outlined notranslate">science</span>
                                         </button>
                                     </ng-container>
                                     
@@ -186,25 +186,25 @@
                                     <button class="action-btn btn-inventory" title="Produits" 
                                         *ngIf="t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL'"
                                         (click)="openProductsModal(t)">
-                                        <span class="material-symbols-outlined">inventory_2</span>
+                                        <span class="material-symbols-outlined notranslate">inventory_2</span>
                                     </button>
 
                                     <!-- REFOULE -->
                                     <button class="action-btn btn-send" title="Marquer renvoyé"
                                         *ngIf="(t.statut === 'Refoulé' || t.statut === 'Annulé') && t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT'"
                                         (click)="markAsRenvoye(t)">
-                                        <span class="material-symbols-outlined">send</span>
+                                        <span class="material-symbols-outlined notranslate">send</span>
                                     </button>
 
                                     <!-- HISTORIQUE -->
                                     <button class="action-btn btn-history" title="Historique" (click)="openHistoryModal(t)">
-                                        <span class="material-symbols-outlined">history</span>
+                                        <span class="material-symbols-outlined notranslate">history</span>
                                     </button>
 
                                     <!-- DETAILS VIEW -->
                                      <button class="action-btn btn-history" title="Détails" (click)="openDetails(t)" 
                                         *ngIf="t.advancedStatus === 'ACCEPTE_FINAL' && t.products">
-                                        <span class="material-symbols-outlined">visibility</span>
+                                        <span class="material-symbols-outlined notranslate">visibility</span>
                                      </button>
                                 </div>
                              </td>
@@ -226,7 +226,7 @@
       <div class="modal-header">
         <h2 class="modal-title">Enregistrer un nouveau camion</h2>
         <button type="button" class="btn-close-icon" aria-label="Fermer" (click)="closeModal()">
-          <span class="material-symbols-outlined">close</span>
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
       </div>
 
@@ -301,7 +301,7 @@
 
       <div class="modal-footer" style="display:block">
           <div class="truck-confirm" *ngIf="showSuccessBanner" style="margin-bottom: 1rem; padding: 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.75rem; color: #166534;">
-            <span class="material-symbols-outlined">check_circle</span>
+            <span class="material-symbols-outlined notranslate">check_circle</span>
             <div>
               <p style="margin:0; font-weight:700">Camion enregistré</p>
               <p style="margin:0; font-size:0.875rem">Statut : {{ lastSavedStatutLabel }}</p>
@@ -323,7 +323,7 @@
         <div class="modal-header">
             <h2 class="modal-title">Modifier le camion</h2>
             <button class="btn-close-icon" (click)="closeEditModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                <span class="material-symbols-outlined notranslate" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body">
@@ -361,7 +361,7 @@
         <div class="modal-header">
             <h2 class="modal-title">Résultats d'analyse</h2>
             <button class="btn-close-icon" (click)="closeAnalysisModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                <span class="material-symbols-outlined notranslate" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body">
@@ -398,7 +398,7 @@
         <div class="modal-header">
             <h2 class="modal-title">Renseigner détails produits</h2>
             <button class="btn-close-icon" (click)="closeProductsModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                <span class="material-symbols-outlined notranslate" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body">
@@ -449,7 +449,7 @@
         <div class="modal-header">
             <h2 class="modal-title">Historique</h2>
             <button class="btn-close-icon" (click)="closeHistoryModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                <span class="material-symbols-outlined notranslate" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body" style="background:#f8fafc; padding: 1.5rem;">
@@ -484,7 +484,7 @@
         <div class="modal-header">
             <h2 class="modal-title">Détails Entrée</h2>
             <button class="btn-close-icon" (click)="closeDetailsModal()">
-                <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                <span class="material-symbols-outlined notranslate" style="font-size:20px">close</span>
             </button>
         </div>
         <div class="modal-body">
@@ -526,7 +526,7 @@
             <button class="truck-submit" 
                     style="background:white; color:var(--text-primary); border:1px solid var(--border-medium); width:auto; padding:0.75rem 1.5rem;" 
                     (click)="printSelectedTruck()">
-                <span class="material-symbols-outlined" style="vertical-align:middle; font-size:18px; margin-right:4px;">print</span>
+                <span class="material-symbols-outlined notranslate" style="vertical-align:middle; font-size:18px; margin-right:4px;">print</span>
                 Imprimer
             </button>
             <button class="truck-submit" style="width:auto; padding:0.75rem 2.5rem;" (click)="closeDetailsModal()">Fermer</button>
@@ -541,12 +541,12 @@
     <div class="modal-header">
       <h2 class="modal-title">Confirmer le renvoi</h2>
       <button class="btn-close-icon" (click)="closeRenvoyeConfirmModal()">
-        <span class="material-symbols-outlined" style="font-size: 20px">close</span>
+        <span class="material-symbols-outlined notranslate" style="font-size: 20px">close</span>
       </button>
     </div>
     <div class="modal-body">
       <div style="text-align: center; margin: 2rem 0;">
-         <span class="material-symbols-outlined" style="font-size: 48px; color: #f59e0b; margin-bottom: 1rem;">warning</span>
+         <span class="material-symbols-outlined notranslate" style="font-size: 48px; color: #f59e0b; margin-bottom: 1rem;">warning</span>
          <p style="font-size: 1.1rem; font-weight: 500; color: #1e293b;">
              Confirmez-vous que le camion <strong>{{ truckToRenvoyer?.immatriculation }}</strong> a bien quitté l'entrepôt ?
          </p>

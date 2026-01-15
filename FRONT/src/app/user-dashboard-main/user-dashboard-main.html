@@ -33,7 +33,7 @@
         
         <!-- Date Picker -->
          <div class="date-input-wrapper">
-          <span class="material-symbols-outlined input-icon">calendar_today</span>
+          <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
           <input 
             type="date" 
             [(ngModel)]="filterDate" 
@@ -50,7 +50,7 @@
     <!-- Total Présents -->
     <div class="summary-card primary">
       <div class="card-icon">
-        <span class="material-symbols-outlined">local_shipping</span>
+        <span class="material-symbols-outlined notranslate">local_shipping</span>
       </div>
       <div class="card-data">
         <span class="card-label">Total Présents</span>
@@ -61,7 +61,7 @@
     <!-- En cours global (En attente + Validés en attente + Attente Décision) -->
     <div class="summary-card info">
       <div class="card-icon">
-        <span class="material-symbols-outlined">hourglass_top</span>
+        <span class="material-symbols-outlined notranslate">hourglass_top</span>
       </div>
       <div class="card-data">
         <span class="card-label">En Traitement</span>
@@ -72,7 +72,7 @@
     <!-- Terminé (Accepté) -->
     <div class="summary-card success">
       <div class="card-icon">
-        <span class="material-symbols-outlined">check_circle</span>
+        <span class="material-symbols-outlined notranslate">check_circle</span>
       </div>
       <div class="card-data">
         <span class="card-label">Acceptés / Déchargés</span>
@@ -142,7 +142,7 @@
     <div class="section-header">
         <h2 class="section-title">Activité Récente</h2>
         <button class="btn-refresh" (click)="loadTrucks()">
-            <span class="material-symbols-outlined">refresh</span>
+            <span class="material-symbols-outlined notranslate">refresh</span>
             Actualiser
         </button>
     </div>
@@ -181,7 +181,7 @@
           <tr *ngIf="filteredTrucks.length === 0">
             <td colspan="6" class="empty-cell">
                <div class="empty-state">
-                   <span class="material-symbols-outlined">inbox</span>
+                   <span class="material-symbols-outlined notranslate">inbox</span>
                    <p>Aucune donnée pour la période sélectionnée.</p>
                </div>
             </td>

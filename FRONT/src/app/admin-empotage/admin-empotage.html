@@ -9,7 +9,7 @@
             [routerLink]="['/dashboard/adminEmpotageMain']"
             title="Retour"
           >
-            <span class="material-symbols-outlined">arrow_back</span>
+            <span class="material-symbols-outlined notranslate">arrow_back</span>
           </button>
           <div class="title-content">
             <h1 class="page-title">
@@ -17,14 +17,14 @@
               <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
             </h1>
             <p class="page-subtitle">
-              <span class="material-symbols-outlined icon-subtitle">admin_panel_settings</span>
+              <span class="material-symbols-outlined notranslate icon-subtitle">admin_panel_settings</span>
               Vue administrateur - Monitoring temps réel des opérations
             </p>
           </div>
         </div>
       </div>
       <button class="btn btn-primary">
-        <span class="material-symbols-outlined">download</span>
+        <span class="material-symbols-outlined notranslate">download</span>
         <span>Exporter en CSV</span>
       </button>
     </header>
@@ -34,7 +34,7 @@
       <!-- Total -->
       <article class="card stat-card">
         <div class="icon-box bg-blue-100 text-blue-600">
-          <span class="material-symbols-outlined">inventory_2</span>
+          <span class="material-symbols-outlined notranslate">inventory_2</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Total</p>
@@ -45,7 +45,7 @@
       <!-- Aujourd'hui -->
       <article class="card stat-card">
         <div class="icon-box bg-blue-100 text-blue-600">
-          <span class="material-symbols-outlined">today</span>
+          <span class="material-symbols-outlined notranslate">today</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Aujourd'hui</p>
@@ -56,7 +56,7 @@
       <!-- Cette semaine -->
       <article class="card stat-card">
         <div class="icon-box bg-purple-100 text-purple-600">
-          <span class="material-symbols-outlined">date_range</span>
+          <span class="material-symbols-outlined notranslate">date_range</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Cette semaine</p>
@@ -67,7 +67,7 @@
       <!-- Ce mois -->
       <article class="card stat-card">
         <div class="icon-box bg-green-100 text-green-600">
-          <span class="material-symbols-outlined">calendar_month</span>
+          <span class="material-symbols-outlined notranslate">calendar_month</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Ce mois</p>
@@ -78,7 +78,7 @@
       <!-- Cette année -->
       <article class="card stat-card">
         <div class="icon-box bg-orange-100 text-orange-600">
-          <span class="material-symbols-outlined">event</span>
+          <span class="material-symbols-outlined notranslate">event</span>
         </div>
         <div class="stat-info">
           <p class="stat-label">Cette année</p>
@@ -92,7 +92,7 @@
       <div class="search-and-filters">
         <!-- N° Booking Search -->
         <div class="search-box">
-          <span class="material-symbols-outlined search-icon">search</span>
+          <span class="material-symbols-outlined notranslate search-icon">search</span>
           <input 
             type="text" 
             placeholder="Rechercher par N° Booking..." 
@@ -112,7 +112,7 @@
 
         <!-- Date Start -->
         <div class="date-wrapper">
-          <span class="material-symbols-outlined left-icon">event</span>
+          <span class="material-symbols-outlined notranslate left-icon">event</span>
           <input 
             type="text" 
             class="date-input" 
@@ -126,7 +126,7 @@
 
         <!-- Date End -->
         <div class="date-wrapper">
-          <span class="material-symbols-outlined left-icon">event</span>
+          <span class="material-symbols-outlined notranslate left-icon">event</span>
           <input 
             type="text" 
             class="date-input" 
@@ -140,7 +140,7 @@
 
         <!-- Reset Button -->
         <!-- <button class="btn-icon-reset" (click)="resetFilters()" title="Réinitialiser">
-          <span class="material-symbols-outlined">refresh</span>
+          <span class="material-symbols-outlined notranslate">refresh</span>
         </button> -->
       </div>
     </section>
@@ -182,7 +182,7 @@
                 <td class="text-right">
                   <div class="actions">
                     <button class="btn-icon" title="Imprimer" (click)="printOperation(op)">
-                        <span class="material-symbols-outlined">print</span>
+                        <span class="material-symbols-outlined notranslate">print</span>
                     </button>
                   </div>
                 </td>
@@ -195,10 +195,10 @@
           <span class="page-info" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">PAGE {{ currentPage }} DE {{ totalPages }}</span>
           <div class="pagination-controls" style="display: flex; gap: 0.5rem;">
             <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
-              <span class="material-symbols-outlined">chevron_left</span>
+              <span class="material-symbols-outlined notranslate">chevron_left</span>
             </button>
             <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
-              <span class="material-symbols-outlined">chevron_right</span>
+              <span class="material-symbols-outlined notranslate">chevron_right</span>
             </button>
           </div>
         </div>
