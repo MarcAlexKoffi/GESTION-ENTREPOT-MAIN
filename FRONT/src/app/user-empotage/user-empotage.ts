@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { WarehouseService } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
 import { environment } from '../config';
@@ -27,6 +29,7 @@ interface Empotage {
 export class UserEmpotage implements OnInit {
   private warehouseService = inject(WarehouseService);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
   
   warehouses: any[] = []; // List to select from
 
@@ -119,12 +122,8 @@ export class UserEmpotage implements OnInit {
     if (!this.selectedWarehouseId) return;
     this.loading = true;
     try {
-      const url = new URL(`${environment.apiUrl}/empotages`);
-      url.searchParams.set('entrepotId', this.selectedWarehouseId.toString());
-      
-      const res = await fetch(url.toString(), { method: 'GET' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const url = `${environment.apiUrl}/empotages?entrepotId=${this.selectedWarehouseId}`;
+      const data = await firstValueFrom(this.http.get<Empotage[]>(url));
       this.empotages = data;
       this.calculateStats();
       this.currentPage = 1; // RESET PAGE on load
@@ -248,8 +247,7 @@ export class UserEmpotage implements OnInit {
     if (!this.itemToDelete || !this.itemToDelete.id) return;
     
     try {
-      const res = await fetch(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await firstValueFrom(this.http.delete(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`));
       
       // refresh
       await this.loadEmpotages();
@@ -368,35 +366,24 @@ export class UserEmpotage implements OnInit {
     this.saving = true;
     try {
       let url = `${environment.apiUrl}/empotages`;
-      let method = 'POST';
+      let req;
 
       if (this.isEditing && this.currentId) {
         url = `${environment.apiUrl}/empotages/${this.currentId}`;
-        method = 'PUT';
+        req = this.http.put(url, this.newEmpotage);
+      } else {
+        req = this.http.post(url, this.newEmpotage);
       }
 
-      const res = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.newEmpotage)
-      });
-
-      if (!res.ok) {
-        // Try to read body for a helpful message
-        let text = '';
-        try { text = await res.text(); } catch (e) { /* ignore */ }
-        console.error('saveEmpotage failed', res.status, text);
-        alert(`Erreur : ${res.status} ${text || ''}`);
-        return;
-      }
+      await firstValueFrom(req);
       
       this.closeCreateModal();
       // reload list
       await this.loadEmpotages();
       // alert(this.isEditing ? 'Empotage modifié' : 'Empotage créé');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Erreur sauvegarde empotage', e);
-      alert('Erreur sauvegarde empotage (voir console)');
+      alert(`Erreur : ${e.status || ''} ${e.message || ''}`);
     } finally {
       this.saving = false;
     }

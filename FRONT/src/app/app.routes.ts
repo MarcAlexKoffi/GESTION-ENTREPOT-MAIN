@@ -14,6 +14,7 @@ import { UsersManager } from './users-manager/users-manager';
 import { AdminEmpotage } from './admin-empotage/admin-empotage';
 import { UserEmpotage } from './user-empotage/user-empotage';
 import { AdminEmpotageMain } from './admin-empotage-main/admin-empotage-main';
+import { authGuard, guestGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -24,10 +25,13 @@ export const routes: Routes = [
     {
         path: 'login',
         component: Login,
+        canActivate: [guestGuard]
     },
     {
         path: 'dashboard',
         component: Dashboard,
+        canActivate: [authGuard],
+        data: { role: 'admin' },
         children: [
             {
                 path: '',
@@ -63,14 +67,20 @@ export const routes: Routes = [
     {
         path: 'register',
         component: Register,
+        canActivate: [guestGuard]
     },
     {
         path: 'enregistrement',
         component: Enregistrement,
+        // Assuming this is public or needing separate logic, leaving unguarded for now or maybe authGuard? 
+        // Best to leave it open if it's the "Pointage" kiosk mode, or protect if it's internal.
+        // Given past context, it often is a kiosk mode. I will leave it unguarded for now unless user asked.
     },
     {
         path: 'userdashboard',
         component: UserDashboard,
+        canActivate: [authGuard],
+        data: { role: 'operator' },
         children: [
             {
                 path: '',
@@ -95,4 +105,8 @@ export const routes: Routes = [
             }
         ]
     },
+    {
+        path: '**',
+        redirectTo: 'login'
+    }
 ];
