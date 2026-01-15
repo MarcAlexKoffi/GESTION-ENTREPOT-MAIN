@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of, catchError, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { User } from './user.service';
 import { environment } from '../config';
@@ -34,5 +34,32 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getCurrentUser();
+  }
+
+  verifySession(): Observable<boolean> {
+    const user = this.getCurrentUser();
+    if (!user || !user.id) {
+      // If we are already on login page, don't force logout/navigate, just return false
+      return of(false);
+    }
+
+    // Endpoint: /api/users/:id
+    return this.http.get<User>(`${environment.apiUrl}/users/${user.id}`).pipe(
+      map(updatedUser => {
+        if (updatedUser && updatedUser.status === 'Actif') {
+          // Update local storage to keep data fresh
+           // Preserve token if you had one (current implementation doesn't seem to use bearer tokens yet, just user object)
+          localStorage.setItem(this.currentUserKey, JSON.stringify(updatedUser));
+          return true;
+        }
+        this.logout();
+        return false;
+      }),
+      catchError(() => {
+        // If DB is down or user deleted
+        this.logout();
+        return of(false);
+      })
+    );
   }
 }

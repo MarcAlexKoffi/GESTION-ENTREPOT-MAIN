@@ -432,6 +432,24 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// GET User by ID (Validation Endpoint)
+app.get('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT id, nom, username, role, entrepotId, status FROM users WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    if (rows[0].status !== 'Actif') {
+        return res.status(403).json({ message: 'Compte inactif' });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error fetching user:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 // POST User
 app.post('/api/users', async (req, res) => {
   const { nom, username, password, role, entrepotId, status } = req.body;
