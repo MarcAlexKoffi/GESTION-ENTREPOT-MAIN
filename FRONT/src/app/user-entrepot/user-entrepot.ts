@@ -22,6 +22,15 @@ export class UserEntrepot implements OnInit {
 
   currentTab: 'enregistres' | 'attente' | 'valides' | 'refoules' | 'acceptes' | 'historique' =
     'enregistres';
+
+  // Counts
+  nbEnregistres = 0;
+  nbAttente = 0;
+  nbValides = 0;
+  nbRefoules = 0;
+  nbAcceptes = 0;
+  nbHistorique = 0;
+
   // Modales
   showEditModal = false;
   showAnalysisModal = false;
@@ -278,11 +287,11 @@ export class UserEntrepot implements OnInit {
   }
 
   applyFilters(): void {
-    const base = this.getBaseListForTab();
     const search = this.filterSearch.trim().toLowerCase();
 
-    this.filteredTrucks = base.filter((t) => {
-      // 1) Recherche
+    // 1. Filtrer 'tous' les camions selon Search + Période (et éventuellement selectedStatus)
+    const validTrucks = this.trucks.filter((t) => {
+      // a) Recherche
       if (search) {
         const haystack = (
           (t.immatriculation ?? '') +
@@ -297,15 +306,93 @@ export class UserEntrepot implements OnInit {
         if (!haystack.includes(search)) return false;
       }
 
-      // 2) Statut
+      // b) SelectedStatus (si utilisé)
       if (this.selectedStatus !== 'all') {
         if (t.statut !== this.selectedStatus) return false;
       }
 
-      // 3) Période
+      // c) Période
       const dateToFilter = this.getDateForPeriod(t);
       return this.isInSelectedPeriod(dateToFilter);
     });
+
+    // 2. Calculer les compteurs pour chaque onglet
+    this.nbEnregistres = 0;
+    this.nbAttente = 0;
+    this.nbValides = 0;
+    this.nbRefoules = 0;
+    this.nbAcceptes = 0;
+    this.nbHistorique = 0;
+
+    validTrucks.forEach((t) => {
+      // Enregistrés
+      if (t.statut === 'Enregistré') {
+        this.nbEnregistres++;
+      }
+      // En attente
+      if (t.statut === 'En attente') {
+        this.nbAttente++;
+      }
+      // Validés
+      if (t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL') {
+        this.nbValides++;
+      }
+      // Refoulés
+      if (
+        t.statut === 'Refoulé' ||
+        (t.statut === 'Annulé' &&
+          (t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT' ||
+            t.advancedStatus === 'REFUSE_RENVOYE'))
+      ) {
+        this.nbRefoules++;
+      }
+      // Acceptés
+      if (t.advancedStatus === 'ACCEPTE_FINAL') {
+        this.nbAcceptes++;
+      }
+      // Historique (tout ce qui a une history)
+      if (t.history && t.history.length > 0) {
+        this.nbHistorique++;
+      }
+    });
+
+    // 3. Définir filteredTrucks selon l'onglet courant
+    switch (this.currentTab) {
+      case 'enregistres':
+        this.filteredTrucks = validTrucks.filter((t) => t.statut === 'Enregistré');
+        break;
+
+      case 'attente':
+        this.filteredTrucks = validTrucks.filter((t) => t.statut === 'En attente');
+        break;
+
+      case 'valides':
+        this.filteredTrucks = validTrucks.filter(
+          (t) => t.statut === 'Validé' && t.advancedStatus !== 'ACCEPTE_FINAL'
+        );
+        break;
+
+      case 'refoules':
+        this.filteredTrucks = validTrucks.filter(
+          (t: any) =>
+            t.statut === 'Refoulé' ||
+            (t.statut === 'Annulé' &&
+              (t.advancedStatus === 'REFUSE_EN_ATTENTE_GERANT' ||
+                t.advancedStatus === 'REFUSE_RENVOYE'))
+        );
+        break;
+
+      case 'acceptes':
+        this.filteredTrucks = validTrucks.filter((t) => t.advancedStatus === 'ACCEPTE_FINAL');
+        break;
+
+      case 'historique':
+        this.filteredTrucks = validTrucks.filter((t) => t.history && t.history.length > 0);
+        break;
+
+      default:
+        this.filteredTrucks = [];
+    }
   }
 
   ngOnInit(): void {
