@@ -90,63 +90,52 @@
     <!-- FILTERS -->
     <section class="controls-area">
       <div class="search-and-filters">
-        <!-- N° Booking Search -->
+        <!-- Search -->
         <div class="search-box">
           <span class="material-symbols-outlined notranslate search-icon">search</span>
           <input 
             type="text" 
-            placeholder="Rechercher par N° Booking..." 
-            [(ngModel)]="filters.booking" 
+            placeholder="Rechercher booking ou client..." 
+            [(ngModel)]="search" 
             (ngModelChange)="applyFilters()"
           />
         </div>
 
-        <!-- Client Select -->
-         <!-- <div class="select-box">
-          <select [(ngModel)]="filters.client" (change)="applyFilters()" class="custom-select">
-            <option value="all">Tous les clients</option>
-            <option value="cma">CMA CGM</option>
-            <option value="maersk">Maersk</option>
-          </select>
-         </div> -->
+        <!-- PERIOD FILTER -->
+        <div class="period-selector">
+          <button 
+            [class.active]="period === 'today'" 
+            (click)="setPeriod('today')"
+          >Aujourd'hui</button>
+          <button 
+            [class.active]="period === 'week'" 
+            (click)="setPeriod('week')"
+          >Semaine</button>
+          <button 
+            [class.active]="period === 'month'" 
+            (click)="setPeriod('month')"
+          >Mois</button>
+          <button 
+            [class.active]="period === 'year'" 
+            (click)="setPeriod('year')"
+          >Année</button>
+        </div>
 
-        <!-- Date Start -->
-        <div class="date-wrapper">
-          <span class="material-symbols-outlined notranslate left-icon">event</span>
+        <!-- Date Input -->
+        <div class="date-input-wrapper">
+          <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
           <input 
-            type="text" 
-            class="date-input" 
-            [(ngModel)]="filters.dateDebut" 
-            (ngModelChange)="applyFilters()"
-            placeholder="Date de début"
-            onfocus="(this.type='date')"
-            onblur="(this.value ? this.type='date' : this.type='text')"
+            type="date" 
+            [(ngModel)]="filterDate" 
+            (ngModelChange)="onDateChange()"
+            placeholder="Date spécifique"
           />
         </div>
-
-        <!-- Date End -->
-        <div class="date-wrapper">
-          <span class="material-symbols-outlined notranslate left-icon">event</span>
-          <input 
-            type="text" 
-            class="date-input" 
-            [(ngModel)]="filters.dateFin" 
-            (ngModelChange)="applyFilters()"
-            placeholder="Date de fin"
-            onfocus="(this.type='date')"
-            onblur="(this.value ? this.type='date' : this.type='text')"
-          />
-        </div>
-
-        <!-- Reset Button -->
-        <!-- <button class="btn-icon-reset" (click)="resetFilters()" title="Réinitialiser">
-          <span class="material-symbols-outlined notranslate">refresh</span>
-        </button> -->
       </div>
     </section>
 
     <!-- TABLE LIST -->
-    <section class="card" style="margin-top: 2rem;">
+    <section class="card">
         <div class="table-wrapper">
           <table>
             <thead>

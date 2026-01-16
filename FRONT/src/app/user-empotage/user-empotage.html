@@ -11,36 +11,54 @@
   </header>
 
   <!-- CONTROLS: search, status filter, export -->
-  <div class="controls-row">
-    <div class="control-item search-wrapper">
-      <span class="material-symbols-outlined notranslate search-icon">search</span>
-      <input
-        type="text"
-        placeholder="Recherche client ou booking..."
-        [(ngModel)]="search"
-        (ngModelChange)="onFiltersChange(); calculateStats();"
-        class="search-input"
-      />
-    </div>
+  <section class="controls-area">
+      <div class="search-and-filters">
+          <!-- SEARCH -->
+          <div class="search-box">
+              <span class="material-symbols-outlined notranslate search-icon">search</span>
+              <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search"
+                  (ngModelChange)="onFiltersChange()" />
+          </div>
 
-    <!-- Warehouse Selector -->
-    
-    <div class="control-item">
-      <input
-        type="date"
-        [(ngModel)]="filterDate"
-        (ngModelChange)="onFiltersChange(); calculateStats();"
-        class="status-select"
-        style="padding: 0.75rem; color: #64748b; font-family: inherit"
-      />
-    </div>
-    <div class="control-item control-actions">
-      <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
-        <span class="material-symbols-outlined notranslate">file_download</span>
-        <span>Exporter CSV</span>
-      </button>
-    </div>
-  </div>
+          <!-- PERIOD FILTER -->
+          <div class="period-selector">
+            <button 
+              [class.active]="period === 'today'" 
+              (click)="setPeriod('today')"
+            >Aujourd'hui</button>
+            <button 
+              [class.active]="period === 'week'" 
+              (click)="setPeriod('week')"
+            >Semaine</button>
+            <button 
+              [class.active]="period === 'month'" 
+              (click)="setPeriod('month')"
+            >Mois</button>
+            <button 
+              [class.active]="period === 'year'" 
+              (click)="setPeriod('year')"
+            >Année</button>
+          </div>
+
+           <!-- DATE INPUT -->
+           <div class="date-input-wrapper">
+              <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
+              <input 
+                  type="date" 
+                  [(ngModel)]="filterDate" 
+                  (ngModelChange)="onDateChange()"
+                  placeholder="Date spécifique"
+              />
+           </div>
+      </div>
+
+      <div class="control-actions">
+        <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
+          <span class="material-symbols-outlined notranslate">file_download</span>
+          <span>Exporter CSV</span>
+        </button>
+      </div>
+  </section>
 
   <!-- CREATE MODAL -->
   <div class="modal" *ngIf="showCreateModal">

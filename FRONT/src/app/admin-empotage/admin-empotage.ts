@@ -49,12 +49,10 @@ export class AdminEmpotage implements OnInit {
     year: 0
   };
 
-  filters = {
-    client: 'all',
-    booking: '',
-    dateDebut: '',
-    dateFin: ''
-  };
+  // Harmonized filters
+  search: string = '';
+  period: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
+  filterDate: string = '';
 
   operations: EmpotageOperation[] = [];
   rawOperations: any[] = [];
@@ -123,51 +121,72 @@ export class AdminEmpotage implements OnInit {
     }
   }
 
+  setPeriod(p: 'today' | 'week' | 'month' | 'year' | 'specific') {
+    this.period = p;
+    if (p !== 'specific') this.filterDate = '';
+    this.applyFilters();
+  }
+
+  onDateChange() {
+    if (this.filterDate) this.setPeriod('specific');
+    else this.setPeriod('today');
+  }
+
   applyFilters() {
     let filtered = [...this.rawOperations];
 
-    // 1. Filtre Booking
-    if (this.filters.booking) {
-      const search = this.filters.booking.toLowerCase().trim();
-      filtered = filtered.filter(op => (op.booking || '').toLowerCase().includes(search));
+    // 1. Filtre Global (Booking/Client)
+    if (this.search) {
+      const s = this.search.toLowerCase().trim();
+      filtered = filtered.filter(op => 
+        (op.booking || '').toLowerCase().includes(s) || 
+        (op.client || '').toLowerCase().includes(s)
+      );
     }
 
-    // 2. Filtre Client
-    if (this.filters.client !== 'all') {
-      const filterVal = this.filters.client.toLowerCase();
-      filtered = filtered.filter(op => {
-        const client = (op.client || '').toLowerCase();
-        // Si valeur spécifique comme 'cma' ou 'maersk'
-        if (filterVal === 'cma') return client.includes('cma');
-        if (filterVal === 'maersk') return client.includes('maersk');
-        return client.includes(filterVal);
-      });
-    }
-
-    // 3. Filtre Période Début
-    if (this.filters.dateDebut) {
-      const start = new Date(this.filters.dateDebut);
-      start.setHours(0, 0, 0, 0);
-      filtered = filtered.filter(op => {
-        if (!op.dateStart) return false;
-        const d = new Date(op.dateStart);
-        return d >= start;
-      });
-    }
-
-    // 4. Filtre Période Fin
-    if (this.filters.dateFin) {
-      const end = new Date(this.filters.dateFin);
-      end.setHours(23, 59, 59, 999);
-      filtered = filtered.filter(op => {
-        if (!op.dateStart) return false;
-        const d = new Date(op.dateStart);
-        return d <= end;
-      });
-    }
+    // 2. Filtre Période (Start Date)
+    filtered = filtered.filter(op => this.isInSelectedPeriod(op.dateStart));
 
     this.operations = filtered.map(item => this.mapToOperation(item));
     this.currentPage = 1; // Reset pagination
+  }
+
+  private isInSelectedPeriod(dateIso?: string): boolean {
+    if (!dateIso) return false;
+    const created = new Date(dateIso);
+    const now = new Date();
+
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7;
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    if (this.period === 'specific' && this.filterDate) {
+       const d = new Date(dateIso);
+       const year = d.getFullYear();
+       const month = String(d.getMonth() + 1).padStart(2, '0');
+       const day = String(d.getDate()).padStart(2, '0');
+       const dateStr = `${year}-${month}-${day}`;
+       return dateStr === this.filterDate;
+    }
+
+    if (this.period === 'today') {
+      return created.toDateString() === now.toDateString();
+    }
+    if (this.period === 'week') {
+      return created >= startOfWeek;
+    }
+    if (this.period === 'month') {
+      return created >= startOfMonth;
+    }
+    if (this.period === 'year') {
+      return created >= startOfYear;
+    }
+
+    return true;
   }
 
   mapToOperation(item: any): EmpotageOperation {
@@ -300,12 +319,9 @@ export class AdminEmpotage implements OnInit {
   }
 
   resetFilters() {
-    this.filters = {
-      client: 'all',
-      booking: '',
-      dateDebut: '',
-      dateFin: ''
-    };
+    this.search = '';
+    this.period = 'today';
+    this.filterDate = '';
     this.applyFilters();
   }
 }

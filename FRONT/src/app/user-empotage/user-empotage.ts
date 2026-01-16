@@ -46,6 +46,7 @@ export class UserEmpotage implements OnInit {
   // UI state
   search: string = '';
   filterDate: string = '';
+  period: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
   loading = false;
   selectedWarehouseId: number | null = null;
   
@@ -196,16 +197,8 @@ export class UserEmpotage implements OnInit {
   get filteredEmpotages(): Empotage[] {
     const q = this.search.trim().toLowerCase();
     return this.empotages.filter(item => {
-      // 1. Filter by Date (comparing dateStart YYYY-MM-DD in local time)
-      if (this.filterDate) {
-        if (!item.dateStart) return false;
-        const d = new Date(item.dateStart);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        return dateStr === this.filterDate;
-      }
+      // 1. Filter by Period
+      if (!this.isInSelectedPeriod(item.dateStart)) return false;
       
       // 2. Filter by search query
       if (!q) return true;
@@ -216,9 +209,59 @@ export class UserEmpotage implements OnInit {
     });
   }
 
+  setPeriod(p: 'today' | 'week' | 'month' | 'year' | 'specific') {
+    this.period = p;
+    if (p !== 'specific') this.filterDate = '';
+    this.onFiltersChange();
+  }
+
+  onDateChange() {
+    if (this.filterDate) this.setPeriod('specific');
+    else this.setPeriod('today');
+  }
+
+  private isInSelectedPeriod(dateIso?: string): boolean {
+    if (!dateIso) return false;
+    const created = new Date(dateIso);
+    const now = new Date();
+
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7;
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    if (this.period === 'specific' && this.filterDate) {
+       const d = new Date(dateIso);
+       const year = d.getFullYear();
+       const month = String(d.getMonth() + 1).padStart(2, '0');
+       const day = String(d.getDate()).padStart(2, '0');
+       const dateStr = `${year}-${month}-${day}`;
+       return dateStr === this.filterDate;
+    }
+
+    if (this.period === 'today') {
+      return created.toDateString() === now.toDateString();
+    }
+    if (this.period === 'week') {
+      return created >= startOfWeek;
+    }
+    if (this.period === 'month') {
+      return created >= startOfMonth;
+    }
+    if (this.period === 'year') {
+      return created >= startOfYear;
+    }
+
+    return true;
+  }
+
   // When filters change, reset pagination
   onFiltersChange() {
       this.currentPage = 1;
+      this.calculateStats();
   }
 
 
