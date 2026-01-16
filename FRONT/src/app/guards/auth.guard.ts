@@ -17,11 +17,15 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
   if (requiredRole) {
     // If the user does not match the required role
     if (user?.role !== requiredRole) {
-        // Redirect based on their actua role to their respective home
+        // Redirect based on their actual role to their respective home
         if (user?.role === 'admin') {
             return router.createUrlTree(['/dashboard']);
-        } else {
+        } else if (user?.role === 'operator') {
             return router.createUrlTree(['/userdashboard']);
+        } else {
+            // Role inconnu ou invalide => Login
+            authService.logout();
+            return router.createUrlTree(['/login']);
         }
     }
   }
@@ -41,8 +45,12 @@ export const guestGuard: CanActivateFn = (route, state) => {
         const user = authService.getCurrentUser();
         if (user?.role === 'admin') {
             return router.createUrlTree(['/dashboard']);
-        } else {
+        } else if (user?.role === 'operator') {
             return router.createUrlTree(['/userdashboard']);
+        } else {
+             // Role invalide dans le localStorage -> on nettoie et on laisse passer vers login
+             authService.logout();
+             return true;
         }
     }
     return true;

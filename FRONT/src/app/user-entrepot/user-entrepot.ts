@@ -198,17 +198,16 @@ export class UserEntrepot implements OnInit {
   // FILTRES (toolbar)
   // ===============================
   filterSearch = '';
-  selectedPeriod: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
+  period: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
   selectedStatus: 'all' | string = 'all';
   filterDate = '';
 
-  showPeriodMenu = false;
   showStatusMenu = false;
   
   filteredTrucks: UITruck[] = [];
 
   get periodLabel(): string {
-    switch (this.selectedPeriod) {
+    switch (this.period) {
       case 'today':
         return "Aujourd'hui";
       case 'week':
@@ -228,34 +227,25 @@ export class UserEntrepot implements OnInit {
     return this.selectedStatus === 'all' ? 'Tous statuts' : this.selectedStatus;
   }
 
-  togglePeriodMenu(): void {
-    this.showPeriodMenu = !this.showPeriodMenu;
-    this.showStatusMenu = false;
-  }
-
   toggleStatusMenu(): void {
     this.showStatusMenu = !this.showStatusMenu;
-    this.showPeriodMenu = false;
   }
 
-  setPeriod(p: 'today' | 'week' | 'month' | 'year' | 'specific'): void {
-    this.selectedPeriod = p;
-    this.showPeriodMenu = false;
-    
-    // Clear date input if not specific, or if user switches back to presets
-    if (this.selectedPeriod !== 'specific') {
+  onPeriodChange(): void {
+    // Clear date input if not specific
+    if (this.period !== 'specific') {
        this.filterDate = '';
     }
-    
     this.applyFilters();
   }
 
   onDateChange(): void {
     if (this.filterDate) {
-      this.setPeriod('specific');
+      this.period = 'specific';
     } else {
-      this.setPeriod('today');
+      this.period = 'today';
     }
+    this.applyFilters();
   }
 
   setStatus(s: 'all' | string): void {
@@ -672,21 +662,21 @@ export class UserEntrepot implements OnInit {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    if (this.selectedPeriod === 'specific') {
+    if (this.period === 'specific') {
       if (!this.filterDate) return true;
       return d.toDateString() === new Date(this.filterDate).toDateString();
     }
 
-    if (this.selectedPeriod === 'today') {
+    if (this.period === 'today') {
       return d.toDateString() === now.toDateString();
     }
-    if (this.selectedPeriod === 'week') {
+    if (this.period === 'week') {
       return d >= startOfWeek;
     }
-    if (this.selectedPeriod === 'month') {
+    if (this.period === 'month') {
       return d >= startOfMonth;
     }
-    if (this.selectedPeriod === 'year') {
+    if (this.period === 'year') {
       return d >= startOfYear;
     }
 
