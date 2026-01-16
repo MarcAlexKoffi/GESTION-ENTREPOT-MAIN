@@ -17,18 +17,18 @@ export class AuthService {
   login(credentials: { username: string; password: string }): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/login`, credentials).pipe(
       tap((user) => {
-        localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+        sessionStorage.setItem(this.currentUserKey, JSON.stringify(user));
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem(this.currentUserKey);
+    sessionStorage.removeItem(this.currentUserKey);
     this.router.navigate(['/login']);
   }
 
   getCurrentUser(): User | null {
-    const raw = localStorage.getItem(this.currentUserKey);
+    const raw = sessionStorage.getItem(this.currentUserKey);
     return raw ? JSON.parse(raw) : null;
   }
 
@@ -48,8 +48,8 @@ export class AuthService {
       map(updatedUser => {
         // Validation plus souple sur le statut (parfois 'Actif', parfois 'actif')
         if (updatedUser && (updatedUser.status === 'Actif' || (updatedUser.status as string) === 'actif')) {
-          // Update local storage to keep data fresh
-          localStorage.setItem(this.currentUserKey, JSON.stringify(updatedUser));
+          // Update session storage to keep data fresh
+          sessionStorage.setItem(this.currentUserKey, JSON.stringify(updatedUser));
           return true;
         }
         

@@ -89,7 +89,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadCurrentUser() {
-      const raw = localStorage.getItem('currentUser');
+      const raw = sessionStorage.getItem('currentUser');
       if (raw) {
           try {
               const u = JSON.parse(raw);

@@ -92,7 +92,7 @@ export class UserDashboard implements OnInit, OnDestroy {
   // Session
   // -----------------------------
   private loadCurrentUserOrRedirect(): void {
-    const raw = localStorage.getItem('currentUser');
+    const raw = sessionStorage.getItem('currentUser');
     if (!raw) {
       this.router.navigate(['/login']);
       return;
@@ -105,7 +105,7 @@ export class UserDashboard implements OnInit, OnDestroy {
     }
 
     if (!this.currentUser || this.currentUser.status !== 'Actif') {
-      localStorage.removeItem('currentUser');
+      sessionStorage.removeItem('currentUser');
       this.router.navigate(['/login']);
       return;
     }
@@ -116,7 +116,7 @@ export class UserDashboard implements OnInit, OnDestroy {
 
     // un user non-admin doit avoir un entrepôt
     if (this.currentUser.role !== 'admin' && this.userEntrepotId === null) {
-      localStorage.removeItem('currentUser');
+      sessionStorage.removeItem('currentUser');
       this.router.navigate(['/login']);
       return;
     }

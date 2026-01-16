@@ -61,7 +61,7 @@ export class UserDashboardMain implements OnInit {
       }
     }
 
-    const raw = localStorage.getItem('currentUser');
+    const raw = sessionStorage.getItem('currentUser');
     if (!raw) return;
 
     try {
