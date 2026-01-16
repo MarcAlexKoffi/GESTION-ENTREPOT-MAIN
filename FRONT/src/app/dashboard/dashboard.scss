@@ -259,7 +259,13 @@
   z-index: 1001;
   
   @media (max-width: 480px) {
-    right: -2rem; /* Align with right edge of screen roughly if parent has padding */
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 94vw;
+    max-width: 94vw;
   }
 
   .popover-header {
