@@ -288,14 +288,14 @@ export class DashboardMain implements OnInit {
     this.newWarehouse = {
       name: card.name,
       location: card.location,
-      imageUrl: `https://gestion-entrepot-main.onrender.com${card.imageUrl}`,
+      imageUrl: card.imageUrl,
       pending: card.pending,
       active: card.active,
       discharged: card.discharged,
     };
 
     this.showWarehouseModal = true;
-    this.imagePreview = `https://gestion-entrepot-main.onrender.com${card.imageUrl}`;
+    this.imagePreview = card.imageUrl;
     this.selectedImageFile = null;
   }
 
