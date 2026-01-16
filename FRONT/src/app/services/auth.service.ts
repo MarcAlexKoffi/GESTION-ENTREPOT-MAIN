@@ -56,11 +56,10 @@ export class AuthService {
         return false;
       }),
       catchError((error) => {
-        // Logout on 401 (Unauthorized), 403 (Forbidden), or 404 (User Not Found)
-        // Keep session for 0 (Network Error) or 500 (Server Error) to retry later
-        if (error.status === 401 || error.status === 403 || error.status === 404) {
-            this.logout();
-        }
+        // En cas d'erreur (serveur éteint, 404, etc...), on ne force plus la déconnexion
+        // Cela permet à l'utilisateur de rester sur l'interface (même si elle est vide)
+        // au lieu d'être renvoyé systématiquement au login.
+        console.warn('Session verification failed but keeping session active:', error);
         return of(false);
       })
     );

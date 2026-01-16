@@ -196,7 +196,7 @@ body.dark .password-toggle:hover {
 .input-field {
   width: 100%;
   height: 3.25rem;
-  padding: 0 1rem 0 3.5rem; // Increased from 3rem to handle font fallback text width
+  padding: 0 3rem 0 3rem; // Added padding-right to avoid overlap with eye icon
   border-radius: 0.625rem;
   border: 1.5px solid #cbd5e1;
   background-color: #ffffff;

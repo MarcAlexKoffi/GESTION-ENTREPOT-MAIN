@@ -436,8 +436,10 @@ app.get('/api/users', async (req, res) => {
 // GET User by ID (Validation Endpoint)
 app.get('/api/users/:id', async (req, res) => {
   const { id } = req.params;
+  console.log(`[DEBUG] GET /api/users/${id} called`);
   try {
     const [rows] = await db.query('SELECT id, nom, username, role, entrepotId, status FROM users WHERE id = ?', [id]);
+    console.log(`[DEBUG] DB Result for user ${id}:`, rows.length > 0 ? 'Found' : 'Not Found');
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
