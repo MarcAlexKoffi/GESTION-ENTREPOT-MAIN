@@ -95,32 +95,33 @@
             </div>
 
             <!-- PERIOD FILTER -->
-            <div class="filter-dropdown-wrapper">
-                <div class="filter-chip-wrap" (click)="togglePeriodDropdown()">
-                    <span class="material-symbols-outlined notranslate">calendar_today</span>
-                    <span class="chip-label">{{ selectedPeriodLabel }}</span>
-                    <span class="material-symbols-outlined notranslate arrow">expand_more</span>
-                </div>
-
-                <div class="filter-dropdown" *ngIf="showPeriodDropdown">
-                    <button type="button" class="dropdown-item" (click)="setPeriod('today')">Aujourd'hui</button>
-                    <button type="button" class="dropdown-item" (click)="setPeriod('week')">Cette semaine</button>
-                    <button type="button" class="dropdown-item" (click)="setPeriod('month')">Ce mois</button>
-                    <button type="button" class="dropdown-item" (click)="setPeriod('year')">Cette année</button>
-                </div>
+            <div class="period-selector">
+              <button 
+                [class.active]="selectedPeriod === 'today'" 
+                (click)="setPeriod('today')"
+              >Aujourd'hui</button>
+              <button 
+                [class.active]="selectedPeriod === 'week'" 
+                (click)="setPeriod('week')"
+              >Semaine</button>
+              <button 
+                [class.active]="selectedPeriod === 'month'" 
+                (click)="setPeriod('month')"
+              >Mois</button>
+              <button 
+                [class.active]="selectedPeriod === 'year'" 
+                (click)="setPeriod('year')"
+              >Année</button>
             </div>
 
             <!-- DATE INPUT -->
-            <div class="calendar-wrapper">
-                <span class="material-symbols-outlined notranslate input-icon">event</span>
+            <div class="calendar-wrapper date-input-wrapper">
+                <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
                 <input 
-                    type="text" 
-                    class="date-input" 
+                    type="date" 
                     [(ngModel)]="filterDate" 
                     (ngModelChange)="onDateChange()"
-                    placeholder="Filtrer par date"
-                    onfocus="(this.type='date')"
-                    onblur="(this.value ? this.type='date' : this.type='text')"
+                    placeholder="Date spécifique"
                 />
             </div>
         </div>

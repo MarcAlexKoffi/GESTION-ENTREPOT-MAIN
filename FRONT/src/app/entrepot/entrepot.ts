@@ -25,7 +25,6 @@ export class Entrepot implements OnInit {
   // Ajout de la nouvelle catégorie RENVOYÉS
   currentTab: 'pending' | 'validated' | 'accepted' | 'cancelled' | 'renvoyes' = 'pending';
 
-  showPeriodDropdown = false;
   showDetailsModal = false;
   showHistoryModal = false;
   historyTruck: Truck | null = null;
@@ -381,22 +380,7 @@ export class Entrepot implements OnInit {
       return this.isInSelectedPeriod(dateToUse);
     });
   }
-  get selectedPeriodLabel(): string {
-    switch (this.selectedPeriod) {
-      case 'today':
-        return "Aujourd'hui";
-      case 'week':
-        return 'Cette semaine';
-      case 'month':
-        return 'Ce mois';
-      case 'year':
-        return 'Cette année';
-      case 'specific':
-        return 'Date spécifique';
-      default:
-        return 'Toutes périodes';
-    }
-  }
+
   // ================================================================
   // MODAL "VOIR PLUS"
   // ================================================================
@@ -763,20 +747,11 @@ export class Entrepot implements OnInit {
     }
   }
 
-  togglePeriodDropdown(): void {
-    this.showPeriodDropdown = !this.showPeriodDropdown;
-  }
-
-  closePeriodDropdown(): void {
-    this.showPeriodDropdown = false;
-  }
-
   setPeriod(value: 'today' | 'week' | 'month' | 'year' | 'specific'): void {
     this.selectedPeriod = value;
     if (value !== 'specific') {
       this.filterDate = '';
     }
-    this.closePeriodDropdown();
   }
 
   onDateChange(): void {
