@@ -54,7 +54,7 @@ export class DashboardMain implements OnInit {
 
   // Modale création / édition
   showWarehouseModal = false;
-  
+
   // Modale suppression
   showDeleteModal = false;
   warehouseToDelete: CardInfo | null = null;
@@ -102,8 +102,8 @@ export class DashboardMain implements OnInit {
             this.cards = warehouses.map((w) => {
               let img = w.imageUrl;
               if (img && !img.startsWith('http') && !img.startsWith('data:')) {
-                 const baseUrl = environment.apiUrl.replace('/api', '');
-                 img = `${baseUrl}${img}`;
+                const baseUrl = environment.apiUrl.replace('/api', '');
+                img = `${baseUrl}${img}`;
               }
 
               // Filtrer les camions pour cet entrepôt
@@ -205,13 +205,13 @@ export class DashboardMain implements OnInit {
     // Calculer les stats pour la semaine en cours (Lundi à Dimanche)
     const days = [];
     const today = new Date();
-    
+
     // Trouver le lundi de la semaine courante
     // getDay(): 0=Dim, 1=Lun, ..., 6=Sam
     // Si on est dimanche (0), on veut reculer de 6 jours.
     // Si on est lundi (1), on recule de 0 jour.
     // Si on est mardi (2), on recule de 1 jour.
-    const dayOfWeek = today.getDay(); 
+    const dayOfWeek = today.getDay();
     // Nombre de jours à soustraire pour revenir au lundi
     // (dayOfWeek + 6) % 7 est l'astuce classique :
     // Dim(0) -> (0+6)%7 = 6
@@ -223,21 +223,21 @@ export class DashboardMain implements OnInit {
 
     // Générer les 7 jours de la semaine (Lun -> Dim)
     for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        days.push(d);
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      days.push(d);
     }
 
     // 2. Group counts
-    const counts = days.map(day => {
+    const counts = days.map((day) => {
       // Start/End of that day
-      const start = new Date(day); 
-      start.setHours(0,0,0,0);
-      const end = new Date(day); 
-      end.setHours(23,59,59,999);
+      const start = new Date(day);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(day);
+      end.setHours(23, 59, 59, 999);
 
       // Filter trucks
-      const dayCount = (allTrucks as any[]).filter(t => {
+      const dayCount = (allTrucks as any[]).filter((t) => {
         // Parse date
         const truckDate = new Date(t.heureArrivee); // or t.createdAt if available
         return truckDate >= start && truckDate <= end;
@@ -245,23 +245,23 @@ export class DashboardMain implements OnInit {
 
       return {
         date: day,
-        count: dayCount
+        count: dayCount,
       };
     });
 
     // 3. Max value for scaling
     // S'assurer qu'on a au moins une valeur max > 0 pour éviter la division par zéro
-    const maxVal = Math.max(...counts.map(c => c.count)) || 1;
-    
+    const maxVal = Math.max(...counts.map((c) => c.count)) || 1;
+
     // 4. Transform to view model
     const formatter = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
 
-    this.stats = counts.map(item => {
+    this.stats = counts.map((item) => {
       // Minimum height logic or purely proportional
       const pct = (item.count / maxVal) * 100;
       let height = `${Math.round(pct)}%`;
-      
-      // Optionnel : fixer une hauteur minime pour look-and-feel si 0 ? 
+
+      // Optionnel : fixer une hauteur minime pour look-and-feel si 0 ?
       // Ici on laisse 0% si 0.
 
       const dayName = formatter.format(item.date);
@@ -271,7 +271,7 @@ export class DashboardMain implements OnInit {
       return {
         day: label,
         count: item.count,
-        height: height
+        height: height,
       };
     });
   }
@@ -288,14 +288,14 @@ export class DashboardMain implements OnInit {
     this.newWarehouse = {
       name: card.name,
       location: card.location,
-      imageUrl: card.imageUrl,
+      imageUrl: `https://gestion-entrepot-main.onrender.com${card.imageUrl}`,
       pending: card.pending,
       active: card.active,
       discharged: card.discharged,
     };
 
     this.showWarehouseModal = true;
-    this.imagePreview = card.imageUrl;
+    this.imagePreview = `https://gestion-entrepot-main.onrender.com${card.imageUrl}`;
     this.selectedImageFile = null;
   }
 
