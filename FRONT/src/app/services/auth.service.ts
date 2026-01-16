@@ -47,7 +47,7 @@ export class AuthService {
     return this.http.get<User>(`${environment.apiUrl}/users/${user.id}`).pipe(
       map(updatedUser => {
         // Validation plus souple sur le statut (parfois 'Actif', parfois 'actif')
-        if (updatedUser && (updatedUser.status === 'Actif' || updatedUser.status === 'actif')) {
+        if (updatedUser && (updatedUser.status === 'Actif' || (updatedUser.status as string) === 'actif')) {
           // Update local storage to keep data fresh
           localStorage.setItem(this.currentUserKey, JSON.stringify(updatedUser));
           return true;
