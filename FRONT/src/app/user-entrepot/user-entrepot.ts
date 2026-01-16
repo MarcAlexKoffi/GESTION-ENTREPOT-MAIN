@@ -39,6 +39,10 @@ export class UserEntrepot implements OnInit {
   showModal = false;
   showSuccessBanner = false;
   showDetailsModal = false;
+  
+  // Notification banner
+  showNotificationBanner = false;
+  notificationMessage = '';
 
   // Modale confirmation renvoi
   showRenvoyeConfirmModal = false;
@@ -53,7 +57,14 @@ export class UserEntrepot implements OnInit {
 
   selectedTruckForHistory: UITruck | null = null;
 
-  // ... (skipping unchanged properties)
+  // Notification Helper
+  showNotification(message: string) {
+    this.notificationMessage = message;
+    this.showNotificationBanner = true;
+    setTimeout(() => {
+      this.showNotificationBanner = false;
+    }, 4000);
+  }
 
   // =========================================================
   // ANALYSES
@@ -127,6 +138,7 @@ export class UserEntrepot implements OnInit {
         this.loadingAnalysis = false;
         this.showAnalysisModal = false;
         this.refreshView();
+        this.showNotification('Analyses transmises avec succès. En attente de validation.');
       },
       error: () => {
         this.loadingAnalysis = false;
@@ -955,6 +967,7 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.showEditModal = false;
         this.refreshView();
+        this.showNotification('Modifications enregistrées avec succès.');
       },
       error: () => alert('Erreur modification'),
     });
@@ -1053,6 +1066,7 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.showProductsModal = false;
         this.refreshView();
+        this.showNotification('Produits enregistrés. Camion accepté définitivement.');
       },
       error: () => alert('Erreur sauvegarde produits'),
     });
@@ -1099,6 +1113,7 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.closeRenvoyeConfirmModal();
         this.refreshView();
+        this.showNotification('Camion marqué comme renvoyé.');
       },
       error: () => alert('Erreur renvoi'),
     });

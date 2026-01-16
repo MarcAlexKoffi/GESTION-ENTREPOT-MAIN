@@ -1,4 +1,8 @@
 <div class="page-container">
+    <div class="notification-banner" *ngIf="showNotificationBanner">
+        <span class="material-symbols-outlined notranslate">check_circle</span>
+        <span>{{ notificationMessage }}</span>
+    </div>
     
         <!-- HEADER -->
         <header class="page-header">

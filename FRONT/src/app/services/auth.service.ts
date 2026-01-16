@@ -46,12 +46,15 @@ export class AuthService {
     // Endpoint: /api/users/:id
     return this.http.get<User>(`${environment.apiUrl}/users/${user.id}`).pipe(
       map(updatedUser => {
-        if (updatedUser && updatedUser.status === 'Actif') {
+        // Validation plus souple sur le statut (parfois 'Actif', parfois 'actif')
+        if (updatedUser && (updatedUser.status === 'Actif' || updatedUser.status === 'actif')) {
           // Update local storage to keep data fresh
-           // Preserve token if you had one (current implementation doesn't seem to use bearer tokens yet, just user object)
           localStorage.setItem(this.currentUserKey, JSON.stringify(updatedUser));
           return true;
         }
+        
+        // Si le statut est explicitement invalide ou l'utilisateur manquant
+        console.warn('Session invalide detectée lors du refresh:', updatedUser);
         this.logout();
         return false;
       }),
@@ -59,8 +62,10 @@ export class AuthService {
         // En cas d'erreur (serveur éteint, 404, etc...), on ne force plus la déconnexion
         // Cela permet à l'utilisateur de rester sur l'interface (même si elle est vide)
         // au lieu d'être renvoyé systématiquement au login.
-        console.warn('Session verification failed but keeping session active:', error);
-        return of(false);
+        console.warn('Session verification failed but keeping session active (optimistic):', error);
+        // On retourne true (ou false, peu importe pour APP_INITIALIZER tant que ça résout)
+        // Mais sémantiquement, on "garde" la session.
+        return of(true);
       })
     );
   }

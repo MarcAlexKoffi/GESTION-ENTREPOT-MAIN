@@ -29,6 +29,10 @@ export class Entrepot implements OnInit {
   showDetailsModal = false;
   showHistoryModal = false;
   historyTruck: Truck | null = null;
+  
+  // Notification Banner
+  showNotificationBanner = false;
+  notificationMessage = '';
 
   trucks: Truck[] = [];
   selectedTruck: Truck | null = null;
@@ -40,6 +44,14 @@ export class Entrepot implements OnInit {
   private route = inject(ActivatedRoute);
   private truckService = inject(TruckService);
   private warehouseService = inject(WarehouseService);
+  
+  showNotification(msg: string) {
+    this.notificationMessage = msg;
+    this.showNotificationBanner = true;
+    setTimeout(() => {
+      this.showNotificationBanner = false;
+    }, 4000);
+  }
 
   constructor() {}
 
@@ -434,6 +446,7 @@ export class Entrepot implements OnInit {
       next: () => {
         this.refreshView();
         this.closeDetailsModal();
+        this.showNotification('Camion validé avec succès.');
       },
       error: (err) => alert('Erreur lors de la validation'),
     });
@@ -465,6 +478,7 @@ export class Entrepot implements OnInit {
     this.truckService.updateTruck(this.selectedTruck.id, updates).subscribe({
       next: () => {
         this.refreshView();
+        this.showNotification('Camion refusé (en attente gérant).');
         this.closeDetailsModal();
       },
       error: (err) => alert('Erreur lors du refus'),
@@ -496,6 +510,7 @@ export class Entrepot implements OnInit {
 
     this.truckService.updateTruck(this.selectedTruck.id, updates).subscribe({
       next: () => {
+        this.showNotification('Camion réintégré avec succès.');
         this.refreshView();
         this.closeDetailsModal();
       },
