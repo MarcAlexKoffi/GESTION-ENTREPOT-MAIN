@@ -191,7 +191,7 @@
                 Aucun camion trouvé pour ce statut.
               </td>
             </tr>
-            <tr *ngFor="let t of filteredTrucks" class="row-hover">
+            <tr *ngFor="let t of filteredTrucks; trackBy: trackById" class="row-hover">
               <td>
                 <div class="plate-number">
                   {{ t.immatriculation }}

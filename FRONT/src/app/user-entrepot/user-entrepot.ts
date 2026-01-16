@@ -525,6 +525,17 @@ export class UserEntrepot implements OnInit {
   // =========================================================
   // ONGLET LISTES
   // =========================================================
+  setTab(tab: 'enregistres' | 'attente' | 'valides' | 'refoules' | 'acceptes' | 'historique'): void {
+    this.currentTab = tab;
+    this.applyFilters();
+    // Rafraîchissement silencieux des données
+    this.loadTrucks();
+  }
+
+  trackById(index: number, item: UITruck): number {
+    return item.id;
+  }
+
   getList(): UITruck[] {
     const source = this.trucksByPeriod;
 

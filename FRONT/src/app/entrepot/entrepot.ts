@@ -334,6 +334,12 @@ export class Entrepot implements OnInit {
   // ================================================================
   setTab(tab: 'pending' | 'validated' | 'accepted' | 'cancelled' | 'renvoyes'): void {
     this.currentTab = tab;
+    // Rafraîchir les données silencieusement
+    this.loadTrucks();
+  }
+
+  trackById(index: number, item: Truck): number {
+    return item.id;
   }
 
   get filteredTrucks(): Truck[] {
