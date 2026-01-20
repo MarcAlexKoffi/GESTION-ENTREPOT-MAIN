@@ -103,16 +103,22 @@ export class DashboardMain implements OnInit {
               let img = w.imageUrl;
               
               // Correction Affichage URL Image
-              if (img) {
-                 // Si c'est déjà une URL complète (cloudinary ou autre), on ne touche à rien
-                 if (img.startsWith('http') || img.startsWith('https') || img.startsWith('data:')) {
-                    // C'est bon, on garde img tel quel
+              let finalImg = 'assets/placeholder-warehouse.png';
+
+              if (img && typeof img === 'string' && img.trim() !== '') {
+                 // Si c'est une URL de placeholder corrompue (cas possible selon logs)
+                 if (img.includes('800x400?text=Entrepot')) {
+                     finalImg = 'assets/placeholder-warehouse.png';
+                 }
+                 // Si c'est déjà une URL complète (cloudinary ou autre)
+                 else if (img.startsWith('http') || img.startsWith('https') || img.startsWith('data:')) {
+                    finalImg = img;
                  } 
                  // Sinon, c'est une ancienne image locale => on construit l'URL
                  else {
                     const baseUrl = environment.apiUrl.replace('/api', '');
                     // On gère le cas où l'image commencerait déjà par / ou non
-                    img = img.startsWith('/') ? `${baseUrl}${img}` : `${baseUrl}/${img}`;
+                    finalImg = img.startsWith('/') ? `${baseUrl}${img}` : `${baseUrl}/${img}`;
                  }
               }
 
@@ -129,7 +135,7 @@ export class DashboardMain implements OnInit {
                 id: w.id,
                 name: w.name,
                 location: w.location,
-                imageUrl: img || 'https://via.placeholder.com/800x400?text=Entrepot',
+                imageUrl: finalImg,
                 pending,
                 active,
                 discharged,
