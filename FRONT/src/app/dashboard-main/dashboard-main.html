@@ -161,6 +161,12 @@
                   }}
                 </p>
 
+                <!-- ERROR MESSAGE -->
+                <div *ngIf="errorMessage" class="error-message-box">
+                  <span class="material-symbols-outlined notranslate">error</span>
+                  <span>{{ errorMessage }}</span>
+                </div>
+
                 <div class="truck-field">
                   <label class="truck-label">Nom de l’entrepôt</label>
                   <input

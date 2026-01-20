@@ -77,6 +77,9 @@ export class DashboardMain implements OnInit {
     discharged: 0,
   };
 
+  // Gestion des erreurs dans la modale
+  errorMessage: string | null = null;
+
   private router = inject(Router);
   private warehouseService = inject(WarehouseService);
   private truckService = inject(TruckService);
@@ -173,6 +176,7 @@ export class DashboardMain implements OnInit {
   openWarehouseModal(): void {
     this.mode = 'create';
     this.editingWarehouseId = null;
+    this.errorMessage = null;
 
     this.newWarehouse = {
       name: '',
@@ -296,6 +300,7 @@ export class DashboardMain implements OnInit {
   // ---------------------------------------------------------------------------
   onEditWarehouse(card: CardInfo): void {
     this.actionsMenuWarehouseId = null;
+    this.errorMessage = null;
 
     this.mode = 'edit';
     this.editingWarehouseId = card.id;
@@ -357,8 +362,10 @@ export class DashboardMain implements OnInit {
   isLoading = false;
 
   saveWarehouse(): void {
+    this.errorMessage = null;
+
     if (!this.newWarehouse.name || !this.newWarehouse.location) {
-      alert('Merci de saisir le nom et la localisation.');
+      this.errorMessage = 'Merci de saisir le nom et la localisation.';
       return;
     }
 
@@ -387,7 +394,7 @@ export class DashboardMain implements OnInit {
         this.isLoading = false;
         console.error('Erreur saveWarehouse', err);
         const errorMsg = err.error?.message || 'Une erreur est survenue.';
-        alert(errorMsg);
+        this.errorMessage = errorMsg;
       },
     });
 
