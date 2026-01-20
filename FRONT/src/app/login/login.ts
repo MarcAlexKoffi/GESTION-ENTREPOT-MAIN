@@ -41,7 +41,7 @@ export class Login {
         if (user.role === 'admin') {
           this.router.navigate(['/dashboard/dashboard-main']);
         } else if (user.entrepotId) {
-          this.router.navigate(['/userdashboard/userentrepot', user.entrepotId]);
+          this.router.navigate(['/userdashboard/userdashboardmain']);
         } else {
           this.errorMessage =
             "Votre compte n'a pas d'entrepôt assigné. Contactez un administrateur.";

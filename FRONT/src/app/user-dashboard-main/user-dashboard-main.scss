@@ -24,8 +24,7 @@
 // Main Wrapper
 .dashboard-wrapper {
     padding: 1.5rem;
-    max-width: 1400px; // Limit width on large screens
-    margin: 0 auto;
+    width: 100%;
     background-color: var(--bg-light);
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
