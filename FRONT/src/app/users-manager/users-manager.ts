@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UserService, User } from '../services/user.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-users-manager',
@@ -35,12 +36,10 @@ export class UsersManager implements OnInit {
   // UI state for validation messages
   saveAttempted = false;
 
-  // --- UI message simple
-  toastMessage: string | null = null;
   isLoading = false;
   showPassword = false;
 
-  constructor(private userService: UserService, private warehouseService: WarehouseService) {}
+  constructor(private userService: UserService, private warehouseService: WarehouseService, private toastService: ToastService) {}
 
   ngOnInit(): void {
     this.loadWarehouses();
@@ -183,7 +182,7 @@ export class UsersManager implements OnInit {
     console.log('saveUserFromModal called', { formUser: this.formUser, isEditMode: this.isEditMode });
 
     if (!this.formUser.nom || !this.formUser.username || !this.formUser.role) {
-      this.showToast('Veuillez remplir les champs obligatoires.');
+      this.toastService.warning('Veuillez remplir les champs obligatoires.');
       return;
     }
 
@@ -191,10 +190,10 @@ export class UsersManager implements OnInit {
     if (this.formUser.role === 'operator' && !this.formUser.entrepotId) {
       // Check if warehouses exist
       if (this.warehouses.length === 0) {
-        this.showToast("Aucun entrepôt disponible. Créez d'abord un entrepôt.");
+        this.toastService.warning("Aucun entrepôt disponible. Créez d'abord un entrepôt.");
         return;
       }
-      this.showToast('Un opérateur doit être lié à un entrepôt.');
+      this.toastService.warning('Un opérateur doit être lié à un entrepôt.');
       return;
     }
 
@@ -207,7 +206,7 @@ export class UsersManager implements OnInit {
     const observer = {
       next: () => {
         this.isLoading = false;
-        this.showToast(this.isEditMode ? 'Utilisateur mis à jour.' : 'Utilisateur créé.');
+        this.toastService.success(this.isEditMode ? 'Utilisateur mis à jour.' : 'Utilisateur créé.');
         this.closeUserModal();
         this.loadUsers();
       },
@@ -215,7 +214,7 @@ export class UsersManager implements OnInit {
         this.isLoading = false;
         console.error(err);
         const msg = err.error?.message || 'Une erreur est survenue';
-        this.showToast(msg);
+        this.toastService.error(msg);
       },
     };
 
@@ -223,7 +222,7 @@ export class UsersManager implements OnInit {
       if (this.isEditMode) {
         if (!this.formUser.id) {
           this.isLoading = false;
-          this.showToast("Impossible : identifiant utilisateur manquant.");
+          this.toastService.error("Impossible : identifiant utilisateur manquant.");
           return;
         }
 
@@ -238,14 +237,14 @@ export class UsersManager implements OnInit {
       // Creation flow
       if (!this.formUser.password) {
         this.isLoading = false;
-        this.showToast('Mot de passe requis pour la création.');
+        this.toastService.warning('Mot de passe requis pour la création.');
         return;
       }
       this.userService.createUser(this.formUser as User).subscribe(observer);
     } catch (err) {
       this.isLoading = false;
       console.error('saveUserFromModal sync error', err);
-      this.showToast('Erreur interne. Voir console.');
+      this.toastService.error('Erreur interne. Voir console.');
     }
   }
 
@@ -254,7 +253,7 @@ export class UsersManager implements OnInit {
     if (user.role === 'admin') {
       const admins = this.users.filter((u) => u.role === 'admin');
       if (admins.length <= 1) {
-        this.showToast('Impossible : il doit rester au moins un administrateur.');
+        this.toastService.warning('Impossible : il doit rester au moins un administrateur.');
         return;
       }
     }
@@ -274,12 +273,12 @@ export class UsersManager implements OnInit {
     
     this.userService.deleteUser(this.userToDelete.id).subscribe({
       next: () => {
-        this.showToast('Utilisateur supprimé.');
+        this.toastService.success('Utilisateur supprimé.');
         this.loadUsers();
         this.cancelDelete();
       },
       error: (err) => {
-        this.showToast('Erreur suppression.');
+        this.toastService.error('Erreur suppression.');
         console.error(err);
         this.cancelDelete();
       },
@@ -294,9 +293,9 @@ export class UsersManager implements OnInit {
     this.userService.updateUser(user.id!, { entrepotId }).subscribe({
       next: () => {
         user.entrepotId = entrepotId;
-        this.showToast('Entrepôt affecté.');
+        this.toastService.success('Entrepôt affecté.');
       },
-      error: (err) => this.showToast('Erreur mise à jour.'),
+      error: (err) => this.toastService.error('Erreur mise à jour.'),
     });
   }
 
@@ -314,10 +313,4 @@ export class UsersManager implements OnInit {
     };
   }
 
-  private showToast(message: string): void {
-    this.toastMessage = message;
-    setTimeout(() => {
-      this.toastMessage = null;
-    }, 2500);
-  }
 }

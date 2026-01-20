@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { ToastService } from '../services/toast.service';
 
 type UITruck = Truck & { showMenu?: boolean };
 
@@ -40,9 +41,6 @@ export class UserEntrepot implements OnInit {
   showSuccessBanner = false;
   showDetailsModal = false;
   
-  // Notification banner
-  showNotificationBanner = false;
-  notificationMessage = '';
 
   // Modale confirmation renvoi
   showRenvoyeConfirmModal = false;
@@ -57,14 +55,6 @@ export class UserEntrepot implements OnInit {
 
   selectedTruckForHistory: UITruck | null = null;
 
-  // Notification Helper
-  showNotification(message: string) {
-    this.notificationMessage = message;
-    this.showNotificationBanner = true;
-    setTimeout(() => {
-      this.showNotificationBanner = false;
-    }, 4000);
-  }
 
   // =========================================================
   // ANALYSES
@@ -138,11 +128,11 @@ export class UserEntrepot implements OnInit {
         this.loadingAnalysis = false;
         this.showAnalysisModal = false;
         this.refreshView();
-        this.showNotification('Analyses transmises avec succès. En attente de validation.');
+        this.toastService.success('Analyses transmises avec succès. En attente de validation.');
       },
       error: () => {
         this.loadingAnalysis = false;
-        alert('Erreur envoi analyses');
+        this.toastService.error('Erreur envoi analyses');
       }
     });
   }
@@ -193,6 +183,7 @@ export class UserEntrepot implements OnInit {
   private router = inject(Router);
   private truckService = inject(TruckService);
   private warehouseService = inject(WarehouseService);
+  private toastService = inject(ToastService);
 
   constructor() {}
   // ===============================
@@ -818,7 +809,7 @@ export class UserEntrepot implements OnInit {
     }
 
     if (!this.entrepot.id) {
-      alert('Entrepôt non chargé, impossible de créer le camion.');
+      this.toastService.error('Entrepôt non chargé, impossible de créer le camion.');
       return;
     }
 
@@ -936,10 +927,10 @@ export class UserEntrepot implements OnInit {
         this.applyFilters();
         try {
           this.saveTrucksToStorage();
-          alert('Camion enregistré localement (mode hors-ligne)');
+          this.toastService.warning('Camion enregistré localement (mode hors-ligne)');
         } catch (e) {
           console.error('Failed to save truck locally', e);
-          alert(err.error?.message || 'Erreur création camion');
+          this.toastService.error(err.error?.message || 'Erreur création camion');
         }
       },
     });
@@ -1000,9 +991,9 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.showEditModal = false;
         this.refreshView();
-        this.showNotification('Modifications enregistrées avec succès.');
+        this.toastService.success('Modifications enregistrées avec succès.');
       },
-      error: () => alert('Erreur modification'),
+      error: () => this.toastService.error('Erreur modification'),
     });
   }
 
@@ -1099,9 +1090,9 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.showProductsModal = false;
         this.refreshView();
-        this.showNotification('Produits enregistrés. Camion accepté définitivement.');
+        this.toastService.success('Produits enregistrés. Camion accepté définitivement.');
       },
-      error: () => alert('Erreur sauvegarde produits'),
+      error: () => this.toastService.error('Erreur sauvegarde produits'),
     });
   }
 
@@ -1146,9 +1137,9 @@ export class UserEntrepot implements OnInit {
       next: () => {
         this.closeRenvoyeConfirmModal();
         this.refreshView();
-        this.showNotification('Camion marqué comme renvoyé.');
+        this.toastService.success('Camion marqué comme renvoyé.');
       },
-      error: () => alert('Erreur renvoi'),
+      error: () => this.toastService.error('Erreur renvoi'),
     });
   }
 

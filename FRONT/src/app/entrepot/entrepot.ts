@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-entrepot',
@@ -28,10 +29,6 @@ export class Entrepot implements OnInit {
   showDetailsModal = false;
   showHistoryModal = false;
   historyTruck: Truck | null = null;
-  
-  // Notification Banner
-  showNotificationBanner = false;
-  notificationMessage = '';
 
   trucks: Truck[] = [];
   selectedTruck: Truck | null = null;
@@ -43,14 +40,8 @@ export class Entrepot implements OnInit {
   private route = inject(ActivatedRoute);
   private truckService = inject(TruckService);
   private warehouseService = inject(WarehouseService);
+  private toastService = inject(ToastService);
   
-  showNotification(msg: string) {
-    this.notificationMessage = msg;
-    this.showNotificationBanner = true;
-    setTimeout(() => {
-      this.showNotificationBanner = false;
-    }, 4000);
-  }
 
   constructor() {}
 
@@ -436,9 +427,9 @@ export class Entrepot implements OnInit {
       next: () => {
         this.refreshView();
         this.closeDetailsModal();
-        this.showNotification('Camion validé avec succès.');
+        this.toastService.success('Camion validé avec succès.');
       },
-      error: (err) => alert('Erreur lors de la validation'),
+      error: (err) => this.toastService.error('Erreur lors de la validation'),
     });
   }
 
@@ -468,10 +459,10 @@ export class Entrepot implements OnInit {
     this.truckService.updateTruck(this.selectedTruck.id, updates).subscribe({
       next: () => {
         this.refreshView();
-        this.showNotification('Camion refusé (en attente gérant).');
+        this.toastService.warning('Camion refusé (en attente gérant).');
         this.closeDetailsModal();
       },
-      error: (err) => alert('Erreur lors du refus'),
+      error: (err) => this.toastService.error('Erreur lors du refus'),
     });
   }
 
@@ -500,11 +491,11 @@ export class Entrepot implements OnInit {
 
     this.truckService.updateTruck(this.selectedTruck.id, updates).subscribe({
       next: () => {
-        this.showNotification('Camion réintégré avec succès.');
+        this.toastService.success('Camion réintégré avec succès.');
         this.refreshView();
         this.closeDetailsModal();
       },
-      error: () => alert('Erreur lors de la réintégration'),
+      error: () => this.toastService.error('Erreur lors de la réintégration'),
     });
   }
   // ================================================================

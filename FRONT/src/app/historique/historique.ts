@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
+import { ToastService } from '../services/toast.service';
 
 type TruckStatus = Truck['statut'];
 
@@ -54,7 +55,7 @@ export class Historique implements OnInit {
   showDetailsModal = false;
   selectedRow: TruckHistoryRow | null = null;
 
-  constructor(private truckService: TruckService, private warehouseService: WarehouseService) {}
+  constructor(private truckService: TruckService, private warehouseService: WarehouseService, private toastService: ToastService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -243,7 +244,7 @@ export class Historique implements OnInit {
 
   exporterCSV(): void {
     if (!this.filteredRows || this.filteredRows.length === 0) {
-      alert('Aucune donnée à exporter.');
+      this.toastService.warning('Aucune donnée à exporter.');
       return;
     }
 

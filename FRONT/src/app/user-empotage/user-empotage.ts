@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { WarehouseService } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 import { environment } from '../config';
 
 interface EmpotageContainer {
@@ -42,6 +43,7 @@ export class UserEmpotage implements OnInit {
   private warehouseService = inject(WarehouseService);
   private authService = inject(AuthService);
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
   
   warehouses: any[] = [];
   empotages: Empotage[] = [];
@@ -166,6 +168,7 @@ export class UserEmpotage implements OnInit {
       this.calculateStats();
     } catch (e) {
       console.error('Erreur chargement empotages', e);
+      this.toastService.error('Impossible de charger les données');
     } finally {
       this.loading = false;
     }
@@ -203,6 +206,7 @@ export class UserEmpotage implements OnInit {
         const res = await firstValueFrom(this.http.post<Empotage>(`${environment.apiUrl}/empotages/init`, this.formInit));
         this.lastSavedEmpotageId = res.id!;
         this.showCreateModal = false;
+        this.toastService.success('Booking créé avec succès');
         
         // Ask for finalization
         this.showFinalizeModal = true;
@@ -211,6 +215,7 @@ export class UserEmpotage implements OnInit {
     } catch(err) {
         console.error(err);
         this.errorMessage = "Erreur lors de la création";
+        this.toastService.error('Erreur lors de la création');
     } finally {
         this.saving = false;
     }
@@ -248,6 +253,7 @@ export class UserEmpotage implements OnInit {
         
         this.lastSavedEmpotageId = this.selectedBookingForAdd.id!;
         this.showAddContainerModal = false;
+        this.toastService.success('Conteneur ajouté');
 
         // Ask for finalization
         this.showFinalizeModal = true;
@@ -256,6 +262,7 @@ export class UserEmpotage implements OnInit {
     } catch(err) {
         console.error(err);
         this.errorMessage = "Erreur ajout conteneur";
+        this.toastService.error('Erreur ajout conteneur');
     } finally {
         this.saving = false;
     }
@@ -293,6 +300,8 @@ export class UserEmpotage implements OnInit {
           await firstValueFrom(this.http.put(`${environment.apiUrl}/empotage-containers/${this.editingId}`, this.formEditContainer));
           
           this.showEditModal = false;
+          this.toastService.success('Conteneur modifié');
+          
           // Reload current history (if we are in history view)
           if(this.selectedBookingHistory && this.selectedBookingHistory.id) {
              const fullData = await firstValueFrom(this.http.get<Empotage>(`${environment.apiUrl}/empotages/${this.selectedBookingHistory.id}`));
@@ -303,6 +312,7 @@ export class UserEmpotage implements OnInit {
       } catch(e) {
           console.error(e);
           this.errorMessage = "Erreur modification conteneur";
+          this.toastService.error('Erreur modification conteneur');
       } finally {
           this.saving = false;
       }
@@ -375,7 +385,7 @@ export class UserEmpotage implements OnInit {
 
     const popupWin = window.open('', '_blank', 'width=1000,height=800,top=50,left=50');
     if (!popupWin) {
-      alert("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
+      this.toastService.warning("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
       return;
     }
 
@@ -488,9 +498,11 @@ export class UserEmpotage implements OnInit {
         await firstValueFrom(this.http.put(`${environment.apiUrl}/empotages/${this.lastSavedEmpotageId}/finalize`, {}));
         this.showFinalizeModal = false;
         this.lastSavedEmpotageId = null;
+        this.toastService.success('Empotage marqué comme terminé');
         this.loadEmpotages();
     } catch(err) {
        console.error(err);
+       this.toastService.error('Erreur lors de la finalisation');
     } finally {
        this.saving = false;
     }
@@ -512,8 +524,12 @@ export class UserEmpotage implements OnInit {
     try {
       await firstValueFrom(this.http.delete(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`));
       this.cancelDelete();
+      this.toastService.success('Empotage supprimé');
       this.loadEmpotages();
-    } catch(err) { console.error(err); }
+    } catch(err) {
+      console.error(err);
+      this.toastService.error('Erreur lors de la suppression');
+    }
   }
 
   // --- FILTERING & STATS ---

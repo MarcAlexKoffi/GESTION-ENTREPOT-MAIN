@@ -1,8 +1,5 @@
 <div class="page-container">
-    <div class="notification-banner" *ngIf="showNotificationBanner"></div>
-        <span class="material-symbols-outlined notranslate">check_circle</span>
-        <span>{{ notificationMessage }}</span>
-    </div>
+
     
         <!-- HEADER -->
         <header class="page-header">
@@ -377,7 +374,7 @@
 
             <div class="truck-field">
                 <label class="truck-label">KOR <span style="color:red">*</span></label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.kor" placeholder="Ex: 11" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
+                <input type="number" class="truck-input" [(ngModel)]="analysisData.kor" placeholder="Ex: 60.3" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
             </div>
             
             <div class="truck-field">

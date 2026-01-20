@@ -2,10 +2,11 @@ import { Component, signal, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { LoaderComponent } from './loader/loader';
 import { LoaderService } from './services/loader.service';
+import { ToastComponent } from './toast/toast.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoaderComponent],
+  imports: [RouterOutlet, LoaderComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
 import { TruckService, Truck } from '../services/truck.service';
+import { ToastService } from '../services/toast.service';
 import { environment } from '../config';
 
 interface CardInfo {
@@ -83,6 +84,7 @@ export class DashboardMain implements OnInit {
   private router = inject(Router);
   private warehouseService = inject(WarehouseService);
   private truckService = inject(TruckService);
+  private toastService = inject(ToastService);
 
   constructor() {}
 
@@ -344,10 +346,11 @@ export class DashboardMain implements OnInit {
         // 1) Mettre à jour l'affichage
         this.cards = this.cards.filter((w) => w.id !== card.id);
         this.closeDeleteModal();
+        this.toastService.success("Entrepôt supprimé");
       },
       error: (err) => {
         console.error('Erreur suppression entrepôt', err);
-        alert('Erreur lors de la suppression de l’entrepôt');
+        this.toastService.error('Erreur lors de la suppression de l’entrepôt');
         this.closeDeleteModal();
       },
     });
@@ -388,13 +391,14 @@ export class DashboardMain implements OnInit {
         this.closeWarehouseModal();
         this.loadWarehouses();
         // Feedback visuel simple (pourrait être un toast)
-        // alert(this.mode === 'create' ? 'Entrepôt créé avec succès' : 'Modifications enregistrées');
+        this.toastService.success(this.mode === 'create' ? 'Entrepôt créé avec succès' : 'Modifications enregistrées');
       },
       error: (err) => {
         this.isLoading = false;
         console.error('Erreur saveWarehouse', err);
         const errorMsg = err.error?.message || 'Une erreur est survenue.';
-        this.errorMessage = errorMsg;
+        this.errorMessage = errorMsg; // keep this for modal error display potentially
+        this.toastService.error(errorMsg);
       },
     });
 

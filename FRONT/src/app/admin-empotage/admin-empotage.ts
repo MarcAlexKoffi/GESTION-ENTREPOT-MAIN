@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WarehouseService } from '../services/warehouse.service';
+import { ToastService } from '../services/toast.service';
 import { environment } from '../config';
 import { firstValueFrom } from 'rxjs';
 
@@ -50,6 +51,7 @@ export class AdminEmpotage implements OnInit {
   private route = inject(ActivatedRoute);
   private warehouseService = inject(WarehouseService);
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
   
   entrepotId: number = 0;
   entrepotName: string = '';
@@ -320,9 +322,10 @@ export class AdminEmpotage implements OnInit {
         
         this.showDeleteModal = false;
         this.itemToDelete = null;
+        this.toastService.success('Empotage supprimé');
     } catch(e) {
         console.error(e);
-        alert("Erreur lors de la suppression");
+        this.toastService.error("Erreur lors de la suppression");
     }
   }
 
@@ -331,7 +334,7 @@ export class AdminEmpotage implements OnInit {
 
     const popupWin = window.open('', '_blank', 'width=1000,height=800,top=50,left=50');
     if (!popupWin) {
-      alert("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
+      this.toastService.warning("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
       return;
     }
 
