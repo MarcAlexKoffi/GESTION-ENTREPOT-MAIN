@@ -46,6 +46,22 @@ const db = mysql.createPool({
 
 console.log('Pool MySQL initialisé');
 
+// Helper pour corriger les URLs Cloudinary mal formées (problème local vs prod)
+function fixCloudinaryUrl(url) {
+  if (!url) return null;
+  // Si l'URL commence par /uploads/gestion-entrepots-uploads/, c'est un chemin hybride local/cloud incorrect
+  // On le transforme en URL Cloudinary complète
+  if (url.startsWith('/uploads/gestion-entrepots-uploads/')) {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    if (cloudName) {
+      // On retire "/uploads/" du début
+      const path = url.replace('/uploads/', ''); 
+      return `https://res.cloudinary.com/${cloudName}/image/upload/${path}`;
+    }
+  }
+  return url;
+}
+
 // Création de la table 'trucks' si elle n'existe pas
 (async () => {
   try {
@@ -599,8 +615,15 @@ app.get('/api/warehouses', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM warehouses ORDER BY id DESC');
     console.log("GET /api/warehouses response:");
-    rows.forEach(r => console.log(`ID: ${r.id}, Name: ${r.name}`));
-    res.json(rows);
+    
+    // Correction des URLs à la volée
+    const fixedRows = rows.map(r => {
+        const fixedUrl = fixCloudinaryUrl(r.imageUrl);
+        return { ...r, imageUrl: fixedUrl };
+    });
+
+    fixedRows.forEach(r => console.log(`ID: ${r.id}, Name: ${r.name}, Img: ${r.imageUrl}`));
+    res.json(fixedRows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur récupération entrepôts' });
@@ -615,7 +638,9 @@ app.get('/api/warehouses/:id', async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Entrepôt non trouvé' });
     }
-    res.json(rows[0]);
+    const warehouse = rows[0];
+    warehouse.imageUrl = fixCloudinaryUrl(warehouse.imageUrl);
+    res.json(warehouse);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur récupération entrepôt' });
@@ -640,7 +665,9 @@ app.post('/api/warehouses', upload.single('image'), async (req, res) => {
       'INSERT INTO warehouses (name, location, imageUrl) VALUES (?, ?, ?)',
       [name, location, imageUrl]
     );
-    res.status(201).json({ id: result.insertId, name, location, imageUrl });
+    // On renvoie l'URL corrigée au frontend immédiatement
+    const finalUrl = fixCloudinaryUrl(imageUrl);
+    res.status(201).json({ id: result.insertId, name, location, imageUrl: finalUrl });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur création entrepôt' });
