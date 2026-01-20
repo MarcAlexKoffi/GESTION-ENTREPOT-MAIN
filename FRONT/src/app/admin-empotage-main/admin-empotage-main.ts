@@ -74,11 +74,16 @@ export class AdminEmpotageMain implements OnInit {
   }
 
   private fixImageUrl(url: string): string {
-    if (!url) return ''; // Le CSS gérera le fallback couleur
-    if (url.startsWith('http')) return url;
+    if (!url || url.includes('800x400?text=Entrepot')) {
+        return '/assets/placeholder-warehouse.png';
+    }
+    
+    if (url.startsWith('http') || url.startsWith('https') || url.startsWith('data:')) {
+        return url;
+    }
     
     const baseUrl = environment.apiUrl.replace('/api', '');
-    return `${baseUrl}${url}`;
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   }
 
   private generateCode(name: string, id: number): string {

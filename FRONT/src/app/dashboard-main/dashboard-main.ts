@@ -103,12 +103,12 @@ export class DashboardMain implements OnInit {
               let img = w.imageUrl;
               
               // Correction Affichage URL Image
-              let finalImg = 'assets/placeholder-warehouse.png';
+              let finalImg = '/assets/placeholder-warehouse.png';
 
               if (img && typeof img === 'string' && img.trim() !== '') {
                  // Si c'est une URL de placeholder corrompue (cas possible selon logs)
                  if (img.includes('800x400?text=Entrepot')) {
-                     finalImg = 'assets/placeholder-warehouse.png';
+                     finalImg = '/assets/placeholder-warehouse.png';
                  }
                  // Si c'est déjà une URL complète (cloudinary ou autre)
                  else if (img.startsWith('http') || img.startsWith('https') || img.startsWith('data:')) {
