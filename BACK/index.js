@@ -120,21 +120,29 @@ console.log('Pool MySQL initialisé');
 
     // Patch Migration for Empotages (Fix schema mismatch)
     try {
-       // Check if we have the old schema (french column names)
-       const [cols] = await connection.query("SHOW COLUMNS FROM empotages LIKE 'nomClient'");
-       if (cols.length > 0) {
-          console.log("Migration de la table empotages (renommage colonnes)...");
-          await connection.query("ALTER TABLE empotages CHANGE nomClient client VARCHAR(255) NULL");
-          await connection.query("ALTER TABLE empotages CHANGE numeroBooking booking VARCHAR(255) NULL");
-          await connection.query("ALTER TABLE empotages CHANGE nombreConteneurs conteneurs INT DEFAULT 0");
-          await connection.query("ALTER TABLE empotages CHANGE volumeEmpote volume FLOAT DEFAULT 0");
-          await connection.query("ALTER TABLE empotages CHANGE dateDebutEmpotage dateStart DATETIME NULL");
-          await connection.query("ALTER TABLE empotages CHANGE dateFinEmpotage dateEnd DATETIME NULL");
-       }
+       console.log("Starting Robust Migration Check...");
+
+       // Helper to rename if exists
+       const renameIfExists = async (table, oldCol, newCol, type) => {
+          try {
+             const [check] = await connection.query(`SHOW COLUMNS FROM ${table} LIKE '${oldCol}'`);
+             if (check.length > 0) {
+                 console.log(`Renaming ${oldCol} to ${newCol} in ${table}...`);
+                 await connection.query(`ALTER TABLE ${table} CHANGE ${oldCol} ${newCol} ${type}`);
+             }
+          } catch(e) { console.error(`Error renaming ${oldCol}:`, e.message); }
+       };
+
+       await renameIfExists('empotages', 'nomClient', 'client', 'VARCHAR(255) NULL');
+       await renameIfExists('empotages', 'numeroBooking', 'booking', 'VARCHAR(255) NULL');
+       await renameIfExists('empotages', 'nombreConteneurs', 'conteneurs', 'INT DEFAULT 0');
+       await renameIfExists('empotages', 'volumeEmpote', 'volume', 'FLOAT DEFAULT 0');
+       await renameIfExists('empotages', 'dateDebutEmpotage', 'dateStart', 'DATETIME NULL');
+       await renameIfExists('empotages', 'dateFinEmpotage', 'dateEnd', 'DATETIME NULL');
        
        // Ensure new columns exist
        try { await connection.query("ALTER TABLE empotages ADD COLUMN clientType VARCHAR(255) NULL"); } catch(e){}
-       try { await connection.query("ALTER TABLE empotages ADD COLUMN status VARCHAR(50) DEFAULT 'A venir'"); } catch(e){}
+       try { await connection.query("ALTER TABLE empotages ADD COLUMN status VARCHAR(50) DEFAULT 'En attente'"); } catch(e){}
        try { await connection.query("ALTER TABLE empotages ADD COLUMN entrepotId INT DEFAULT NULL"); } catch(e){}
        
     } catch (e) {
