@@ -631,7 +631,8 @@ app.post('/api/warehouses', upload.single('image'), async (req, res) => {
 
   let imageUrl = '';
   if (req.file) {
-    imageUrl = `/uploads/${req.file.filename}`;
+    // Avec Cloudinary, l'URL complète est dans req.file.path
+    imageUrl = req.file.path;
   }
 
   try {
@@ -659,7 +660,8 @@ app.put('/api/warehouses/:id', upload.single('image'), async (req, res) => {
     if (location) { fields.push('location=?'); values.push(location); }
     
     if (req.file) {
-      const imageUrl = `/uploads/${req.file.filename}`;
+      // Avec Cloudinary, l'URL complète est dans req.file.path
+      const imageUrl = req.file.path;
       fields.push('imageUrl=?'); values.push(imageUrl);
     }
 
