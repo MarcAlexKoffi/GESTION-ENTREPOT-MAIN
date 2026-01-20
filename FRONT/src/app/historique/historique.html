@@ -73,10 +73,12 @@
                   (change)="applyFilters()"
                 >
                   <option [ngValue]="'all'">Tous les statuts</option>
+                  <option value="Enregistré">Enregistré</option>
                   <option value="En attente">En attente</option>
-                  <option value="En cours de déchargement">En cours de déchargement</option>
-                  <option value="Déchargé">Déchargé</option>
-                  <option value="Annulé">Annulé</option>
+                  <option value="Validé">Validé</option>
+                  <option value="Accepté">Accepté</option>
+                  <option value="Refoulé">Refoulé</option>
+                  <option value="Renvoyé">Renvoyé</option>
                 </select>
               </div>
             </div>
@@ -131,12 +133,26 @@
                     <td>{{ row.createdAt | date : 'dd/MM/yyyy' }}</td>
                     <td>{{ formatHeure(row.createdAt) }}</td>
                     <td>
-                      <span class="status-pill" [ngClass]="getStatusCssClass(row.statut)">
-                        <span class="material-symbols-outlined notranslate status-icon">{{
-                          getStatusIcon(row.statut)
-                        }}</span>
-                        {{ row.statut }}
+                      <!-- AFFICHAGE DU STATUT PERSONNALISÉ (Identique au tableau d'entrepôt) -->
+                      <span *ngIf="row.statut === 'Enregistré'" class="status-pill status-pill--enregistre">
+                          <span class="material-symbols-outlined notranslate status-icon">check_circle</span> Enregistré
                       </span>
+                      <span *ngIf="row.statut === 'En attente'" class="status-pill status-pill--pending">
+                          <span class="material-symbols-outlined notranslate status-icon">hourglass_empty</span> En attente
+                      </span>
+                      <span *ngIf="row.statut === 'Validé' && row.advancedStatus !== 'ACCEPTE_FINAL'" class="status-pill status-pill--validated">
+                          <span class="material-symbols-outlined notranslate status-icon">verified</span> Validé
+                      </span>
+                      <span *ngIf="row.advancedStatus === 'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
+                          <span class="material-symbols-outlined notranslate status-icon">assignment_turned_in</span> Accepté déf.
+                      </span>
+                      <span *ngIf="row.statut === 'Refoulé' || (row.statut === 'Annulé' && row.advancedStatus !== 'REFUSE_RENVOYE')" class="status-pill status-pill--refoule">
+                          <span class="material-symbols-outlined notranslate status-icon">cancel</span> Refoulé
+                      </span>
+                      <span *ngIf="row.advancedStatus === 'REFUSE_RENVOYE'" class="status-pill status-pill--refoule" style="background-color: #fef9c3; color: #854d0e; border-color: #fde047;">
+                          <span class="material-symbols-outlined notranslate status-icon">reply</span> Renvoyé
+                      </span>
+                      <!-- Fallback old way if needed, or just invisible -->
                     </td>
                     <td>
                       <div class="row-actions">

@@ -141,10 +141,6 @@
   <section class="activity-section">
     <div class="section-header">
         <h2 class="section-title">Activité Récente</h2>
-        <button class="btn-refresh" (click)="loadTrucks()">
-            <span class="material-symbols-outlined notranslate">refresh</span>
-            Actualiser
-        </button>
     </div>
     
     <div class="table-container">
@@ -153,7 +149,7 @@
           <tr>
             <th>Immatriculation</th>
             <th>Transporteur</th>
-            <th>Type Produit</th>
+            <th>Fiche de transport</th>
             <th>Statut</th>
             <th>Date / Heure</th>
             <th class="text-right">Poids (Net)</th>
@@ -164,14 +160,24 @@
             <td class="fw-bold">{{ truck.immatriculation }}</td>
             <td>{{ truck.transporteur || '-' }}</td>
             <td>
-                <span class="badge-product">{{ truck.products?.type || 'Non spécifié' }}</span>
+                <span class="text-primary fw-medium">{{ truck.transfert || '-' }}</span>
             </td>
             <td>
-              <span class="status-badge" [ngClass]="{
-                'status-success': truck.advancedStatus === 'ACCEPTE_FINAL',
-                'status-warning': truck.statut === 'En attente' || truck.statut === 'Validé',
-                'status-danger': truck.statut === 'Annulé' || truck.statut === 'Refoulé'
+              <span class="status-pill" [ngClass]="{
+                'status-success': truck.statut === 'Déchargé' || truck.statut === 'Validé',
+                'status-warning': truck.statut === 'En attente' || truck.statut === 'En cours de déchargement',
+                'status-danger': truck.statut === 'Annulé' || truck.statut === 'Refoulé',
+                'status-registered': truck.statut === 'Enregistré'
               }">
+                <span class="material-symbols-outlined notranslate">
+                    {{ 
+                        truck.statut === 'Déchargé' || truck.statut === 'Validé' ? 'check_circle' :
+                        truck.statut === 'Annulé' || truck.statut === 'Refoulé' ? 'cancel' :
+                        truck.statut === 'En cours de déchargement' ? 'pending' :
+                        truck.statut === 'Enregistré' ? 'app_registration' :
+                        'hourglass_empty'
+                    }}
+                </span>
                 {{ truck.statut }}
               </span>
             </td>

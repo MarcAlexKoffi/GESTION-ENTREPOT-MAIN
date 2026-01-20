@@ -1,195 +1,360 @@
 <div class="page-container">
-    <!-- HEADER -->
-    <header class="page-header">
-      <div class="page-title-block">
-        <div class="title-with-back">
-          <button
-            type="button"
-            class="btn-icon-back"
-            [routerLink]="['/dashboard/adminEmpotageMain']"
-            title="Retour"
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="page-title-block">
+      <div class="title-with-back">
+        <button
+          type="button"
+          class="btn-icon-back"
+          [routerLink]="['/dashboard/adminEmpotageMain']"
+          title="Retour"
+        >
+          <span class="material-symbols-outlined notranslate">arrow_back</span>
+        </button>
+        <div class="title-content">
+          <h1 class="page-title">
+            Supervision des Empotages
+            <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
+          </h1>
+          <p class="page-subtitle">
+            <span class="material-symbols-outlined notranslate icon-subtitle"
+              >admin_panel_settings</span
+            >
+            Vue administrateur - Monitoring temps réel des opérations
+          </p>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" (click)="exportAllCsv()">
+      <span class="material-symbols-outlined notranslate">download</span>
+      <span>Exporter en CSV</span>
+    </button>
+  </header>
+
+  <!-- STATS CARDS -->
+  <section class="stats-grid">
+    <!-- Total -->
+    <article class="card stat-card">
+      <div class="icon-box bg-blue-100 text-blue-600">
+        <span class="material-symbols-outlined notranslate">inventory_2</span>
+      </div>
+      <div class="stat-info">
+        <p class="stat-label">Total</p>
+        <p class="stat-value">{{ stats.total | number }}</p>
+      </div>
+    </article>
+
+    <!-- Aujourd'hui -->
+    <article class="card stat-card">
+      <div class="icon-box bg-blue-100 text-blue-600">
+        <span class="material-symbols-outlined notranslate">today</span>
+      </div>
+      <div class="stat-info">
+        <p class="stat-label">Aujourd'hui</p>
+        <p class="stat-value">{{ stats.today }}</p>
+      </div>
+    </article>
+
+    <!-- Cette semaine -->
+    <article class="card stat-card">
+      <div class="icon-box bg-purple-100 text-purple-600">
+        <span class="material-symbols-outlined notranslate">date_range</span>
+      </div>
+      <div class="stat-info">
+        <p class="stat-label">Cette semaine</p>
+        <p class="stat-value">{{ stats.week }}</p>
+      </div>
+    </article>
+
+    <!-- Ce mois -->
+    <article class="card stat-card">
+      <div class="icon-box bg-green-100 text-green-600">
+        <span class="material-symbols-outlined notranslate">calendar_month</span>
+      </div>
+      <div class="stat-info">
+        <p class="stat-label">Ce mois</p>
+        <p class="stat-value">{{ stats.month }}</p>
+      </div>
+    </article>
+
+    <!-- Cette année -->
+    <article class="card stat-card">
+      <div class="icon-box bg-orange-100 text-orange-600">
+        <span class="material-symbols-outlined notranslate">event</span>
+      </div>
+      <div class="stat-info">
+        <p class="stat-label">Cette année</p>
+        <p class="stat-value">{{ stats.year }}</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- CONTROLS -->
+  <section class="controls-area">
+    <div class="search-and-filters">
+      <!-- SEARCH -->
+      <div class="search-box">
+        <span class="material-symbols-outlined notranslate search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Recherche client ou booking..."
+          [(ngModel)]="search"
+          (ngModelChange)="applyFilters()"
+        />
+      </div>
+
+      <!-- PERIOD FILTER -->
+      <div class="period-selector">
+        <button [class.active]="period === 'today'" (click)="setPeriod('today')">
+          Aujourd'hui
+        </button>
+        <button [class.active]="period === 'week'" (click)="setPeriod('week')">Semaine</button>
+        <button [class.active]="period === 'month'" (click)="setPeriod('month')">Mois</button>
+        <button [class.active]="period === 'year'" (click)="setPeriod('year')">Année</button>
+      </div>
+
+      <!-- DATE INPUT -->
+      <div class="date-input-wrapper">
+        <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
+        <input type="date" [(ngModel)]="filterDate" (ngModelChange)="onDateChange()" />
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE CARD -->
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Booking</th>
+            <th>Conteneurs</th>
+            <th>Volume</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Statut</th>
+            <th >Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- EMPTY STATE -->
+          <tr *ngIf="filteredEmpotages.length === 0 && !loading">
+            <td colspan="8" style="padding: 0">
+              <div class="empty-state-content">
+                <span class="material-symbols-outlined notranslate">content_paste_off</span>
+                <p>Aucun empotage trouvé</p>
+                <small style="color: var(--text-secondary)">Modifiez vos filtres.</small>
+              </div>
+            </td>
+          </tr>
+
+          <!-- LOADING STATE -->
+          <tr *ngIf="loading">
+            <td colspan="8" style="padding: 3rem; text-align: center">
+              <span style="color: var(--text-secondary)">Chargement des données...</span>
+            </td>
+          </tr>
+
+          <!-- ROWS -->
+          <tr *ngFor="let item of paginatedEmpotages" class="row-hover">
+            <td>
+              <div class="client-info">
+                <div class="client-avatar">
+                  {{ item.client.charAt(0).toUpperCase() }}
+                </div>
+                <span class="cell-bold">{{ item.client }}</span>
+              </div>
+            </td>
+            <td class="cell-bold">{{ item.booking }}</td>
+            <td class="text-center">
+              <span class="badge-count">{{ item.conteneurs }}</span>
+            </td>
+            <td>{{ item.volume | number : '1.0-2' }} m³</td>
+            <td class="cell-muted">
+              <div>{{ item.dateStart | date : 'dd/MM/yyyy' }}</div>
+              <small>{{ item.dateStart | date : 'HH:mm' }}</small>
+            </td>
+            <td class="cell-muted">
+              <ng-container *ngIf="item.dateEnd; else noDate">
+                <div>{{ item.dateEnd | date : 'dd/MM/yyyy' }}</div>
+                <small>{{ item.dateEnd | date : 'HH:mm' }}</small>
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
+            </td>
+            <td>
+              <span
+                class="status-pill"
+                [ngClass]="item.status === 'Terminé' ? 'status-completed' : 'status-future'"
+              >
+                <span class="material-symbols-outlined notranslate">
+                  {{ item.status === 'Terminé' ? 'check_circle' : 'hourglass_empty' }}
+                </span>
+                {{ item.status }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-group">
+                <div class="actions-subgroup">
+                  <button
+                    class="action-btn btn-history"
+                    title="Historique / Détails"
+                    (click)="openHistory(item)"
+                  >
+                    <span class="material-symbols-outlined notranslate">history</span>
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="pagination-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+        <span class="material-symbols-outlined notranslate">chevron_left</span>
+      </button>
+      <span class="pagination-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <span class="material-symbols-outlined notranslate">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-root" *ngIf="showHistoryModal && selectedBookingHistory">
+    <div class="modal-backdrop" (click)="closeHistoryModal()"></div>
+    <div class="modal-panel large">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          Historique: {{ selectedBookingHistory.booking }}
+          <span
+            class="status-pill"
+            [ngClass]="
+              selectedBookingHistory.status === 'Terminé' ? 'status-completed' : 'status-future'
+            "
           >
-            <span class="material-symbols-outlined notranslate">arrow_back</span>
-          </button>
-          <div class="title-content">
-            <h1 class="page-title">
-              Supervision des Empotages 
-              <span *ngIf="entrepotName" class="warehouse-name">— {{ entrepotName }}</span>
-            </h1>
-            <p class="page-subtitle">
-              <span class="material-symbols-outlined notranslate icon-subtitle">admin_panel_settings</span>
-              Vue administrateur - Monitoring temps réel des opérations
-            </p>
+            {{ selectedBookingHistory.status }}
+          </span>
+        </h2>
+        <button class="btn-close-icon" (click)="closeHistoryModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="history-summary">
+          <div class="summary-item">
+            <label>Client</label>
+            <span>{{ selectedBookingHistory.client }}</span>
+          </div>
+          <div class="summary-item">
+            <label>Début</label>
+            <span>{{ selectedBookingHistory.dateStart | date : 'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="summary-item">
+            <label>Fin</label>
+            <span>{{
+              selectedBookingHistory.dateEnd
+                ? (selectedBookingHistory.dateEnd | date : 'dd/MM/yyyy HH:mm')
+                : '-'
+            }}</span>
           </div>
         </div>
-      </div>
-      <button class="btn btn-primary">
-        <span class="material-symbols-outlined notranslate">download</span>
-        <span>Exporter en CSV</span>
-      </button>
-    </header>
 
-    <!-- STATS CARDS -->
-    <section class="stats-grid">
-      <!-- Total -->
-      <article class="card stat-card">
-        <div class="icon-box bg-blue-100 text-blue-600">
-          <span class="material-symbols-outlined notranslate">inventory_2</span>
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">Total</p>
-          <p class="stat-value">{{ stats.total | number }}</p>
-        </div>
-      </article>
-
-      <!-- Aujourd'hui -->
-      <article class="card stat-card">
-        <div class="icon-box bg-blue-100 text-blue-600">
-          <span class="material-symbols-outlined notranslate">today</span>
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">Aujourd'hui</p>
-          <p class="stat-value">{{ stats.today }}</p>
-        </div>
-      </article>
-
-      <!-- Cette semaine -->
-      <article class="card stat-card">
-        <div class="icon-box bg-purple-100 text-purple-600">
-          <span class="material-symbols-outlined notranslate">date_range</span>
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">Cette semaine</p>
-          <p class="stat-value">{{ stats.week }}</p>
-        </div>
-      </article>
-
-      <!-- Ce mois -->
-      <article class="card stat-card">
-        <div class="icon-box bg-green-100 text-green-600">
-          <span class="material-symbols-outlined notranslate">calendar_month</span>
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">Ce mois</p>
-          <p class="stat-value">{{ stats.month }}</p>
-        </div>
-      </article>
-      
-      <!-- Cette année -->
-      <article class="card stat-card">
-        <div class="icon-box bg-orange-100 text-orange-600">
-          <span class="material-symbols-outlined notranslate">event</span>
-        </div>
-        <div class="stat-info">
-          <p class="stat-label">Cette année</p>
-          <p class="stat-value">{{ stats.year }}</p>
-        </div>
-      </article>
-    </section>
-
-    <!-- FILTERS -->
-    <section class="controls-area">
-      <div class="search-and-filters">
-        <!-- Search -->
-        <div class="search-box">
-          <span class="material-symbols-outlined notranslate search-icon">search</span>
-          <input 
-            type="text" 
-            placeholder="Rechercher booking ou client..." 
-            [(ngModel)]="search" 
-            (ngModelChange)="applyFilters()"
-          />
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+          "
+        >
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-secondary); margin: 0">
+            LISTE DES CONTENEURS ({{ selectedBookingHistory.containers?.length || 0 }})
+          </h3>
         </div>
 
-        <!-- PERIOD FILTER -->
-        <div class="period-selector">
-          <button 
-            [class.active]="period === 'today'" 
-            (click)="setPeriod('today')"
-          >Aujourd'hui</button>
-          <button 
-            [class.active]="period === 'week'" 
-            (click)="setPeriod('week')"
-          >Semaine</button>
-          <button 
-            [class.active]="period === 'month'" 
-            (click)="setPeriod('month')"
-          >Mois</button>
-          <button 
-            [class.active]="period === 'year'" 
-            (click)="setPeriod('year')"
-          >Année</button>
-        </div>
-
-        <!-- Date Input -->
-        <div class="date-input-wrapper">
-          <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
-          <input 
-            type="date" 
-            [(ngModel)]="filterDate" 
-            (ngModelChange)="onDateChange()"
-            placeholder="Date spécifique"
-          />
-        </div>
-      </div>
-    </section>
-
-    <!-- TABLE LIST -->
-    <section class="card">
-        <div class="table-wrapper">
-          <table>
+        <div class="history-table-container">
+          <table style="width: 100%">
             <thead>
               <tr>
-                <th>CLIENT</th>
-                <th>BOOKING</th>
-                <th class="text-center">CONTENEURS</th>
-                <th class="text-center">VOLUME (M³)</th>
-                <th>DÉBUT</th>
-                <th>FIN</th>
-                <th class="text-right">ACTION</th>
+                <th>N° booking</th>
+                <th>N° Conteneur</th>
+                <th>Sacs</th>
+                <th>Volume empoté</th>
+                <th>Poids Net</th>
+                <th>Date Ajout</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let op of paginatedOperations">
-                <td>
-                  <div class="client-info">
-                    <strong>{{ op.clientName }}</strong>
-                    <!-- <small>Init: {{ op.clientInitials }}</small> -->
-                  </div>
+              <tr *ngFor="let c of selectedBookingHistory.containers">
+                <td style="font-weight: 700">{{ selectedBookingHistory.booking }}</td>
+                <td style="font-weight: 700; color: var(--text-primary)">
+                  {{ c.numeroConteneur }}
                 </td>
-                <td>
-                    <span class="booking-link">{{ op.booking }}</span>
+                <td>{{ c.nombreSacs }}</td>
+                <td>{{ c.volume }} m³</td>
+                <td>{{ c.poids }} kg</td>
+                <td style="color: var(--text-tertiary)">
+                  {{ c.createdAt | date : 'dd/MM/yyyy HH:mm' }}
                 </td>
-                <td class="text-center">{{ op.conteneurs }}</td>
-                <td class="text-center">{{ op.volume }}</td>
-                <td>
-                   <span style="font-size: 0.9rem; color: #64748b;">{{ op.debutPrevu }}</span>
-                </td>
-                <td>
-                   <span style="font-size: 0.9rem; color: #64748b;">{{ op.finEstimee }}</span>
-                </td>
-                <td class="text-right">
-                  <div class="actions">
-                    <button class="btn-icon" title="Imprimer" (click)="printOperation(op)">
-                        <span class="material-symbols-outlined notranslate">print</span>
-                    </button>
-                  </div>
+              </tr>
+              <tr
+                *ngIf="
+                  !selectedBookingHistory.containers ||
+                  selectedBookingHistory.containers.length === 0
+                "
+              >
+                <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8">
+                  Aucun conteneur associé.
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        
-        <div class="pagination-footer" *ngIf="totalPages > 1" style="padding: 1rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
-          <span class="page-info" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">PAGE {{ currentPage }} DE {{ totalPages }}</span>
-          <div class="pagination-controls" style="display: flex; gap: 0.5rem;">
-            <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
-              <span class="material-symbols-outlined notranslate">chevron_left</span>
-            </button>
-            <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()" style="padding: 0.5rem; border: 1px solid var(--border-light); background: white; border-radius: 0.5rem; cursor: pointer; display: flex;">
-              <span class="material-symbols-outlined notranslate">chevron_right</span>
-            </button>
-          </div>
+      </div>
+
+      <div class="modal-footer space-between">
+        <div style="display: flex; gap: 0.5rem">
+          <button class="btn btn-primary" (click)="exportHistoryCsv()">
+            <span class="material-symbols-outlined notranslate">download</span>
+            Exporter CSV
+          </button>
+          <button class="btn btn-secondary" (click)="printOperation(selectedBookingHistory)">
+            <span class="material-symbols-outlined notranslate">print</span>
+            Imprimer
+          </button>
         </div>
-      </section>
+        <button class="btn btn-secondary" (click)="closeHistoryModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-root" *ngIf="showDeleteModal">
+    <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    <div class="modal-panel mini">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: #ef4444">Supprimer l'empotage</h2>
+        <button class="btn-close-icon" (click)="cancelDelete()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-primary); font-weight: 600; text-align: center">
+          Voulez-vous vraiment supprimer cet empotage ?
+        </p>
+        <p style="font-size: 0.9em; color: var(--text-tertiary); text-align: center">
+          Cela supprimera également tous les conteneurs associés. Cette action est irréversible.
+        </p>
+      </div>
+      <div class="modal-footer space-between">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Annuler</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
 </div>

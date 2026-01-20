@@ -187,6 +187,7 @@ export class UserEntrepot implements OnInit {
     comment: ''
   };
   loadingAnalysis = false;
+  errorMessage = '';
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -789,6 +790,7 @@ export class UserEntrepot implements OnInit {
   openModal() {
     this.showSuccessBanner = false;
     this.isNewTruckInvalid = false;
+    this.errorMessage = '';
     this.newTruck = {
       immatriculation: '',
       transporteur: '',
@@ -819,6 +821,36 @@ export class UserEntrepot implements OnInit {
       alert('Entrepôt non chargé, impossible de créer le camion.');
       return;
     }
+
+    // --- CHECK DUPLICATE (Immat OR Transfert + Date) ---
+    const checkImmat = this.newTruck.immatriculation.trim().toLowerCase();
+    const checkTransfert = this.newTruck.transfert.trim().toLowerCase();
+    const todayStr = new Date().toDateString();
+
+    this.errorMessage = '';
+
+    const duplicate = this.trucks.find((t) => {
+      const tImmat = (t.immatriculation || '').trim().toLowerCase();
+      const tTrans = (t.transfert || '').trim().toLowerCase();
+      
+      const tDate = t.heureArrivee ? new Date(t.heureArrivee) : (t.createdAt ? new Date(t.createdAt) : null);
+      if (!tDate) return false;
+
+      if (tDate.toDateString() !== todayStr) return false;
+
+      // Check if Immat is duplicate
+      if (checkImmat && tImmat === checkImmat) return true;
+      // Check if Transfert is duplicate (if not empty)
+      if (checkTransfert && tTrans === checkTransfert) return true;
+
+      return false;
+    });
+
+    if (duplicate) {
+      this.errorMessage = "Doublon : cette immatriculation ou cette fiche de transfert a déjà été enregistrée aujourd'hui.";
+      return;
+    }
+    // --------------------------------------------------------
 
     const now = new Date();
     // note: 'Enregistré' n'est pas dans le type strict, on triche ou on change le type

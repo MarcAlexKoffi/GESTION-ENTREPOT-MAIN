@@ -38,6 +38,7 @@ export class UsersManager implements OnInit {
   // --- UI message simple
   toastMessage: string | null = null;
   isLoading = false;
+  showPassword = false;
 
   constructor(private userService: UserService, private warehouseService: WarehouseService) {}
 
@@ -169,7 +170,7 @@ export class UsersManager implements OnInit {
 
   openEditUser(user: User): void {
     this.isEditMode = true;
-    this.formUser = { ...user, password: '' }; // On ne préremplit pas le mot de passe
+    this.formUser = { ...user }; // Le mot de passe est maintenant inclus dans l'objet user depuis l'API
     this.showUserModal = true;
   }
 

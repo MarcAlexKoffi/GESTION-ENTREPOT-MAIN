@@ -7,16 +7,28 @@ import { WarehouseService } from '../services/warehouse.service';
 import { AuthService } from '../services/auth.service';
 import { environment } from '../config';
 
+interface EmpotageContainer {
+  id?: number;
+  empotageId?: number;
+  numeroConteneur: string;
+  nombreSacs: number;
+  volume: number;
+  poids: number;
+  createdAt?: string;
+}
+
 interface Empotage {
   id?: number;
   client: string;
+  clientType?: string;
   booking: string;
   conteneurs: number;
   volume: number;
   dateStart: string;
-  dateEnd: string;
-  status: 'A venir' | 'En cours' | 'Terminé';
-  entrepotId?: number; // Added to sync with Admin
+  dateEnd: string | null;
+  status: 'En attente' | 'Terminé';
+  entrepotId?: number;
+  containers?: EmpotageContainer[];
 }
 
 @Component({
@@ -31,18 +43,12 @@ export class UserEmpotage implements OnInit {
   private authService = inject(AuthService);
   private http = inject(HttpClient);
   
-  warehouses: any[] = []; // List to select from
-
-  stats = {
-    total: 0,
-    today: 0,
-    week: 0,
-    month: 0,
-    year: 0
-  };
-
+  warehouses: any[] = [];
   empotages: Empotage[] = [];
   
+  // Stats
+  stats = { total: 0, today: 0, week: 0, month: 0, year: 0 };
+
   // UI state
   search: string = '';
   filterDate: string = '';
@@ -50,17 +56,60 @@ export class UserEmpotage implements OnInit {
   loading = false;
   selectedWarehouseId: number | null = null;
   
-  // Modal state
-  showCreateModal = false;
-  saving = false;
-  isEditing = false;
-  currentId: number | null = null;
-  errorMessage: string = '';
+  // === MODAL STATES ===
   
-  // Delete Modal State
+  // 1. New Empotage Modal (Initial)
+  showCreateModal = false;
+  
+  // 2. Add Container Modal
+  showAddContainerModal = false;
+  selectedBookingForAdd: Empotage | null = null;
+  
+  // 3. History Modal
+  showHistoryModal = false;
+  selectedBookingHistory: Empotage | null = null;
+
+  // 4. Finalize Confirmation Modal
+  showFinalizeModal = false;
+  lastSavedEmpotageId: number | null = null; 
+
+  // Delete Modal
   showDeleteModal = false;
   itemToDelete: Empotage | null = null;
   
+  // Edit Modal
+  showEditModal = false;
+  editingId: number | null = null;
+  formEditContainer = {
+    numeroConteneur: '',
+    nombreSacs: 0,
+    volume: 0,
+    poids: 0
+  };
+
+  // Generic State
+  saving = false;
+  errorMessage: string = '';
+
+  // Form A: Initial Creation (Header + First Container)
+  formInit = {
+    client: '',
+    booking: '',
+    numeroConteneur: '',
+    nombreSacs: null as number | null,
+    volume: null as number | null,
+    poids: null as number | null,
+    entrepotId: 0
+  };
+
+  // Form B: Add Container (Just Container data)
+  formContainer = {
+    numeroConteneur: '',
+    nombreSacs: null as number | null,
+    volume: null as number | null,
+    poids: null as number | null
+  };
+
   // Pagination
   currentPage = 1;
   pageSize = 10;
@@ -81,25 +130,12 @@ export class UserEmpotage implements OnInit {
   prevPage() {
      if (this.currentPage > 1) this.currentPage--;
   }
-
-  newEmpotage: Empotage = {
-    client: '',
-    booking: '',
-    conteneurs: 1,
-    volume: 0,
-    dateStart: '',
-    dateEnd: '',
-    status: 'A venir',
-    entrepotId: undefined
-  };
   
-  // ... (computed filteredEmpotages and other methods remain same)
-
-  // --- Server integration ---
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     if (user && user.entrepotId) {
       this.selectedWarehouseId = user.entrepotId;
+      this.formInit.entrepotId = user.entrepotId;
     }
     this.loadWarehouses();
   }
@@ -110,6 +146,7 @@ export class UserEmpotage implements OnInit {
           this.warehouses = res;
           if (this.warehouses.length > 0 && !this.selectedWarehouseId) {
             this.selectedWarehouseId = this.warehouses[0].id;
+            this.formInit.entrepotId = this.warehouses[0].id;
             this.loadEmpotages();
           } else if (this.selectedWarehouseId) {
             this.loadEmpotages();
@@ -127,73 +164,360 @@ export class UserEmpotage implements OnInit {
       const data = await firstValueFrom(this.http.get<Empotage[]>(url));
       this.empotages = data;
       this.calculateStats();
-      this.currentPage = 1; // RESET PAGE on load
     } catch (e) {
       console.error('Erreur chargement empotages', e);
-      // alert('Erreur chargement empotages (voir console)');
     } finally {
       this.loading = false;
     }
   }
 
-  calculateStats() {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    // Calculate start of week (Monday)
-    const currentDay = now.getDay() || 7; // Sunday is 0, make it 7
-    const startOfWeek = new Date(startOfDay);
-    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+  // --- ACTIONS ---
 
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-    const list = this.filteredEmpotages;
-
-    this.stats = {
-      total: list.length,
-      today: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        // On compare strictement la date du jour (ignorer l'heure pour le jour courant)
-        return d.toDateString() === now.toDateString();
-      }).length,
-      week: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfWeek;
-      }).length,
-      month: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfMonth;
-      }).length,
-      year: list.filter(e => {
-        if (!e.dateStart) return false;
-        const d = new Date(e.dateStart);
-        return d >= startOfYear;
-      }).length
-    };
-  }
-
-  // Trigger server-side CSV download
-  exportCsvServer() {
-    const params = new URLSearchParams();
-    if (this.search) params.append('q', this.search);
-    window.location.href = `${environment.apiUrl}/empotages/export?${params.toString()}`;
-  }
-
-  openCreateModal() {
-    this.isEditing = false;
-    this.currentId = null;
-    this.showCreateModal = true;
+  // 1. INIT EMPOTAGE (Booking + Container 1)
+  openInitModal() {
     this.errorMessage = '';
-    // reset
-    this.newEmpotage = {
-      client: '', booking: '', conteneurs: 1, volume: 0, dateStart: '', dateEnd: '', status: 'A venir',
-      entrepotId: this.selectedWarehouseId || undefined
+    this.formInit = {
+      client: '',
+      booking: '',
+      numeroConteneur: '',
+      nombreSacs: null,
+      volume: null,
+      poids: null,
+      entrepotId: this.selectedWarehouseId || 0
     };
+    this.showCreateModal = true;
   }
+
+  closeInitModal() {
+    this.showCreateModal = false;
+  }
+
+  async submitInit() {
+    if(!this.formInit.client || !this.formInit.booking || !this.formInit.numeroConteneur) {
+        this.errorMessage = "Veuillez remplir les champs obligatoires";
+        return;
+    }
+    
+    this.saving = true;
+    try {
+        const res = await firstValueFrom(this.http.post<Empotage>(`${environment.apiUrl}/empotages/init`, this.formInit));
+        this.lastSavedEmpotageId = res.id!;
+        this.showCreateModal = false;
+        
+        // Ask for finalization
+        this.showFinalizeModal = true;
+        
+        this.loadEmpotages();
+    } catch(err) {
+        console.error(err);
+        this.errorMessage = "Erreur lors de la création";
+    } finally {
+        this.saving = false;
+    }
+  }
+
+  // 2. ADD CONTAINER
+  openAddContainerModal(booking: Empotage) {
+    if(booking.status === 'Terminé') return;
+    
+    this.errorMessage = '';
+    this.selectedBookingForAdd = booking;
+    this.formContainer = {
+       numeroConteneur: '',
+       nombreSacs: null,
+       volume: null,
+       poids: null
+    };
+    this.showAddContainerModal = true;
+  }
+
+  closeAddContainerModal() {
+    this.showAddContainerModal = false;
+    this.selectedBookingForAdd = null;
+  }
+
+  async submitAddContainer() {
+    if(!this.selectedBookingForAdd || !this.formContainer.numeroConteneur) {
+        this.errorMessage = "Numéro conteneur requis";
+        return;
+    }
+
+    this.saving = true;
+    try {
+        await firstValueFrom(this.http.post(`${environment.apiUrl}/empotages/${this.selectedBookingForAdd.id}/add-container`, this.formContainer));
+        
+        this.lastSavedEmpotageId = this.selectedBookingForAdd.id!;
+        this.showAddContainerModal = false;
+
+        // Ask for finalization
+        this.showFinalizeModal = true;
+
+        this.loadEmpotages();
+    } catch(err) {
+        console.error(err);
+        this.errorMessage = "Erreur ajout conteneur";
+    } finally {
+        this.saving = false;
+    }
+  }
+
+  // --- EDIT CONTAINER ACTIONS ---
+  openEditContainerModal(container: EmpotageContainer) {
+    if(!container.id) return;
+    this.errorMessage = '';
+    this.editingId = container.id;
+    this.formEditContainer = {
+        numeroConteneur: container.numeroConteneur,
+        nombreSacs: container.nombreSacs,
+        volume: container.volume,
+        poids: container.poids
+    };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingId = null;
+  }
+
+  async submitEdit() {
+      if(!this.editingId) return;
+      if(!this.formEditContainer.numeroConteneur) {
+          this.errorMessage = "Numéro conteneur requis";
+          return;
+      }
+
+      this.saving = true;
+      try {
+          // Endpoint: PUT /empotage-containers/:id
+          await firstValueFrom(this.http.put(`${environment.apiUrl}/empotage-containers/${this.editingId}`, this.formEditContainer));
+          
+          this.showEditModal = false;
+          // Reload current history (if we are in history view)
+          if(this.selectedBookingHistory && this.selectedBookingHistory.id) {
+             const fullData = await firstValueFrom(this.http.get<Empotage>(`${environment.apiUrl}/empotages/${this.selectedBookingHistory.id}`));
+             this.selectedBookingHistory.containers = fullData.containers;
+             // Also refresh main list to update totals if needed
+             this.loadEmpotages();
+          }
+      } catch(e) {
+          console.error(e);
+          this.errorMessage = "Erreur modification conteneur";
+      } finally {
+          this.saving = false;
+      }
+  }
+
+  // 3. HISTORY
+  async openHistory(item: Empotage) {
+    if(!item.id) return;
+    this.selectedBookingHistory = item;
+    // Load details if not present or always fresh load
+    try {
+       const fullData = await firstValueFrom(this.http.get<Empotage>(`${environment.apiUrl}/empotages/${item.id}`));
+       this.selectedBookingHistory.containers = fullData.containers;
+       this.showHistoryModal = true;
+    } catch(e) {
+       console.error(e);
+    }
+  }
+
+  closeHistoryModal() {
+    this.showHistoryModal = false;
+    this.selectedBookingHistory = null;
+  }
+  
+  openFinalizeManually(item: Empotage) {
+      if(item.status === 'Terminé') return;
+      this.lastSavedEmpotageId = item.id!;
+      this.showFinalizeModal = true;
+  }
+
+  exportHistoryCsv() {
+    if (!this.selectedBookingHistory || !this.selectedBookingHistory.containers) return;
+
+    // Entêtes pour le fichier CSV
+    const headers = ['Booking', 'Conteneur', 'Sacs', 'Volume (m³)', 'Poids (kg)', 'Date Ajout'];
+    
+    // Construction des lignes
+    const rows = this.selectedBookingHistory.containers.map(c => {
+      const dateAjout = c.createdAt ? new Date(c.createdAt).toLocaleDateString('fr-FR') + ' ' + new Date(c.createdAt).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'}) : '';
+      
+      const clean = (str: string) => (str || '').replace(/;/g, ',');
+
+      return [
+        clean(this.selectedBookingHistory!.booking),
+        clean(c.numeroConteneur),
+        c.nombreSacs,
+        (c.volume || 0).toLocaleString('fr-FR'),
+        (c.poids || 0).toLocaleString('fr-FR'),
+        dateAjout
+      ].join(';');
+    });
+
+    const csvContent = [headers.join(';'), ...rows].join('\n');
+    
+    // Ajout du BOM pour l'encodage UTF-8 correct dans Excel
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Téléchargement
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `historique_${this.selectedBookingHistory.booking}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  printOperation(op: Empotage) {
+    if (!op) return;
+
+    const popupWin = window.open('', '_blank', 'width=1000,height=800,top=50,left=50');
+    if (!popupWin) {
+      alert("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
+      return;
+    }
+
+    const containersHtml = op.containers?.map(c => `
+      <tr>
+        <td>${c.numeroConteneur}</td>
+        <td>${c.nombreSacs}</td>
+        <td>${c.volume} m³</td>
+        <td>${c.poids} kg</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;">Aucun conteneur</td></tr>';
+
+    const content = `
+      <html>
+        <head>
+          <title>Impression Empotage - ${op.booking}</title>
+          <style>
+             body { font-family: sans-serif; padding: 40px; color: #333; }
+             .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+             h1 { margin: 0; font-size: 24px; }
+             .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 30px; }
+             .meta-item { display: flex; flex-direction: column; }
+             .label { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #666; }
+             .value { font-size: 16px; margin-top: 4px; }
+             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+             th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+             th { background-color: #f5f5f5; font-weight: bold; }
+             .footer { margin-top: 50px; font-size: 12px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Bon d'Empotage</h1>
+            <div style="text-align: right;">
+               <div style="font-size: 14px; font-weight: bold;">${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
+          
+          <div class="meta">
+            <div class="meta-item">
+              <span class="label">Booking</span>
+              <span class="value">${op.booking}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Client</span>
+              <span class="value">${op.client}</span>
+            </div>
+             <div class="meta-item">
+              <span class="label">Date Début</span>
+              <span class="value">${new Date(op.dateStart).toLocaleDateString()} ${new Date(op.dateStart).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Statut</span>
+              <span class="value">${op.status}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Total Conteneurs</span>
+              <span class="value">${op.conteneurs}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Volume Total</span>
+              <span class="value">${op.volume} m³</span>
+            </div>
+          </div>
+
+          <h3>Liste des Conteneurs</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>N° Conteneur</th>
+                <th>Sacs</th>
+                <th>Volume</th>
+                <th>Poids</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${containersHtml}
+            </tbody>
+          </table>
+
+          <div class="footer">
+             Généré automatiquement par le système de Gestion Entrepôt
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    `;
+
+    popupWin.document.open();
+    popupWin.document.write(content);
+    popupWin.document.close();
+  }
+
+  // 4. FINALIZE (Modale Oui/Non)
+  closeFinalizeModal() {
+    // Action = NON (Pas terminé)
+    this.showFinalizeModal = false;
+    this.lastSavedEmpotageId = null;
+  }
+
+  async confirmFinalize() {
+    // Action = OUI (Terminé)
+    if(!this.lastSavedEmpotageId) return;
+
+    this.saving = true;
+    try {
+        await firstValueFrom(this.http.put(`${environment.apiUrl}/empotages/${this.lastSavedEmpotageId}/finalize`, {}));
+        this.showFinalizeModal = false;
+        this.lastSavedEmpotageId = null;
+        this.loadEmpotages();
+    } catch(err) {
+       console.error(err);
+    } finally {
+       this.saving = false;
+    }
+  }
+
+  // 4. DELETE
+  deleteEmpotage(item: Empotage) {
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
+  }
+
+  async confirmDelete() {
+    if (!this.itemToDelete || !this.itemToDelete.id) return;
+    try {
+      await firstValueFrom(this.http.delete(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`));
+      this.cancelDelete();
+      this.loadEmpotages();
+    } catch(err) { console.error(err); }
+  }
+
+  // --- FILTERING & STATS ---
+
   get filteredEmpotages(): Empotage[] {
     const q = this.search.trim().toLowerCase();
     return this.empotages.filter(item => {
@@ -204,15 +528,22 @@ export class UserEmpotage implements OnInit {
       if (!q) return true;
       return (
         (item.client || '').toLowerCase().includes(q) ||
-        (item.booking || '').toLowerCase().includes(q)
+        (item.booking || '').toLowerCase().includes(q) ||
+        (item.status || '').toLowerCase().includes(q)
       );
     });
+  }
+
+  onFiltersChange() {
+      this.currentPage = 1;
+      this.calculateStats();
   }
 
   setPeriod(p: 'today' | 'week' | 'month' | 'year' | 'specific') {
     this.period = p;
     if (p !== 'specific') this.filterDate = '';
-    this.onFiltersChange();
+    this.currentPage = 1;
+    this.calculateStats();
   }
 
   onDateChange() {
@@ -241,194 +572,74 @@ export class UserEmpotage implements OnInit {
        const dateStr = `${year}-${month}-${day}`;
        return dateStr === this.filterDate;
     }
-
-    if (this.period === 'today') {
-      return created.toDateString() === now.toDateString();
-    }
-    if (this.period === 'week') {
-      return created >= startOfWeek;
-    }
-    if (this.period === 'month') {
-      return created >= startOfMonth;
-    }
-    if (this.period === 'year') {
-      return created >= startOfYear;
-    }
-
+    if (this.period === 'today') return created.toDateString() === now.toDateString();
+    if (this.period === 'week') return created >= startOfWeek;
+    if (this.period === 'month') return created >= startOfMonth;
+    if (this.period === 'year') return created >= startOfYear;
     return true;
   }
 
-  // When filters change, reset pagination
-  onFiltersChange() {
-      this.currentPage = 1;
-      this.calculateStats();
+  calculateStats() {
+    const now = new Date();
+    // Same period logic for stats
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentDay = now.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDay - 1));
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const all = this.empotages;
+
+    this.stats = {
+      total: all.length,
+      today: all.filter(e => e.dateStart && new Date(e.dateStart).toDateString() === now.toDateString()).length,
+      week: all.filter(e => e.dateStart && new Date(e.dateStart) >= startOfWeek).length,
+      month: all.filter(e => e.dateStart && new Date(e.dateStart) >= startOfMonth).length,
+      year: all.filter(e => e.dateStart && new Date(e.dateStart) >= startOfYear).length
+    };
   }
-
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'A venir': return 'status-future';
-      case 'En cours': return 'status-progress';
-      case 'Terminé': return 'status-completed';
-      default: return '';
-    }
-  }
-
-  // Actions
-  deleteEmpotage(item: Empotage) {
-    if (!item.id) return;
-    this.itemToDelete = item;
-    this.showDeleteModal = true;
-  }
-
-  cancelDelete() {
-    this.showDeleteModal = false;
-    this.itemToDelete = null;
-  }
-
-  async confirmDelete() {
-    if (!this.itemToDelete || !this.itemToDelete.id) return;
+  
+  exportCsvClient() {
+    // Entêtes pour le fichier CSV
+    const headers = ['Client', 'Booking', 'Conteneurs', 'Volume (m³)', 'Date Début', 'Date Fin', 'Statut'];
     
-    try {
-      await firstValueFrom(this.http.delete(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`));
+    // Construction des lignes
+    const rows = this.filteredEmpotages.map(item => {
+      const start = item.dateStart ? new Date(item.dateStart).toLocaleDateString('fr-FR') : '';
+      const end = item.dateEnd ? new Date(item.dateEnd).toLocaleDateString('fr-FR') : '';
       
-      // refresh
-      await this.loadEmpotages();
-    } catch (e) {
-      console.error('Erreur suppression', e);
-      alert('Erreur lors de la suppression');
-    } finally {
-      this.cancelDelete();
-    }
-  }
+      // Nettoyage des données pour le CSV (échappement des points-virgules si nécessaire)
+      const clean = (str: string) => (str || '').replace(/;/g, ',');
 
-  editEmpotage(item: Empotage) {
-    this.isEditing = true;
-    this.currentId = item.id || null;
+      return [
+        clean(item.client),
+        clean(item.booking),
+        item.conteneurs,
+        (item.volume || 0).toLocaleString('fr-FR'), // Format nombre avec virgule
+        start,
+        end,
+        clean(item.status)
+      ].join(';'); // Utilisation du point-virgule pour Excel version FR
+    });
+
+    const csvContent = [headers.join(';'), ...rows].join('\n');
     
-    // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
-    const formatDate = (dateStr: string) => {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return '';
-      // Adjust to local ISO string roughly
-      const pad = (n: number) => n < 10 ? '0' + n : n;
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
-
-    this.newEmpotage = { 
-      ...item,
-      dateStart: formatDate(item.dateStart),
-      dateEnd: formatDate(item.dateEnd)
-    };
-    this.showCreateModal = true;
-  }
-
-  // Export the currently visible rows as CSV
-  exportCsv(filename = 'empotages.csv') {
-    const rows = this.filteredEmpotages;
-    if (!rows.length) {
-      alert('Aucune donnée à exporter.');
-      return;
-    }
-
-    const headers = ['Client', 'Booking', 'Conteneurs', 'Volume (m3)', 'Début', 'Fin', 'Statut'];
-    
-    // Helper to format date for CSV (DD/MM/YYYY HH:mm)
-    const fmtDate = (isoStr: string | undefined) => {
-      if (!isoStr) return '';
-      const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return '';
-      return d.toLocaleString('fr-FR', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
-    };
-
-    const escape = (v: any) => {
-      if (v === null || v === undefined) return '';
-      const s = String(v);
-      // Escape for CSV (quotes)
-      if (s.includes(';') || s.includes('"') || s.includes('\n')) {
-        return `"${s.replace(/"/g, '""')}"`;
-      }
-      return s;
-    };
-
-    // Use semicolon for better Excel compatibility in FR regions
-    const separator = ';';
-    
-    const csvContent = [headers.join(separator)]
-      .concat(rows.map(r => [
-        r.client, 
-        r.booking, 
-        r.conteneurs, 
-        r.volume, 
-        fmtDate(r.dateStart), 
-        fmtDate(r.dateEnd), 
-        r.status
-      ].map(escape).join(separator)))
-      .join('\n');
-
-    // Add BOM for UTF-8 Excel support
+    // Ajout du BOM pour l'encodage UTF-8 correct dans Excel
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     
+    // Téléchargement
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.setAttribute('download', filename);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `empotages_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
   }
 
-  closeCreateModal() {
-    this.showCreateModal = false;
-    this.saving = false;
-    this.isEditing = false;
-    this.currentId = null;
-  }
-
-  async saveEmpotage() {
-    this.errorMessage = '';
-    // Basic validation
-    if (!this.newEmpotage.entrepotId) {
-       this.errorMessage = 'Erreur interne: aucun entrepôt sélectionné.';
-       return;
-    }
-    if (!this.newEmpotage.client || 
-        !this.newEmpotage.booking || 
-        !this.newEmpotage.conteneurs || 
-        !this.newEmpotage.volume || 
-        !this.newEmpotage.dateStart) {
-      this.errorMessage = 'Veuillez remplir tous les champs obligatoires (Client, Booking, Booking, Volume, Date de début).';
-      return;
-    }
-    this.saving = true;
-    try {
-      let url = `${environment.apiUrl}/empotages`;
-      let req;
-
-      if (this.isEditing && this.currentId) {
-        url = `${environment.apiUrl}/empotages/${this.currentId}`;
-        req = this.http.put(url, this.newEmpotage);
-      } else {
-        req = this.http.post(url, this.newEmpotage);
-      }
-
-      await firstValueFrom(req);
-      
-      this.closeCreateModal();
-      // reload list
-      await this.loadEmpotages();
-      // alert(this.isEditing ? 'Empotage modifié' : 'Empotage créé');
-    } catch (e: any) {
-      console.error('Erreur sauvegarde empotage', e);
-      alert(`Erreur : ${e.status || ''} ${e.message || ''}`);
-    } finally {
-      this.saving = false;
-    }
+  getStatusClass(status: string): string {
+     if (status === 'Terminé') return 'status-completed';
+     return 'status-future'; // 'En attente'
   }
 }

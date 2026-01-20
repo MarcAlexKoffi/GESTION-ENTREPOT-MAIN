@@ -23,6 +23,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // ===============================================================
   notifCount = 0;
   showNotifDropdown = false;
+  showUserMenu = false; // Added for User Profile Dropdown
   
   // Logout confirmation
   showLogoutConfirm = false;
@@ -165,16 +166,28 @@ export class Dashboard implements OnInit, OnDestroy {
   toggleNotifications(event: MouseEvent) {
     event.stopPropagation(); // empêche la fermeture immédiate
     this.showNotifDropdown = !this.showNotifDropdown;
+    if (this.showNotifDropdown) this.showUserMenu = false;
+  }
+  
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+    if (this.showUserMenu) this.showNotifDropdown = false;
   }
 
   @HostListener('document:click')
-  closeNotifOnOutsideClick(): void {
-    this.showNotifDropdown = false;
+  closeDropdownsOnOutsideClick(): void {
+    if (this.showNotifDropdown) {
+      this.showNotifDropdown = false;
+    }
+    if (this.showUserMenu) {
+      this.showUserMenu = false;
+    }
   }
 
   @HostListener('document:keydown.escape')
   closeNotifOnEscape(): void {
     this.showNotifDropdown = false;
+    this.showUserMenu = false;
   }
 
   // ===============================================================

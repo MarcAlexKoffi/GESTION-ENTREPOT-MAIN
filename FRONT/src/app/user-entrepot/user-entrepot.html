@@ -246,7 +246,7 @@
 
         <!-- Immatriculation -->
         <div class="truck-field">
-          <label class="truck-label" for="immatriculation"> Immatriculation du camion </label>
+          <label class="truck-label" for="immatriculation"> Immatriculation du camion <span style="color:red">*</span></label>
           <input
             id="immatriculation"
             type="text"
@@ -260,7 +260,7 @@
 
         <!-- Transporteur -->
         <div class="truck-field">
-          <label class="truck-label" for="transporteur"> Transporteur / Chauffeur </label>
+          <label class="truck-label" for="transporteur"> Transporteur / Chauffeur <span style="color:red">*</span></label>
           <input
             id="transporteur"
             type="text"
@@ -287,7 +287,7 @@
 
         <!-- Coopérative -->
         <div class="truck-field">
-          <label class="truck-label" for="cooperative"> Nom coopérative </label>
+          <label class="truck-label" for="cooperative"> Nom coopérative <span style="color:red">*</span></label>
           <input
             id="cooperative"
             type="text"
@@ -301,6 +301,9 @@
 
         <div *ngIf="isNewTruckInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem; padding:0.5rem; background:#fef2f2; border-radius:0.5rem; border:1px solid #fecaca;">
             Tous les champs sont requis.
+        </div>
+        <div *ngIf="errorMessage" style="color:#ef4444; font-weight:700; margin-top:1rem; padding:0.5rem; background:#fef2f2; border-radius:0.5rem; border:1px solid #fecaca;">
+            {{ errorMessage }}
         </div>
       </div>
 
@@ -333,19 +336,19 @@
         </div>
         <div class="modal-body">
             <div class="truck-field">
-                <label class="truck-label">Immatriculation</label>
+                <label class="truck-label">Immatriculation <span style="color:red">*</span></label>
                 <input class="truck-input" [(ngModel)]="editTruckData.immatriculation">
             </div>
             <div class="truck-field">
-                <label class="truck-label">Transporteur</label>
+                <label class="truck-label">Transporteur <span style="color:red">*</span></label>
                 <input class="truck-input" [(ngModel)]="editTruckData.transporteur">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Transfert</label>
+                <label class="truck-label">Transfert <span style="color:red">*</span></label>
                 <input class="truck-input" [(ngModel)]="editTruckData.transfert">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Coopérative</label>
+                <label class="truck-label">Coopérative <span style="color:red">*</span></label>
                 <input class="truck-input" [(ngModel)]="editTruckData.cooperative">
             </div>
 
@@ -375,13 +378,13 @@
             </div>
 
             <div class="truck-field">
-                <label class="truck-label">KOR</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.kor" placeholder="Ex: 11">
+                <label class="truck-label">KOR <span style="color:red">*</span></label>
+                <input type="number" class="truck-input" [(ngModel)]="analysisData.kor" placeholder="Ex: 11" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
             </div>
             
             <div class="truck-field">
-                <label class="truck-label">TH</label>
-                <input type="number" class="truck-input" [(ngModel)]="analysisData.th" placeholder="Ex: 12.5">
+                <label class="truck-label">TH <span style="color:red">*</span></label>
+                <input type="number" class="truck-input" [(ngModel)]="analysisData.th" placeholder="Ex: 12.5" oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);">
             </div>
 
             <div *ngIf="isAnalysisInvalid" style="color:#ef4444; font-weight:700; margin-top:1rem;">
@@ -412,27 +415,27 @@
                 <input type="text" class="truck-input" [value]="productsData.numeroCamion" readonly disabled style="background:#f1f5f9; color:#64748b;">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Numéro de la fiche de transfert</label>
+                <label class="truck-label">Numéro de la fiche de transfert <span style="color:red">*</span></label>
                 <input type="text" class="truck-input" [(ngModel)]="productsData.numeroFicheTransfert">
             </div>
             <div class="truck-field">
-                <label class="truck-label">Numéro de lot</label>
+                <label class="truck-label">Numéro de lot <span style="color:red">*</span></label>
                 <input type="text" class="truck-input" [(ngModel)]="productsData.numeroLot" placeholder="Ex : LOT-4587">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Nombre de sacs déchargés</label>
+                <label class="truck-label">Nombre de sacs déchargés <span style="color:red">*</span></label>
                 <input type="number" class="truck-input" [(ngModel)]="productsData.nombreSacsDecharges" placeholder="Ex: 120">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Poids brut</label>
+                <label class="truck-label">Poids brut <span style="color:red">*</span></label>
                 <input type="number" class="truck-input" [(ngModel)]="productsData.poidsBrut" placeholder="Ex: 3500">
             </div>
              <div class="truck-field">
-                <label class="truck-label">Poids net</label>
+                <label class="truck-label">Poids net <span style="color:red">*</span></label>
                 <input type="number" class="truck-input" [(ngModel)]="productsData.poidsNet" placeholder="Ex: 3400">
             </div>
              <div class="truck-field">
-                <label class="truck-label">KOR</label>
+                <label class="truck-label">KOR <span style="color:red">*</span></label>
                 <input type="number" class="truck-input" [(ngModel)]="productsData.kor">
             </div>
 

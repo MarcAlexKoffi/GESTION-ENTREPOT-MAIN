@@ -4,326 +4,585 @@
       <h1 class="page-title">Gestion des Empotages</h1>
       <p class="page-subtitle">Suivez et gérez l'ensemble de vos opérations de chargement.</p>
     </div>
-    <button class="btn btn-primary" (click)="openCreateModal()">
+    <button class="btn btn-primary" (click)="openInitModal()">
       <span class="material-symbols-outlined notranslate">add</span>
       <span>Nouveau empotage</span>
     </button>
   </header>
 
-  <!-- CONTROLS: search, status filter, export -->
+  <!-- CONTROLS -->
   <section class="controls-area">
-      <div class="search-and-filters">
-          <!-- SEARCH -->
-          <div class="search-box">
-              <span class="material-symbols-outlined notranslate search-icon">search</span>
-              <input type="text" placeholder="Recherche client ou booking..." [(ngModel)]="search"
-                  (ngModelChange)="onFiltersChange()" />
-          </div>
-
-          <!-- PERIOD FILTER -->
-          <div class="period-selector">
-            <button 
-              [class.active]="period === 'today'" 
-              (click)="setPeriod('today')"
-            >Aujourd'hui</button>
-            <button 
-              [class.active]="period === 'week'" 
-              (click)="setPeriod('week')"
-            >Semaine</button>
-            <button 
-              [class.active]="period === 'month'" 
-              (click)="setPeriod('month')"
-            >Mois</button>
-            <button 
-              [class.active]="period === 'year'" 
-              (click)="setPeriod('year')"
-            >Année</button>
-          </div>
-
-           <!-- DATE INPUT -->
-           <div class="date-input-wrapper">
-              <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
-              <input 
-                  type="date" 
-                  [(ngModel)]="filterDate" 
-                  (ngModelChange)="onDateChange()"
-                  placeholder="Date spécifique"
-              />
-           </div>
+    <div class="search-and-filters">
+      <!-- SEARCH -->
+      <div class="search-box">
+        <span class="material-symbols-outlined notranslate search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Recherche client ou booking..."
+          [(ngModel)]="search"
+          (ngModelChange)="onFiltersChange()"
+        />
       </div>
 
-      <div class="control-actions">
-        <button class="btn btn-primary" (click)="exportCsv()" [disabled]="loading">
-          <span class="material-symbols-outlined notranslate">file_download</span>
-          <span>Exporter CSV</span>
+      <!-- PERIOD FILTER -->
+      <div class="period-selector">
+        <button [class.active]="period === 'today'" (click)="setPeriod('today')">
+          Aujourd'hui
         </button>
-      </div>
-  </section>
-
-  <!-- CREATE MODAL -->
-  <div class="modal" *ngIf="showCreateModal">
-    <div class="modal__backdrop" (click)="closeCreateModal()"></div>
-    <div class="modal__panel">
-      <div class="truck-modal-header">
-        <h2 class="truck-modal-title">
-          {{ isEditing ? 'Modifier empotage' : 'Créer un nouvel empotage' }}
-        </h2>
-        <button class="truck-modal-close" (click)="closeCreateModal()">
-          <span class="material-symbols-outlined notranslate">close</span>
-        </button>
+        <button [class.active]="period === 'week'" (click)="setPeriod('week')">Semaine</button>
+        <button [class.active]="period === 'month'" (click)="setPeriod('month')">Mois</button>
+        <button [class.active]="period === 'year'" (click)="setPeriod('year')">Année</button>
       </div>
 
-      <div class="truck-modal-body">
-        <div
-          *ngIf="errorMessage"
-          style="
-            background-color: #fee2e2;
-            color: #991b1b;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          "
-        >
-          <span class="material-symbols-outlined notranslate" style="font-size: 18px">error</span>
-          {{ errorMessage }}
-        </div>
-
-        <div class="form-row">
-          <label>Client</label>
-          <input
-            type="text"
-            [(ngModel)]="newEmpotage.client"
-            name="client"
-            required
-            placeholder="Ex: Marcus Koné"
-          />
-        </div>
-
-        <div class="form-row">
-          <label>Numéro de Booking</label>
-          <input
-            type="text"
-            [(ngModel)]="newEmpotage.booking"
-            name="booking"
-            required
-            placeholder="Ex: BK-98213"
-          />
-        </div>
-
-        <div class="form-row two-cols">
-          <div>
-            <label>Conteneurs</label>
-            <input
-              type="number"
-              min="1"
-              [(ngModel)]="newEmpotage.conteneurs"
-              name="conteneurs"
-              required
-              placeholder="NB"
-            />
-          </div>
-          <div>
-            <label>Volume (m³)</label>
-            <input
-              type="number"
-              step="0.1"
-              [(ngModel)]="newEmpotage.volume"
-              name="volume"
-              required
-              placeholder="m³"
-            />
-          </div>
-        </div>
-
-        <div class="form-row two-cols">
-          <div>
-            <label>Début</label>
-            <input
-              type="datetime-local"
-              [(ngModel)]="newEmpotage.dateStart"
-              name="dateStart"
-              required
-            />
-          </div>
-          <div>
-            <label>Fin</label>
-            <input
-              type="datetime-local"
-              [(ngModel)]="newEmpotage.dateEnd"
-              name="dateEnd"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="truck-modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="closeCreateModal()"
-          [disabled]="saving"
-        >
-          Annuler
-        </button>
-        <button type="button" class="btn btn-primary" (click)="saveEmpotage()" [disabled]="saving">
-          <span *ngIf="!saving">{{ isEditing ? 'Enregistrer' : 'Créer' }}</span>
-          <span *ngIf="saving">En cours...</span>
-        </button>
+      <!-- DATE INPUT -->
+      <div class="date-input-wrapper">
+        <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
+        <input type="date" [(ngModel)]="filterDate" (ngModelChange)="onDateChange()" />
       </div>
     </div>
-  </div>
 
-  <!-- DELETE CONFIRMATION MODAL -->
-  <div class="modal" *ngIf="showDeleteModal">
-    <div class="modal__backdrop" (click)="cancelDelete()"></div>
-    <div class="modal__panel">
-      <div class="truck-modal-header">
-        <h2 class="truck-modal-title">Confirmer la suppression</h2>
-        <button class="truck-modal-close" (click)="cancelDelete()">
-          <span class="material-symbols-outlined notranslate">close</span>
-        </button>
-      </div>
-      <div class="truck-modal-body">
-        <div style="color: var(--text-secondary); line-height: 1.5">
-          <p>Êtes-vous sûr de vouloir supprimer cet empotage ?</p>
-          <p
-            *ngIf="itemToDelete"
-            style="font-weight: 600; color: var(--text-primary); margin-top: 0.5rem"
-          >
-            {{ itemToDelete.client }} ({{ itemToDelete.booking }})
-          </p>
-          <p
-            style="
-              margin-top: 0.5rem;
-              font-size: 0.9em;
-              color: #ef4444;
-              display: flex;
-              align-items: center;
-              gap: 0.5rem;
-            "
-          >
-            <span class="material-symbols-outlined notranslate" style="font-size: 18px">warning</span>
-            Cette action est irréversible.
-          </p>
-        </div>
-      </div>
-      <div class="truck-modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Annuler</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border: none"
-          (click)="confirmDelete()"
-        >
-          Supprimer
-        </button>
-      </div>
+    <div class="actions-group">
+      <button class="btn btn-primary" (click)="exportCsvClient()" [disabled]="loading">
+        <span class="material-symbols-outlined notranslate">file_download</span>
+        <span>Exporter CSV</span>
+      </button>
     </div>
-  </div>
-
-  <section class="stats-grid">
-    <article class="stat-card">
-      <p class="stat-label">TOTAL</p>
-      <p class="stat-value">{{ stats.total }}</p>
-    </article>
-    <article class="stat-card">
-      <p class="stat-label" style="color: #3b82f6">AUJOURD'HUI</p>
-      <p class="stat-value">{{ stats.today }}</p>
-    </article>
-    <article class="stat-card">
-      <p class="stat-label" style="color: #8b5cf6">CETTE SEMAINE</p>
-      <p class="stat-value">{{ stats.week }}</p>
-    </article>
-    <article class="stat-card">
-      <p class="stat-label" style="color: #10b981">CE MOIS</p>
-      <p class="stat-value">{{ stats.month }}</p>
-    </article>
-    <article class="stat-card">
-      <p class="stat-label" style="color: #f59e0b">CETTE ANNÉE</p>
-      <p class="stat-value">{{ stats.year }}</p>
-    </article>
   </section>
 
-  <section class="card">
-    <div class="table-wrapper">
+  <!-- TABLE CARD (New Structure) -->
+  <div class="card table-card">
+    <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>Client</th>
             <th>Booking</th>
-            <th class="text-center">Conteneurs</th>
-            <th class="text-center">Volume (m³)</th>
+            <th>Conteneurs</th>
+            <th>Volume</th>
             <th>Début</th>
             <th>Fin</th>
-            <th class="text-right">Actions</th>
+            <th>Statut</th>
+            <th style="text-align: right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of paginatedEmpotages">
-            <td>
-              <div class="client-info">
-                <strong>{{ item.client }}</strong>
+          <!-- EMPTY STATE INSIDE TABLE -->
+          <tr *ngIf="filteredEmpotages.length === 0 && !loading">
+            <td colspan="8" style="padding: 0">
+              <div class="empty-state-content">
+                <span class="material-symbols-outlined notranslate">content_paste_off</span>
+                <p>Aucun empotage trouvé</p>
+                <small style="color: var(--text-secondary)"
+                  >Modifiez vos filtres ou créez un nouvel enregistrement.</small
+                >
               </div>
             </td>
-            <td class="booking-link">
-              {{ item.booking }}
+          </tr>
+
+          <!-- LOADING STATE -->
+          <tr *ngIf="loading">
+            <td colspan="8" style="padding: 3rem; text-align: center">
+              <span style="color: var(--text-secondary)">Chargement des données...</span>
             </td>
-            <td class="text-center">{{ item.conteneurs }}</td>
-            <td class="text-center">{{ item.volume }}</td>
+          </tr>
+
+          <!-- ROWS -->
+          <tr *ngFor="let item of paginatedEmpotages" class="row-hover">
             <td>
-              <span style="font-size: 0.9rem; color: #64748b">{{
-                item.dateStart | date : 'dd/MM/yyyy HH:mm'
-              }}</span>
+              <div class="client-info">
+                <div class="client-avatar">
+                  {{ item.client.charAt(0).toUpperCase() }}
+                </div>
+                <span class="cell-bold">{{ item.client }}</span>
+              </div>
+            </td>
+            <td class="cell-bold">{{ item.booking }}</td>
+            <td style="text-align: center">
+              <span
+                style="font-weight: 700; background: #f3f4f6; padding: 2px 8px; border-radius: 4px"
+                >{{ item.conteneurs }}</span
+              >
+            </td>
+            <td>{{ item.volume | number : '1.0-2' }} m³</td>
+            <td class="cell-muted">{{ item.dateStart | date : 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="cell-muted">
+              {{ item.dateEnd ? (item.dateEnd | date : 'dd/MM/yyyy HH:mm') : '-' }}
             </td>
             <td>
-              <span style="font-size: 0.9rem; color: #64748b">{{
-                item.dateEnd | date : 'dd/MM/yyyy HH:mm'
-              }}</span>
+              <span
+                class="status-pill"
+                [ngClass]="item.status === 'Terminé' ? 'status-completed' : 'status-future'"
+              >
+                <span class="material-symbols-outlined notranslate">
+                  {{ item.status === 'Terminé' ? 'check_circle' : 'hourglass_empty' }}
+                </span>
+                {{ item.status }}
+              </span>
             </td>
-            <td class="text-right">
-              <div class="actions">
-                <button class="btn-icon" title="Modifier" (click)="editEmpotage(item)">
-                  <span class="material-symbols-outlined notranslate">edit</span>
-                </button>
-                <button
-                  class="btn-icon delete-btn"
-                  title="Supprimer"
-                  (click)="deleteEmpotage(item)"
-                >
-                  <span class="material-symbols-outlined notranslate">delete</span>
-                </button>
+            <td>
+              <div class="actions-group">
+                <div class="actions-subgroup">
+                  <!-- OPERATIONAL -->
+                  <button
+                    class="action-btn btn-add"
+                    title="Ajouter Conteneur"
+                    (click)="openAddContainerModal(item)"
+                    [disabled]="item.status === 'Terminé'"
+                  >
+                    <span class="material-symbols-outlined notranslate">add_box</span>
+                  </button>
+
+                  <button
+                    class="action-btn btn-validate"
+                    title="Marquer comme Terminé"
+                    *ngIf="item.status !== 'Terminé'"
+                    (click)="openFinalizeManually(item)"
+                  >
+                    <span class="material-symbols-outlined notranslate">check_circle</span>
+                  </button>
+
+                  <div class="actions-divider"></div>
+
+                  <!-- ADMIN -->
+                  <button
+                    class="action-btn btn-history"
+                    title="Historique / Détails"
+                    (click)="openHistory(item)"
+                  >
+                    <span class="material-symbols-outlined notranslate">history</span>
+                  </button>
+                  <button
+                    class="action-btn btn-delete"
+                    title="Supprimer"
+                    (click)="deleteEmpotage(item)"
+                  >
+                    <span class="material-symbols-outlined notranslate">delete</span>
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    
-    <!-- Table Footer with Pagination -->
-    <div class="table-footer" *ngIf="filteredEmpotages.length > 0">
-      <div class="pagination-info">PAGE {{ currentPage }} DE {{ totalPages }}</div>
-      <div class="pagination-controls">
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === 1"
-          (click)="prevPage()" 
-          title="Page précédente"
-        >
-          <span class="material-symbols-outlined notranslate">chevron_left</span>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="pagination-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+        <span class="material-symbols-outlined notranslate">chevron_left</span>
+      </button>
+      <span class="pagination-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <span class="material-symbols-outlined notranslate">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. INITIAL CREATION MODAL -->
+  <div class="modal-root" *ngIf="showCreateModal">
+    <div class="modal-backdrop" (click)="closeInitModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="modal-title">Nouveau Booking</h2>
+        <button class="btn-close-icon" (click)="closeInitModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
         </button>
-        <button 
-          class="page-btn" 
-          [disabled]="currentPage === totalPages"
-          (click)="nextPage()" 
-          title="Page suivante"
+      </div>
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Client & Booking -->
+          <div class="form-grid grid-2">
+            <div class="form-field">
+              <label class="form-label">Client <span style="color: red">*</span></label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="formInit.client"
+                placeholder="Nom du client"
+                required
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label">N° Booking <span style="color: red">*</span></label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="formInit.booking"
+                placeholder="ex: 234567"
+                required
+              />
+            </div>
+          </div>
+          <hr style="border: 0; border-top: 1px solid var(--border-light); margin: 0.5rem 0" />
+          <p style="font-weight: 700; color: var(--text-primary); margin: 0">Premier Conteneur</p>
+
+          <div class="form-field">
+            <label class="form-label">N° Conteneur <span style="color: red">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="formInit.numeroConteneur"
+              placeholder="ex: CXRU-123456"
+              required
+            />
+          </div>
+
+          <div class="form-grid grid-3" style="grid-template-columns: 1fr 1fr 1fr">
+            <div class="form-field">
+              <label class="form-label">Sacs <span style="color: red">*</span></label>
+              <input type="number" class="form-input" [(ngModel)]="formInit.nombreSacs" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Volume (m³) <span style="color: red">*</span></label>
+              <input type="number" class="form-input" [(ngModel)]="formInit.volume" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Poids (kg) <span style="color: red">*</span></label>
+              <input type="number" class="form-input" [(ngModel)]="formInit.poids" required />
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="errorMessage"
+          style="margin-top: 1rem; color: #ef4444; font-size: 0.9rem; font-weight: 600"
         >
-          <span class="material-symbols-outlined notranslate">chevron_right</span>
+          {{ errorMessage }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" style="background-color: #dc3545; color: white; border: none;" (click)="closeInitModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="submitInit()" [disabled]="saving">
+          {{ saving ? 'Enregistrement...' : 'Créer Booking' }}
         </button>
       </div>
     </div>
-  </section>
+  </div>
+
+  <!-- 2. ADD CONTAINER MODAL -->
+  <div class="modal-root" *ngIf="showAddContainerModal">
+    <div class="modal-backdrop" (click)="closeAddContainerModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="modal-title">Ajouter un Conteneur</h2>
+        <button class="btn-close-icon" (click)="closeAddContainerModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div
+          style="
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+          "
+        >
+          <div>
+            <small style="color: var(--text-secondary); display: block">Booking</small>
+            <strong style="font-size: 1.1rem">{{ selectedBookingForAdd?.booking }}</strong>
+          </div>
+          <div style="text-align: right">
+            <small style="color: var(--text-secondary); display: block">Conteneur actuel</small>
+            <strong style="color: var(--primary)"
+              >#{{ (selectedBookingForAdd?.conteneurs || 0) + 1 }}</strong
+            >
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Nouveau Conteneur <span style="color: red">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="formContainer.numeroConteneur"
+              placeholder="ex: MSCU 456789-0"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="form-grid grid-3" style="grid-template-columns: 1fr 1fr 1fr">
+            <div class="form-field">
+              <label class="form-label">Sacs <span style="color: red">*</span></label>
+              <input
+                type="number"
+                class="form-input"
+                [(ngModel)]="formContainer.nombreSacs"
+                required
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Volume (m³) <span style="color: red">*</span></label>
+              <input type="number" class="form-input" [(ngModel)]="formContainer.volume" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">Poids Net (kg) <span style="color: red">*</span></label>
+              <input type="number" class="form-input" [(ngModel)]="formContainer.poids" required />
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="errorMessage"
+          style="margin-top: 1rem; color: #ef4444; font-size: 0.9rem; font-weight: 600"
+        >
+          {{ errorMessage }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" style="background-color: #dc3545; color: white; border: none;" (click)="closeAddContainerModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="submitAddContainer()" [disabled]="saving">
+          {{ saving ? 'Ajout...' : 'Enregistrer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. HISTORY MODAL -->
+  <div class="modal-root" *ngIf="showHistoryModal && selectedBookingHistory">
+    <div class="modal-backdrop" (click)="closeHistoryModal()"></div>
+    <div class="modal-panel large">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          Historique: {{ selectedBookingHistory.booking }}
+          <span
+            class="status-pill"
+            [ngClass]="
+              selectedBookingHistory.status === 'Terminé' ? 'status-completed' : 'status-future'
+            "
+          >
+            {{ selectedBookingHistory.status }}
+          </span>
+        </h2>
+        <button class="btn-close-icon" (click)="closeHistoryModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Summary Cards -->
+        <div class="history-summary">
+          <div class="summary-item">
+            <label>Client</label>
+            <span>{{ selectedBookingHistory.client }}</span>
+          </div>
+          <div class="summary-item">
+            <label>Début</label>
+            <span>{{ selectedBookingHistory.dateStart | date : 'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="summary-item">
+            <label>Fin</label>
+            <span>{{
+              selectedBookingHistory.dateEnd
+                ? (selectedBookingHistory.dateEnd | date : 'dd/MM/yyyy HH:mm')
+                : '-'
+            }}</span>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+          "
+        >
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-secondary); margin: 0">
+            LISTE DES CONTENEURS ({{ selectedBookingHistory.containers?.length || 0 }})
+          </h3>
+        </div>
+
+        <div class="history-table-container">
+          <table style="width: 100%">
+            <thead>
+              <tr>
+                <th>N° booking</th>
+                <th>N° Conteneur</th>
+                <th>Sacs</th>
+                <th>Volume empoté</th>
+                <th>Poids Net</th>
+                <th>Date Ajout</th>
+                <th style="width: 40px">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of selectedBookingHistory.containers">
+                <td style="font-weight: 700">{{ selectedBookingHistory.booking }}</td>
+                <td style="font-weight: 700; color: var(--text-primary)">
+                  {{ c.numeroConteneur }}
+                </td>
+                <td>{{ c.nombreSacs }}</td>
+                <td>{{ c.volume }} m³</td>
+                <td>{{ c.poids }} kg</td>
+                <td style="color: var(--text-tertiary)">
+                  {{ c.createdAt | date : 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td>
+                   <button class="action-btn btn-edit" title="Modifier Conteneur" (click)="openEditContainerModal(c)">
+                      <span class="material-symbols-outlined notranslate" style="font-size: 18px">edit</span>
+                   </button>
+                </td>
+              </tr>
+              <tr
+                *ngIf="
+                  !selectedBookingHistory.containers ||
+                  selectedBookingHistory.containers.length === 0
+                "
+              >
+                <td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8">
+                  Aucun conteneur associé.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer space-between">
+         <div style="display: flex; gap: 0.5rem;">
+             <button class="btn btn-primary" (click)="exportHistoryCsv()">
+                <span class="material-symbols-outlined notranslate">download</span>
+                Exporter CSV
+             </button>
+             <button class="btn btn-secondary" (click)="printOperation(selectedBookingHistory)">
+                <span class="material-symbols-outlined notranslate">print</span>
+                Imprimer
+             </button>
+         </div>
+         <button class="btn btn-secondary" (click)="closeHistoryModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. FINALIZE MODAL -->
+  <div class="modal-root" *ngIf="showFinalizeModal">
+    <div class="modal-backdrop" (click)="closeFinalizeModal()"></div>
+    <div class="modal-panel mini">
+      <div class="modal-header">
+        <h2 class="modal-title">Empotage terminé ?</h2>
+        <button class="btn-close-icon" (click)="closeFinalizeModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p
+          style="
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            text-align: center;
+          "
+        >
+          L'empotage est-il terminé pour ce numéro de booking ?
+        </p>
+
+        <div style="display: flex; gap: 1rem; justify-content: center">
+          <button class="btn btn-secondary" style="flex: 1" (click)="closeFinalizeModal()">
+            NON <span style="font-weight: 400; font-size: 0.8em">(En attente)</span>
+          </button>
+          <button
+            class="btn btn-primary"
+            style="flex: 1; background: #16a34a; border-color: #16a34a"
+            (click)="confirmFinalize()"
+          >
+            OUI <span style="font-weight: 400; font-size: 0.8em">(Terminé)</span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" style="width: 100%" (click)="closeFinalizeModal()">
+          <span class="material-symbols-outlined notranslate">arrow_back</span>
+          Retour
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT CONTAINER MODAL -->
+  <div class="modal-root" *ngIf="showEditModal">
+    <div class="modal-backdrop" (click)="closeEditModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 class="modal-title">Modifier Conteneur</h2>
+        <button class="btn-close-icon" (click)="closeEditModal()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">N° Conteneur <span style="color: red">*</span></label>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="formEditContainer.numeroConteneur"
+                required
+              />
+            </div>
+            <div class="form-grid grid-3" style="grid-template-columns: 1fr 1fr 1fr">
+                <div class="form-field">
+                  <label class="form-label">Sacs</label>
+                  <input type="number" class="form-input" [(ngModel)]="formEditContainer.nombreSacs" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Volume (m³)</label>
+                  <input type="number" class="form-input" [(ngModel)]="formEditContainer.volume" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Poids (kg)</label>
+                  <input type="number" class="form-input" [(ngModel)]="formEditContainer.poids" />
+                </div>
+            </div>
+        </div>
+        <div
+          *ngIf="errorMessage"
+          style="margin-top: 1rem; color: #ef4444; font-size: 0.9rem; font-weight: 600"
+        >
+          {{ errorMessage }}
+        </div>
+      </div>
+      <div class="modal-footer space-between">
+         <button class="btn btn-secondary" (click)="closeEditModal()">Annuler</button>
+         <button class="btn btn-primary" (click)="submitEdit()" [disabled]="saving">
+            {{ saving ? 'Enregistrement...' : 'Sauvegarder' }}
+         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="modal-root" *ngIf="showDeleteModal">
+    <div class="modal-backdrop" (click)="cancelDelete()"></div>
+    <div class="modal-panel mini">
+      <div class="modal-header">
+        <h2 class="modal-title" style="color: #ef4444">Supprimer l'empotage</h2>
+        <button class="btn-close-icon" (click)="cancelDelete()">
+          <span class="material-symbols-outlined notranslate">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-primary); font-weight: 600; text-align: center">
+          Voulez-vous vraiment supprimer cet empotage ?
+        </p>
+        <p style="font-size: 0.9em; color: var(--text-tertiary); text-align: center">
+          Cela supprimera également tous les conteneurs associés. Cette action est irréversible.
+        </p>
+      </div>
+      <div class="modal-footer space-between">
+        <button class="btn btn-secondary" style="background-color: #dc3545; color: white; border: none;" (click)="cancelDelete()">Annuler</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
 </div>

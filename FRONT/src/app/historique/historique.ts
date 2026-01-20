@@ -17,6 +17,7 @@ interface TruckHistoryRow {
   debutDechargement: string;
   finDechargement: string;
   statut: TruckStatus;
+  advancedStatus?: string; // Ajout du statut avancé
   createdAt: string; // utile pour le filtre par période
   history?: Array<{ event: string; by?: string; date?: string }>;
 }
@@ -43,7 +44,7 @@ export class Historique implements OnInit {
   // champs de filtre
   searchTerm = '';
   selectedWarehouseId: number | 'all' = 'all';
-  selectedStatus: TruckStatus | 'all' = 'all';
+  selectedStatus: string = 'all';
   selectedDate: string = ''; // Format YYYY-MM-DD
 
   // options pour la liste des entrepôts
@@ -95,6 +96,7 @@ export class Historique implements OnInit {
             debutDechargement: '-',
             finDechargement: '-',
             statut: t.statut,
+            advancedStatus: (t as any).advancedStatus,
             createdAt: t.createdAt || new Date().toISOString(),
             history: t.history || [],
           };
@@ -134,8 +136,29 @@ export class Historique implements OnInit {
 
       // 3) Filtre statut
       if (this.selectedStatus !== 'all') {
-        if (row.statut !== this.selectedStatus) {
-          return false;
+        const s = this.selectedStatus;
+        const rowStatut = row.statut;
+        const rowAdv = row.advancedStatus;
+
+        if (s === 'Enregistré') {
+          if (rowStatut !== 'Enregistré') return false;
+        } else if (s === 'En attente') {
+          if (rowStatut !== 'En attente') return false;
+        } else if (s === 'Validé') {
+            // Validé MAIS PAS Accepté final
+            if (rowStatut !== 'Validé' || rowAdv === 'ACCEPTE_FINAL') return false;
+        } else if (s === 'Accepté') {
+            if (rowAdv !== 'ACCEPTE_FINAL') return false;
+        } else if (s === 'Refoulé') {
+            // Refoulé OU (Annulé mais PAS Renvoyé)
+            const isRefoule = rowStatut === 'Refoulé'; 
+            const isAnnuleOther = (rowStatut === 'Annulé' && rowAdv !== 'REFUSE_RENVOYE');
+            if (!isRefoule && !isAnnuleOther) return false;
+        } else if (s === 'Renvoyé') {
+            if (rowStatut !== 'Annulé' || rowAdv !== 'REFUSE_RENVOYE') return false;
+        } else {
+             // Fallback pour statuts simples s'ils existent (ex: string exact)
+             if (rowStatut !== s) return false;
         }
       }
 

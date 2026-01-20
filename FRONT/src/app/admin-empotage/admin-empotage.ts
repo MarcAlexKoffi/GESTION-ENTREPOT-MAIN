@@ -1,9 +1,35 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { WarehouseService } from '../services/warehouse.service';
 import { environment } from '../config';
+import { firstValueFrom } from 'rxjs';
+
+interface EmpotageContainer {
+  id?: number;
+  empotageId?: number;
+  numeroConteneur: string;
+  nombreSacs: number;
+  volume: number;
+  poids: number;
+  createdAt?: string;
+}
+
+interface Empotage {
+  id?: number;
+  client: string;
+  clientType?: string;
+  booking: string;
+  conteneurs: number;
+  volume: number;
+  dateStart: string;
+  dateEnd: string | null;
+  status: 'En attente' | 'Terminé';
+  entrepotId?: number;
+  containers?: EmpotageContainer[];
+}
 
 interface EmpotageStats {
   total: number;
@@ -11,20 +37,6 @@ interface EmpotageStats {
   week: number;
   month: number;
   year: number;
-}
-
-interface EmpotageOperation {
-  id: number;
-  clientName: string;
-  clientInitials: string;
-  clientColor: string; // class for background color
-  booking: string;
-  conteneurs: string;
-  volume: number;
-  debutPrevu: string;
-  finEstimee: string;
-  statut: 'En cours' | 'Terminé' | 'A venir' | string;
-  entrepotId?: number;
 }
 
 @Component({
@@ -37,6 +49,7 @@ interface EmpotageOperation {
 export class AdminEmpotage implements OnInit {
   private route = inject(ActivatedRoute);
   private warehouseService = inject(WarehouseService);
+  private http = inject(HttpClient);
   
   entrepotId: number = 0;
   entrepotName: string = '';
@@ -54,8 +67,9 @@ export class AdminEmpotage implements OnInit {
   period: 'today' | 'week' | 'month' | 'year' | 'specific' = 'today';
   filterDate: string = '';
 
-  operations: EmpotageOperation[] = [];
-  rawOperations: any[] = [];
+  paginatedEmpotages: Empotage[] = [];
+  rawEmpotages: Empotage[] = [];
+  filteredEmpotages: Empotage[] = [];
   loading = false;
 
   // Pagination
@@ -63,21 +77,15 @@ export class AdminEmpotage implements OnInit {
   pageSize = 10;
 
   get totalPages(): number {
-    return Math.ceil(this.operations.length / this.pageSize) || 1;
+    return Math.ceil(this.filteredEmpotages.length / this.pageSize) || 1;
   }
 
-  get paginatedOperations(): EmpotageOperation[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.operations.slice(start, start + this.pageSize);
-  }
-
-  nextPage() {
-     if (this.currentPage < this.totalPages) this.currentPage++;
-  }
-
-  prevPage() {
-     if (this.currentPage > 1) this.currentPage--;
-  }
+  // Modals
+  showHistoryModal = false;
+  selectedBookingHistory: Empotage | null = null;
+  
+  showDeleteModal = false;
+  itemToDelete: Empotage | null = null;
 
   async ngOnInit() {
     this.route.params.subscribe(async (params) => {
@@ -101,16 +109,13 @@ export class AdminEmpotage implements OnInit {
   async loadOperations() {
     this.loading = true;
     try {
-      const url = new URL(`${environment.apiUrl}/empotages`);
+      let url = `${environment.apiUrl}/empotages`;
       if (this.entrepotId) {
-        url.searchParams.set('entrepotId', this.entrepotId.toString());
+        url += `?entrepotId=${this.entrepotId}`;
       }
       
-      const res = await fetch(url.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      
-      this.rawOperations = data;
+      const data = await firstValueFrom(this.http.get<Empotage[]>(url));
+      this.rawEmpotages = data.sort((a, b) => new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime());
       
       this.calculateStats();
       this.applyFilters();
@@ -133,7 +138,7 @@ export class AdminEmpotage implements OnInit {
   }
 
   applyFilters() {
-    let filtered = [...this.rawOperations];
+    let filtered = [...this.rawEmpotages];
 
     // 1. Filtre Global (Booking/Client)
     if (this.search) {
@@ -147,8 +152,28 @@ export class AdminEmpotage implements OnInit {
     // 2. Filtre Période (Start Date)
     filtered = filtered.filter(op => this.isInSelectedPeriod(op.dateStart));
 
-    this.operations = filtered.map(item => this.mapToOperation(item));
-    this.currentPage = 1; // Reset pagination
+    this.filteredEmpotages = filtered;
+    this.currentPage = 1; 
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.paginatedEmpotages = this.filteredEmpotages.slice(start, start + this.pageSize);
+  }
+
+  nextPage() {
+     if (this.currentPage < this.totalPages) {
+       this.currentPage++;
+       this.updatePagination();
+     }
+  }
+
+  prevPage() {
+     if (this.currentPage > 1) {
+       this.currentPage--;
+       this.updatePagination();
+     }
   }
 
   private isInSelectedPeriod(dateIso?: string): boolean {
@@ -189,39 +214,7 @@ export class AdminEmpotage implements OnInit {
     return true;
   }
 
-  mapToOperation(item: any): EmpotageOperation {
-    const clientName = item.client || 'Inconnu';
-    const init = clientName.substring(0, 2).toUpperCase();
-    
-    // Simple color logic based on first char of initial or length
-    const colors = [
-      'bg-blue-100 text-blue-600',
-      'bg-purple-100 text-purple-600',
-      'bg-green-100 text-green-600',
-      'bg-orange-100 text-orange-600',
-      'bg-pink-100 text-pink-600'
-    ];
-    const colorIndex = (clientName.length + (item.id || 0)) % colors.length;
-
-    return {
-      id: item.id,
-      clientName: clientName,
-      clientInitials: init,
-      clientColor: colors[colorIndex],
-      booking: item.booking || '-',
-      conteneurs: item.conteneurs ? `${item.conteneurs} Ctr` : '0 Ctr',
-      volume: item.volume || 0,
-      debutPrevu: item.dateStart ? new Date(item.dateStart).toLocaleString() : '-',
-      finEstimee: item.dateEnd ? new Date(item.dateEnd).toLocaleString() : '-',
-      statut: item.status || 'A venir',
-      entrepotId: item.entrepotId
-    };
-  }
-
   calculateStats() {
-    const total = this.operations.length;
-    
-    // Time-based calculations matches user-empotage logic
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
@@ -232,16 +225,7 @@ export class AdminEmpotage implements OnInit {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    const today = this.operations.filter(op => {
-      // Need to rely on raw Date objects if possible, but mapToOperation converted to string format
-      // Better to use rawOperations if available or parse back. 
-      // Fortunately we stored rawOperations
-      // Wait, let's look at raw operations logic below
-      return false; 
-    }).length; 
-    
-    // REWRITE using rawOperations for accuracy
-    const raw = this.rawOperations;
+    const raw = this.rawEmpotages;
     
     this.stats = {
       total: raw.length,
@@ -251,77 +235,196 @@ export class AdminEmpotage implements OnInit {
       year: raw.filter(e => e.dateStart && new Date(e.dateStart) >= startOfYear).length
     };
   }
-  printOperation(op: EmpotageOperation) {
-    // Implémentation basique de l'impression
-    // Vous pourriez vouloir une modale ou une page dédiée
-    const printContent = `
+
+  async exportAllCsv() {
+      // Export filtered empotages
+      const rows = [
+          ['Client', 'Booking', 'Conteneurs', 'Volume', 'Date Début', 'Date Fin', 'Statut']
+      ];
+
+      this.filteredEmpotages.forEach(e => {
+          rows.push([
+              e.client || '',
+              e.booking || '',
+              e.conteneurs.toString(),
+              e.volume.toFixed(2).replace('.', ','), // French format often prefers comma
+              e.dateStart ? new Date(e.dateStart).toLocaleDateString() + ' ' + new Date(e.dateStart).toLocaleTimeString() : '',
+              e.dateEnd ? new Date(e.dateEnd).toLocaleDateString() + ' ' + new Date(e.dateEnd).toLocaleTimeString() : '',
+              e.status
+          ]);
+      });
+
+      const csvContent = rows.map(e => e.map(cell => {
+          const stringCell = String(cell);
+          return `"${stringCell.replace(/"/g, '""')}"`;
+      }).join(";")).join("\r\n"); // Windows EOL
+
+      // Add BOM for Excel UTF-8 recognition
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `empotages_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+  }
+
+  // HISTORY
+  async openHistory(item: Empotage) {
+    if(!item.id) return;
+    this.selectedBookingHistory = item;
+    // Load details (containers)
+    try {
+       const fullData = await firstValueFrom(this.http.get<Empotage>(`${environment.apiUrl}/empotages/${item.id}`));
+       this.selectedBookingHistory.containers = fullData.containers;
+       this.showHistoryModal = true;
+    } catch(e) {
+       console.error(e);
+    }
+  }
+
+  closeHistoryModal() {
+    this.showHistoryModal = false;
+    this.selectedBookingHistory = null;
+  }
+
+  exportHistoryCsv() {
+    if (!this.selectedBookingHistory || !this.selectedBookingHistory.id) return;
+    window.location.href = `${environment.apiUrl}/empotages/${this.selectedBookingHistory.id}/export`;
+  }
+  
+  // DELETE
+  deleteEmpotage(item: Empotage) {
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
+  }
+
+  async confirmDelete() {
+    if (!this.itemToDelete || !this.itemToDelete.id) return;
+
+    try {
+        await firstValueFrom(this.http.delete(`${environment.apiUrl}/empotages/${this.itemToDelete.id}`));
+        
+        // Remove from list
+        this.rawEmpotages = this.rawEmpotages.filter(e => e.id !== this.itemToDelete!.id);
+        this.applyFilters();
+        this.calculateStats();
+        
+        this.showDeleteModal = false;
+        this.itemToDelete = null;
+    } catch(e) {
+        console.error(e);
+        alert("Erreur lors de la suppression");
+    }
+  }
+
+  printOperation(op: Empotage) {
+    if (!op) return;
+
+    const popupWin = window.open('', '_blank', 'width=1000,height=800,top=50,left=50');
+    if (!popupWin) {
+      alert("La fenêtre d'impression a été bloquée. Veuillez autoriser les popups.");
+      return;
+    }
+
+    const containersHtml = op.containers?.map(c => `
+      <tr>
+        <td>${c.numeroConteneur}</td>
+        <td>${c.nombreSacs}</td>
+        <td>${c.volume} m³</td>
+        <td>${c.poids} kg</td>
+      </tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;">Aucun conteneur</td></tr>';
+
+    const content = `
       <html>
         <head>
-          <title>Impression Opération ${op.booking}</title>
+          <title>Impression Empotage - ${op.booking}</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; }
-            h1 { color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
+             body { font-family: sans-serif; padding: 40px; color: #333; }
+             .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+             h1 { margin: 0; font-size: 24px; }
+             .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 30px; }
+             .meta-item { display: flex; flex-direction: column; }
+             .label { font-weight: bold; font-size: 12px; text-transform: uppercase; color: #666; }
+             .value { font-size: 16px; margin-top: 4px; }
+             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+             th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+             th { background-color: #f5f5f5; font-weight: bold; }
+             .footer { margin-top: 50px; font-size: 12px; color: #999; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
           </style>
         </head>
         <body>
-          <h1>Détails Opération d'Empotage</h1>
-          <p><strong>Client:</strong> ${op.clientName}</p>
-          <p><strong>Booking:</strong> ${op.booking}</p>
-          <p><strong>Statut:</strong> ${op.statut}</p>
+          <div class="header">
+            <h1>Bon d'Empotage</h1>
+            <div style="text-align: right;">
+               <div style="font-size: 14px; font-weight: bold;">${new Date().toLocaleDateString()}</div>
+            </div>
+          </div>
           
+          <div class="meta">
+            <div class="meta-item">
+              <span class="label">Booking</span>
+              <span class="value">${op.booking}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Client</span>
+              <span class="value">${op.client}</span>
+            </div>
+             <div class="meta-item">
+              <span class="label">Date Début</span>
+              <span class="value">${new Date(op.dateStart).toLocaleDateString()} ${new Date(op.dateStart).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Statut</span>
+              <span class="value">${op.status}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Total Conteneurs</span>
+              <span class="value">${op.conteneurs}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">Volume Total</span>
+              <span class="value">${op.volume} m³</span>
+            </div>
+          </div>
+
+          <h3>Liste des Conteneurs</h3>
           <table>
-            <tr>
-              <th>Conteneurs</th>
-              <th>Volume (m³)</th>
-              <th>Début Prévu</th>
-              <th>Fin Estimée</th>
-            </tr>
-            <tr>
-              <td>${op.conteneurs}</td>
-              <td>${op.volume}</td>
-              <td>${op.debutPrevu}</td>
-              <td>${op.finEstimee}</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>N° Conteneur</th>
+                <th>Sacs</th>
+                <th>Volume</th>
+                <th>Poids</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${containersHtml}
+            </tbody>
           </table>
+
+          <div class="footer">
+             Généré automatiquement par le système de Gestion Entrepôt
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
         </body>
       </html>
     `;
 
-    const popupWin = window.open('', '_blank', 'width=600,height=600');
-    if (popupWin) {
-      popupWin.document.open();
-      popupWin.document.write(printContent);
-      popupWin.document.close();
-      popupWin.print();
-    }
-  }
-  getStatusClass(statut: string): string {
-    switch (statut) {
-      case 'En cours': return 'status-pill--enregistre';
-      case 'Terminé': return 'status-pill--validated';
-      case 'A venir': 
-      case 'Prévu': return 'status-pill--pending';
-      default: return 'status-pill--pending';
-    }
-  }
-
-  getStatusIcon(statut: string): string {
-    switch (statut) {
-      case 'En cours': return 'sync'; 
-      case 'Terminé': return 'check_circle';
-      case 'A venir': 
-      case 'Prévu': return 'schedule';
-      default: return 'help';
-    }
-  }
-
-  resetFilters() {
-    this.search = '';
-    this.period = 'today';
-    this.filterDate = '';
-    this.applyFilters();
+    popupWin.document.open();
+    popupWin.document.write(content);
+    popupWin.document.close();
   }
 }

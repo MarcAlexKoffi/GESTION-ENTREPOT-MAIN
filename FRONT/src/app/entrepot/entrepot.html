@@ -330,7 +330,7 @@
             <span class="material-symbols-outlined notranslate">history</span> Historique
           </button>
 
-          <button *ngIf="selectedTruck?.statut === 'Annulé'" class="btn-secondary danger" (click)="reintegrateTruck()">
+          <button *ngIf="selectedTruck?.statut === 'Annulé' && selectedTruck?.advancedStatus !== 'REFUSE_RENVOYE'" class="btn-secondary danger" (click)="reintegrateTruck()">
             <span class="material-symbols-outlined notranslate">restore</span> Réintégré
           </button>
         </div>

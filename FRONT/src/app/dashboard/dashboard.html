@@ -133,7 +133,7 @@
         </div>
 
         <!-- USER PROFILE AREA -->
-        <div class="profile-block">
+        <div class="profile-block" (click)="$event.stopPropagation(); toggleUserMenu()" style="cursor: pointer; position: relative;">
           <div
             class="profile-avatar"
             style="
@@ -144,9 +144,37 @@
             <p class="name">{{ userName }}</p>
             <p class="role">{{ userRoleLabel }}</p>
           </div>
-          <!-- <button class="profile-toggle">
+          <button class="profile-toggle">
             <span class="material-symbols-outlined notranslate">expand_more</span>
-          </button> -->
+          </button>
+          
+          <!-- DROPDOWN MENU -->
+          <div class="user-dropdown" *ngIf="showUserMenu" (click)="$event.stopPropagation()">
+             <div class="dropdown-header-mobile">
+                ADMINISTRATION
+             </div>
+             <a [routerLink]="'/dashboard/dashboard-main'" class="dropdown-item" (click)="showUserMenu = false">
+                <span class="material-symbols-outlined notranslate">dashboard</span>
+                Tableau de bord
+             </a>
+             <a [routerLink]="'/dashboard/userManager'" class="dropdown-item" (click)="showUserMenu = false">
+                <span class="material-symbols-outlined notranslate">manage_accounts</span>
+                Utilisateurs
+             </a>
+             <a [routerLink]="'/dashboard/historique'" class="dropdown-item" (click)="showUserMenu = false">
+                <span class="material-symbols-outlined notranslate">history_edu</span>
+                Historique
+             </a>
+             <a [routerLink]="'/dashboard/adminEmpotageMain'" class="dropdown-item" (click)="showUserMenu = false">
+                <span class="material-symbols-outlined notranslate">inventory_2</span>
+                Empotage
+             </a>
+             <div class="dropdown-divider"></div>
+             <a href="#" class="dropdown-item text-danger" (click)="$event.preventDefault(); requestLogout()">
+                <span class="material-symbols-outlined notranslate">logout</span>
+                Déconnexion
+             </a>
+          </div>
         </div>
       </div>
     </header>

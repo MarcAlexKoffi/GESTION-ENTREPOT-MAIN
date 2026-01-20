@@ -41,6 +41,7 @@ export class UserDashboard implements OnInit, OnDestroy {
   // notifications
   notifCount = 0;
   showNotifDropdown = false;
+  showUserMenu = false; // Added for User Profile Dropdown
   
   // Logout confirmation
   showLogoutConfirm = false;
@@ -182,11 +183,21 @@ export class UserDashboard implements OnInit, OnDestroy {
 
   toggleNotifications(): void {
     this.showNotifDropdown = !this.showNotifDropdown;
+    if(this.showNotifDropdown) this.showUserMenu = false;
   }
+  
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+    if(this.showUserMenu) this.showNotifDropdown = false;
+  }
+
   @HostListener('document:click')
-  closeNotifDropdownOnOutsideClick(): void {
+  closeDropdownsOnOutsideClick(): void {
     if (this.showNotifDropdown) {
       this.showNotifDropdown = false;
+    }
+    if (this.showUserMenu) {
+      this.showUserMenu = false;
     }
   }
 

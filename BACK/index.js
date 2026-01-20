@@ -5,6 +5,15 @@ const mysql = require('mysql2/promise');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 
@@ -89,9 +98,23 @@ console.log('Pool MySQL initialisé');
         volume FLOAT DEFAULT 0,
         dateStart DATETIME NULL,
         dateEnd DATETIME NULL,
-        status VARCHAR(50) DEFAULT 'A venir',
+        status VARCHAR(50) DEFAULT 'En attente',
         entrepotId INT DEFAULT NULL,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Nouvelle table pour les details des conteneurs
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS empotage_containers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        empotageId INT NOT NULL,
+        numeroConteneur VARCHAR(255) NULL,
+        nombreSacs INT DEFAULT 0,
+        volume FLOAT DEFAULT 0,
+        poids FLOAT DEFAULT 0,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (empotageId) REFERENCES empotages(id) ON DELETE CASCADE
       )
     `);
 
@@ -422,7 +445,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/users', async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT u.id, u.nom, u.username, u.role, u.entrepotId, u.status, u.createdAt, w.name as entrepotName
+      SELECT u.id, u.nom, u.username, u.password, u.role, u.entrepotId, u.status, u.createdAt, w.name as entrepotName
       FROM users u
       LEFT JOIN warehouses w ON u.entrepotId = w.id
       ORDER BY u.createdAt DESC
@@ -543,18 +566,12 @@ app.use((err, req, res, next) => {
 // Warehouses
 // =======================
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'gestion-entrepots-uploads',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
 });
 
 const upload = multer({ 
@@ -667,10 +684,10 @@ app.delete('/api/warehouses/:id', async (req, res) => {
 // (server will be started after routes are defined)
 
 // -----------------------
-// Empotages API
+// Empotages API (Revised Logic)
 // -----------------------
 
-// GET /api/empotages - list with optional filters: q, status, entrepotId
+// GET /api/empotages - list empotages (Bookings)
 app.get('/api/empotages', async (req, res) => {
   const { q = '', status, entrepotId } = req.query;
   try {
@@ -690,8 +707,7 @@ app.get('/api/empotages', async (req, res) => {
 
     const [rows] = await db.query(query, params);
 
-    // Filtrage recherche (simple implementation in JS to keep consistent with previous behavior)
-    // Mais idéalement, faire un LIKE en SQL
+    // Filtrage recherche côté serveur si possible, mais ici on garde le filter JS pour compatibilité like
     const filtered = rows.filter(item => {
       if (!q || String(q).trim() === '') return true;
       const qq = String(q).toLowerCase();
@@ -708,79 +724,130 @@ app.get('/api/empotages', async (req, res) => {
   }
 });
 
-// GET /api/empotages/:id
+// GET /api/empotages/:id - Get Booking with Detail Containers
 app.get('/api/empotages/:id', async (req, res) => {
   const { id } = req.params;
   try {
+    // 1. Get header
     const [rows] = await db.query('SELECT * FROM empotages WHERE id = ?', [id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Non trouvé' });
-    res.json(rows[0]);
+    
+    const empotage = rows[0];
+
+    // 2. Get containers details
+    const [containers] = await db.query('SELECT * FROM empotage_containers WHERE empotageId = ? ORDER BY id ASC', [id]);
+    
+    empotage.containers = containers; // Attach details
+
+    res.json(empotage);
   } catch (err) {
     console.error('Erreur GET /api/empotages/:id', err);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
-// POST /api/empotages - create
-app.post('/api/empotages', async (req, res) => {
+// POST /api/empotages/init - Create Booking + 1st Container
+app.post('/api/empotages/init', async (req, res) => {
+  const connection = await db.getConnection();
   try {
-    console.log('POST /api/empotages body:', req.body);
-    const { client, clientType, booking, conteneurs, volume, dateStart, dateEnd, status, entrepotId } = req.body;
-    
-    // Insertion directe dans la table empotages
-    const [result] = await db.query(
-      `INSERT INTO empotages (client, clientType, booking, conteneurs, volume, dateStart, dateEnd, status, entrepotId)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [client, clientType, booking, conteneurs || 0, volume || 0, dateStart || null, dateEnd || null, status || 'A venir', entrepotId || null]
+    await connection.beginTransaction();
+
+    const { client, booking, nombreSacs, volume, poids, numeroConteneur, entrepotId } = req.body;
+
+    // 1. Create Booking Header
+    const dateStart = new Date();
+    const [resHeader] = await connection.query(
+      `INSERT INTO empotages (client, booking, conteneurs, volume, dateStart, status, entrepotId)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [client, booking, 1, volume || 0, dateStart, 'En attente', entrepotId]
+    );
+    const empotageId = resHeader.insertId;
+
+    // 2. Create First Container
+    await connection.query(
+      `INSERT INTO empotage_containers (empotageId, numeroConteneur, nombreSacs, volume, poids)
+       VALUES (?, ?, ?, ?, ?)`,
+      [empotageId, numeroConteneur, nombreSacs || 0, volume || 0, poids || 0]
     );
 
-    // Notification
+    // 3. Notification
     try {
-      const msg = `Nouvel empotage : ${client || '?'} / ${booking || '?'}`;
-      await db.query('INSERT INTO notifications (message, relatedId, type) VALUES (?, ?, ?)', [msg, result.insertId, 'empotage']);
-    } catch (e) { console.error("Erreur créa notif", e); }
+        const msg = `Nouvel empotage démarré : ${client} / ${booking}`;
+        await connection.query('INSERT INTO notifications (message, relatedId, type) VALUES (?, ?, ?)', [msg, empotageId, 'empotage']);
+    } catch(e) {}
 
-    const [newRow] = await db.query('SELECT * FROM empotages WHERE id = ?', [result.insertId]);
-    res.status(201).json(newRow[0]);
+    await connection.commit();
+
+    // Return full object
+    const [rows] = await connection.query('SELECT * FROM empotages WHERE id = ?', [empotageId]);
+    const empotage = rows[0];
+    const [containers] = await connection.query('SELECT * FROM empotage_containers WHERE empotageId = ?', [empotageId]);
+    empotage.containers = containers;
+
+    res.status(201).json(empotage);
+
   } catch (err) {
-    console.error('Erreur POST /api/empotages', err);
+    await connection.rollback();
+    console.error('Erreur POST /api/empotages/init', err);
     res.status(500).json({ message: 'Erreur création empotage', error: err.message });
+  } finally {
+    connection.release();
   }
 });
 
-// PUT /api/empotages/:id - update status/metadata
-app.put('/api/empotages/:id', async (req, res) => {
-  const { id } = req.params;
-  const { status, client, booking, conteneurs, volume, dateStart, dateEnd, clientType, entrepotId } = req.body;
-  
+
+// POST /api/empotages/:id/add-container - Add next container
+app.post('/api/empotages/:id/add-container', async (req, res) => {
+  const empotageId = req.params.id;
+  const { numeroConteneur, nombreSacs, volume, poids } = req.body;
+
+  const connection = await db.getConnection();
   try {
-     // Construction dynamique de l'update
-     const fields = [];
-     const values = [];
+    await connection.beginTransaction();
 
-     if (client !== undefined) { fields.push('client = ?'); values.push(client); }
-     if (clientType !== undefined) { fields.push('clientType = ?'); values.push(clientType); }
-     if (booking !== undefined) { fields.push('booking = ?'); values.push(booking); }
-     if (conteneurs !== undefined) { fields.push('conteneurs = ?'); values.push(conteneurs); }
-     if (volume !== undefined) { fields.push('volume = ?'); values.push(volume); }
-     if (dateStart !== undefined) { fields.push('dateStart = ?'); values.push(dateStart); }
-     if (dateEnd !== undefined) { fields.push('dateEnd = ?'); values.push(dateEnd); }
-     if (status !== undefined) { fields.push('status = ?'); values.push(status); }
-     if (entrepotId !== undefined) { fields.push('entrepotId = ?'); values.push(entrepotId); }
+    // Check status
+    const [rows] = await connection.query('SELECT status, conteneurs, volume FROM empotages WHERE id = ?', [empotageId]);
+    if (rows.length === 0) throw new Error('Empotage non trouvé');
+    if (rows[0].status === 'Terminé') throw new Error('Empotage déjà terminé');
 
-     if (fields.length === 0) return res.json({ message: 'Rien à mettre à jour' });
-     
-     values.push(id);
-     await db.query(`UPDATE empotages SET ${fields.join(', ')} WHERE id = ?`, values);
-     
-     const [updated] = await db.query('SELECT * FROM empotages WHERE id = ?', [id]);
-     if (updated.length === 0) return res.status(404).json({ message: 'Non trouvé' });
-     res.json(updated[0]);
+    // Add Container
+    await connection.query(
+      `INSERT INTO empotage_containers (empotageId, numeroConteneur, nombreSacs, volume, poids)
+       VALUES (?, ?, ?, ?, ?)`,
+      [empotageId, numeroConteneur, nombreSacs || 0, volume || 0, poids || 0]
+    );
+
+    // Update Header (increment count, add volume)
+    const newCount = (rows[0].conteneurs || 0) + 1;
+    const newVolume = (rows[0].volume || 0) + (volume ? parseFloat(volume) : 0);
+
+    await connection.query('UPDATE empotages SET conteneurs = ?, volume = ? WHERE id = ?', [newCount, newVolume, empotageId]);
+
+    await connection.commit();
+    res.json({ message: 'Conteneur ajouté', empotageId, newCount });
+
   } catch (err) {
-    console.error('Erreur PUT /api/empotages/:id', err);
-    res.status(500).json({ message: 'Erreur mise à jour' });
+    await connection.rollback();
+    console.error('Erreur add-container', err);
+    res.status(500).json({ message: err.message });
+  } finally {
+    connection.release();
   }
 });
+
+// PUT /api/empotages/:id/finalize - Finish Booking
+app.put('/api/empotages/:id/finalize', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const dateEnd = new Date();
+    await db.query('UPDATE empotages SET status = ?, dateEnd = ? WHERE id = ?', ['Terminé', dateEnd, id]);
+    res.json({ message: 'Empotage terminé', dateEnd });
+  } catch (err) {
+    console.error('Erreur finalize', err);
+    res.status(500).json({ message: 'Erreur finalisation' });
+  }
+});
+
 
 // DELETE /api/empotages/:id
 app.delete('/api/empotages/:id', async (req, res) => {
@@ -794,6 +861,48 @@ app.delete('/api/empotages/:id', async (req, res) => {
   } catch (err) {
     console.error('Erreur DELETE /api/empotages/:id', err);
     res.status(500).json({ message: 'Erreur suppression empotage', error: err.message });
+  }
+});
+
+// PUT /api/empotage-containers/:id - Update Container Details
+app.put('/api/empotage-containers/:id', async (req, res) => {
+  const { id } = req.params;
+  const { numeroConteneur, nombreSacs, volume, poids } = req.body;
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Get container to find parent booking
+    const [existing] = await connection.query('SELECT empotageId, volume FROM empotage_containers WHERE id = ?', [id]);
+    if (existing.length === 0) {
+        connection.release();
+        return res.status(404).json({ message: 'Conteneur non trouvé' });
+    }
+    const empotageId = existing[0].empotageId;
+    const oldVolume = existing[0].volume || 0;
+
+    // 2. Update Container
+    await connection.query(
+      'UPDATE empotage_containers SET numeroConteneur = ?, nombreSacs = ?, volume = ?, poids = ? WHERE id = ?',
+      [numeroConteneur, nombreSacs, volume, poids, id]
+    );
+
+    // 3. Recalculate total volume for this booking
+    const [rows] = await connection.query('SELECT SUM(volume) as totalVol FROM empotage_containers WHERE empotageId = ?', [empotageId]);
+    const totalVol = rows[0].totalVol || 0;
+    
+    await connection.query('UPDATE empotages SET volume = ? WHERE id = ?', [totalVol, empotageId]);
+
+    await connection.commit();
+    res.json({ message: 'Conteneur mis à jour', totalVolume: totalVol });
+
+  } catch (err) {
+    await connection.rollback();
+    console.error('Erreur update container', err);
+    res.status(500).json({ message: 'Erreur mise à jour conteneur' });
+  } finally {
+    connection.release();
   }
 });
 
@@ -838,6 +947,52 @@ app.get('/api/empotages/export', async (req, res) => {
   } catch (err) {
     console.error('Erreur export CSV', err);
     res.status(500).json({ message: 'Erreur export' });
+  }
+});
+
+// GET /api/empotages/:id/export - Export details of a specific booking
+app.get('/api/empotages/:id/export', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM empotages WHERE id = ?', [id]);
+    if (rows.length === 0) return res.status(404).send('Booking non trouvé');
+    const booking = rows[0];
+
+    const [containers] = await db.query('SELECT * FROM empotage_containers WHERE empotageId = ? ORDER BY id ASC', [id]);
+
+    const headers = ['N° Conteneur', 'Nombre de sacs', 'Poids (kg)', 'Volume (m³)', 'Date Ajout'];
+    const escape = v => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+      return s;
+    };
+
+    const csvRows = containers.map(c => [
+      c.numeroConteneur,
+      c.nombreSacs,
+      c.poids,
+      c.volume,
+      c.createdAt
+    ].map(escape).join(','));
+
+    // Construct CSV with Header Info first
+    const csvContent = [
+      `Client: ${booking.client}`,
+      `Booking: ${booking.booking}`,
+      `Statut: ${booking.status}`,
+      '', // empty line
+      headers.join(','),
+      ...csvRows
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="booking-${booking.booking}.csv"`);
+    res.send(csvContent);
+
+  } catch (err) {
+    console.error('Erreur export détail CSV', err);
+    res.status(500).json({ message: 'Erreur export détail' });
   }
 });
 

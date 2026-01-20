@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS truck_admin_comments (
   FOREIGN KEY (truckId) REFERENCES trucks(id) ON DELETE CASCADE
 );
 
--- Table: empotages (Celle qui manquait)
+-- Table: empotages (Booking header)
 CREATE TABLE IF NOT EXISTS empotages (
   id INT AUTO_INCREMENT PRIMARY KEY,
   client VARCHAR(255) NULL,
@@ -77,9 +77,21 @@ CREATE TABLE IF NOT EXISTS empotages (
   volume FLOAT DEFAULT 0,
   dateStart DATETIME NULL,
   dateEnd DATETIME NULL,
-  status VARCHAR(50) DEFAULT 'A venir',
+  status VARCHAR(50) DEFAULT 'En attente',
   entrepotId INT DEFAULT NULL,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: empotage_containers (Details containers)
+CREATE TABLE IF NOT EXISTS empotage_containers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  empotageId INT NOT NULL,
+  numeroConteneur VARCHAR(255) NULL,
+  nombreSacs INT DEFAULT 0,
+  volume FLOAT DEFAULT 0,
+  poids FLOAT DEFAULT 0,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (empotageId) REFERENCES empotages(id) ON DELETE CASCADE
 );
 
 -- Table: notifications (Celle qui manquait aussi)
