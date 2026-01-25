@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TruckService, Truck } from '../services/truck.service';
 import { WarehouseService, StoredWarehouse } from '../services/warehouse.service';
-import { ToastService } from '../services/toast.service';
 
 type TruckStatus = Truck['statut'];
 
@@ -11,7 +10,7 @@ interface TruckHistoryRow {
   entrepotId: number;
   entrepotName: string;
   immatriculation: string;
-  transporteur: string;
+  cooperative: string;
   kor: string;
   th?: string;
   heureArrivee: string;
@@ -55,7 +54,10 @@ export class Historique implements OnInit {
   showDetailsModal = false;
   selectedRow: TruckHistoryRow | null = null;
 
-  constructor(private truckService: TruckService, private warehouseService: WarehouseService, private toastService: ToastService) {}
+  constructor(
+    private truckService: TruckService,
+    private warehouseService: WarehouseService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -87,7 +89,7 @@ export class Historique implements OnInit {
             entrepotId: t.entrepotId,
             entrepotName: warehouse ? warehouse.name : 'Entrepôt inconnu',
             immatriculation: t.immatriculation,
-            transporteur: t.transporteur,
+            cooperative: t.cooperative || '',
             kor: t.kor || '',
             // TH (élément d'analyse) may be named differently server-side; try common candidates
             th: (t as any).th || (t as any).thElement || (t as any).TH || '',
@@ -105,7 +107,7 @@ export class Historique implements OnInit {
 
         // Tri : le plus récent en premier
         this.allRows.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
         this.applyFilters();
       },
@@ -122,7 +124,7 @@ export class Historique implements OnInit {
     this.filteredRows = this.allRows.filter((row) => {
       // 1) Filtre texte (immat OU transporteur)
       if (search) {
-        const haystack = (row.immatriculation + ' ' + row.transporteur).toLowerCase();
+        const haystack = (row.immatriculation + ' ' + row.cooperative).toLowerCase();
         if (!haystack.includes(search)) {
           return false;
         }
@@ -146,20 +148,20 @@ export class Historique implements OnInit {
         } else if (s === 'En attente') {
           if (rowStatut !== 'En attente') return false;
         } else if (s === 'Validé') {
-            // Validé MAIS PAS Accepté final
-            if (rowStatut !== 'Validé' || rowAdv === 'ACCEPTE_FINAL') return false;
+          // Validé MAIS PAS Accepté final
+          if (rowStatut !== 'Validé' || rowAdv === 'ACCEPTE_FINAL') return false;
         } else if (s === 'Accepté') {
-            if (rowAdv !== 'ACCEPTE_FINAL') return false;
+          if (rowAdv !== 'ACCEPTE_FINAL') return false;
         } else if (s === 'Refoulé') {
-            // Refoulé OU (Annulé mais PAS Renvoyé)
-            const isRefoule = rowStatut === 'Refoulé'; 
-            const isAnnuleOther = (rowStatut === 'Annulé' && rowAdv !== 'REFUSE_RENVOYE');
-            if (!isRefoule && !isAnnuleOther) return false;
+          // Refoulé OU (Annulé mais PAS Renvoyé)
+          const isRefoule = rowStatut === 'Refoulé';
+          const isAnnuleOther = rowStatut === 'Annulé' && rowAdv !== 'REFUSE_RENVOYE';
+          if (!isRefoule && !isAnnuleOther) return false;
         } else if (s === 'Renvoyé') {
-            if (rowStatut !== 'Annulé' || rowAdv !== 'REFUSE_RENVOYE') return false;
+          if (rowStatut !== 'Annulé' || rowAdv !== 'REFUSE_RENVOYE') return false;
         } else {
-             // Fallback pour statuts simples s'ils existent (ex: string exact)
-             if (rowStatut !== s) return false;
+          // Fallback pour statuts simples s'ils existent (ex: string exact)
+          if (rowStatut !== s) return false;
         }
       }
 
@@ -244,7 +246,7 @@ export class Historique implements OnInit {
 
   exporterCSV(): void {
     if (!this.filteredRows || this.filteredRows.length === 0) {
-      this.toastService.warning('Aucune donnée à exporter.');
+      alert('Aucune donnée à exporter.');
       return;
     }
 
@@ -252,7 +254,7 @@ export class Historique implements OnInit {
     const headers = [
       'Entrepôt',
       'Immatriculation',
-      'Transporteur',
+      'Coopérative',
       'Date Arrivée Camion',
       "Heure d'enregistrement",
       'Statut',
@@ -265,14 +267,14 @@ export class Historique implements OnInit {
       const dateArrive =
         created && !isNaN(created.getTime())
           ? `${String(created.getDate()).padStart(2, '0')}/${String(
-              created.getMonth() + 1
+              created.getMonth() + 1,
             ).padStart(2, '0')}/${created.getFullYear()}`
           : '';
       const heureEnreg =
         created && !isNaN(created.getTime())
           ? `${String(created.getHours()).padStart(2, '0')}:${String(created.getMinutes()).padStart(
               2,
-              '0'
+              '0',
             )}`
           : '';
 
@@ -280,7 +282,7 @@ export class Historique implements OnInit {
       return [
         entrepot ? entrepot.name : '',
         row.immatriculation,
-        row.transporteur,
+        row.cooperative,
         dateArrive,
         heureEnreg,
         row.statut,

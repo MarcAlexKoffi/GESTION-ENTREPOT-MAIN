@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ToastService } from '../services/toast.service';
 
 type TruckStatus = 'En attente' | 'En cours de déchargement' | 'Déchargé' | 'Annulé';
 
@@ -49,7 +48,7 @@ interface TruckHistoryRow {
 export class UserHistorique implements OnInit {
   entrepotId: number | null = null;
 
-  constructor(private route: ActivatedRoute, private toastService: ToastService) {}
+  constructor(private route: ActivatedRoute) {}
 
   // toutes les lignes (avant filtre)
   allRows: TruckHistoryRow[] = [];
@@ -232,7 +231,7 @@ export class UserHistorique implements OnInit {
 
   exporterCSV(): void {
     if (!this.filteredRows || this.filteredRows.length === 0) {
-      this.toastService.warning('Aucune donnée à exporter.');
+      alert('Aucune donnée à exporter.');
       return;
     }
 

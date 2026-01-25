@@ -5,41 +5,37 @@
       <div class="header-titles">
         <h1>Tableau de bord — {{ entrepotName }}</h1>
         <p class="subtitle">
-           Bienvenue{{ currentUser?.nom ? ', ' + currentUser?.nom : '' }}.
-           <span *ngIf="trucks.length > 0">{{ trucks.length }} camions total enregistrés.</span>
+          Bienvenue{{ currentUser?.nom ? ', ' + currentUser?.nom : '' }}.
+          <span *ngIf="trucks.length > 0">{{ trucks.length }} camions total enregistrés.</span>
         </p>
       </div>
-      
+
       <div class="header-actions">
         <!-- Période Tabs -->
         <div class="period-selector">
-          <button 
-            [class.active]="period === 'today'" 
-            (click)="period='today'; onPeriodChange()"
-          >Aujourd'hui</button>
-          <button 
-            [class.active]="period === 'week'" 
-            (click)="period='week'; onPeriodChange()"
-          >Semaine</button>
-          <button 
-            [class.active]="period === 'month'" 
-            (click)="period='month'; onPeriodChange()"
-          >Mois</button>
-          <button 
-            [class.active]="period === 'year'" 
-            (click)="period='year'; onPeriodChange()"
-          >Année</button>
+          <button [class.active]="period === 'today'" (click)="period = 'today'; onPeriodChange()">
+            Aujourd'hui
+          </button>
+          <button [class.active]="period === 'week'" (click)="period = 'week'; onPeriodChange()">
+            Semaine
+          </button>
+          <button [class.active]="period === 'month'" (click)="period = 'month'; onPeriodChange()">
+            Mois
+          </button>
+          <button [class.active]="period === 'year'" (click)="period = 'year'; onPeriodChange()">
+            Année
+          </button>
         </div>
-        
+
         <!-- Date Picker -->
-         <div class="date-input-wrapper">
+        <div class="date-input-wrapper">
           <span class="material-symbols-outlined notranslate input-icon">calendar_today</span>
-          <input 
-            type="date" 
-            [(ngModel)]="filterDate" 
+          <input
+            type="date"
+            [(ngModel)]="filterDate"
             (ngModelChange)="onDateChange()"
             placeholder="Date spécifique"
-          >
+          />
         </div>
       </div>
     </div>
@@ -85,70 +81,68 @@
   <section class="details-section">
     <h2 class="section-title">Détails des statuts</h2>
     <div class="details-grid">
-      
       <div class="detail-card">
         <div class="detail-header">
-            <span class="dot info"></span>
-            <span class="title">En attente</span>
+          <span class="dot info"></span>
+          <span class="title">En attente</span>
         </div>
         <div class="detail-value">{{ enAttente }}</div>
       </div>
 
-       <div class="detail-card">
+      <div class="detail-card">
         <div class="detail-header">
-            <span class="dot warning"></span>
-            <span class="title">Validés (Attente)</span>
+          <span class="dot warning"></span>
+          <span class="title">Validés (Attente)</span>
         </div>
         <div class="detail-value">{{ enDechargement }}</div>
       </div>
 
-       <div class="detail-card">
+      <div class="detail-card">
         <div class="detail-header">
-            <span class="dot orange"></span>
-            <span class="title">Décision Admin</span>
+          <span class="dot orange"></span>
+          <span class="title">Décision Admin</span>
         </div>
         <div class="detail-value">{{ attenteDecisionAdmin }}</div>
       </div>
 
-       <div class="detail-card">
+      <div class="detail-card">
         <div class="detail-header">
-            <span class="dot danger"></span>
-            <span class="title">Refusés (Gérant)</span>
+          <span class="dot danger"></span>
+          <span class="title">Refusés (Gérant)</span>
         </div>
         <div class="detail-value">{{ refusesAttenteGerant }}</div>
       </div>
 
-       <div class="detail-card">
+      <div class="detail-card">
         <div class="detail-header">
-            <span class="dot purple"></span>
-            <span class="title">Refusés (Renvoyés)</span>
+          <span class="dot purple"></span>
+          <span class="title">Refusés (Renvoyés)</span>
         </div>
         <div class="detail-value">{{ refusesRenvoyes }}</div>
       </div>
 
       <div class="detail-card">
         <div class="detail-header">
-            <span class="dot teal"></span>
-            <span class="title">Réintégrés</span>
+          <span class="dot teal"></span>
+          <span class="title">Réintégrés</span>
         </div>
         <div class="detail-value">{{ refusesRintegres }}</div>
       </div>
-
     </div>
   </section>
 
   <!-- RECENT ACTIVITY TABLE -->
   <section class="activity-section">
     <div class="section-header">
-        <h2 class="section-title">Activité Récente</h2>
+      <h2 class="section-title">Activité Récente</h2>
     </div>
-    
+
     <div class="table-container">
       <table class="modern-table">
         <thead>
           <tr>
             <th>Immatriculation</th>
-            <th>Transporteur</th>
+            <th>COOPERATIVE</th>
             <th>Fiche de transport</th>
             <th>Statut</th>
             <th>Date / Heure</th>
@@ -156,45 +150,54 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let truck of filteredTrucks | slice:0:10">
+          <tr *ngFor="let truck of filteredTrucks | slice: 0 : 10">
             <td class="fw-bold">{{ truck.immatriculation }}</td>
-            <td>{{ truck.transporteur || '-' }}</td>
+            <td>{{ truck.cooperative || '-' }}</td>
             <td>
-                <span class="text-primary fw-medium">{{ truck.transfert || '-' }}</span>
+              <span class="text-primary fw-medium">{{ truck.transfert || '-' }}</span>
             </td>
             <td>
-              <span class="status-pill" [ngClass]="{
-                'status-success': truck.statut === 'Déchargé' || truck.statut === 'Validé',
-                'status-warning': truck.statut === 'En attente' || truck.statut === 'En cours de déchargement',
-                'status-danger': truck.statut === 'Annulé' || truck.statut === 'Refoulé',
-                'status-registered': truck.statut === 'Enregistré'
-              }">
+              <span
+                class="status-pill"
+                [ngClass]="{
+                  'status-success': truck.statut === 'Déchargé' || truck.statut === 'Validé',
+                  'status-warning':
+                    truck.statut === 'En attente' || truck.statut === 'En cours de déchargement',
+                  'status-danger': truck.statut === 'Annulé' || truck.statut === 'Refoulé',
+                  'status-registered': truck.statut === 'Enregistré',
+                }"
+              >
                 <span class="material-symbols-outlined notranslate">
-                    {{ 
-                        truck.statut === 'Déchargé' || truck.statut === 'Validé' ? 'check_circle' :
-                        truck.statut === 'Annulé' || truck.statut === 'Refoulé' ? 'cancel' :
-                        truck.statut === 'En cours de déchargement' ? 'pending' :
-                        truck.statut === 'Enregistré' ? 'app_registration' :
-                        'hourglass_empty'
-                    }}
+                  {{
+                    truck.statut === 'Déchargé' || truck.statut === 'Validé'
+                      ? 'check_circle'
+                      : truck.statut === 'Annulé' || truck.statut === 'Refoulé'
+                        ? 'cancel'
+                        : truck.statut === 'En cours de déchargement'
+                          ? 'pending'
+                          : truck.statut === 'Enregistré'
+                            ? 'app_registration'
+                            : 'hourglass_empty'
+                  }}
                 </span>
                 {{ truck.statut }}
               </span>
             </td>
-            <td>{{ (truck.heureArrivee | date:'dd/MM/yy HH:mm') || '-' }}</td>
-            <td class="text-right monospace">{{ truck.products?.poidsNet ? (truck.products?.poidsNet + ' kg') : '-' }}</td>
+            <td>{{ (truck.heureArrivee | date: 'dd/MM/yy HH:mm') || '-' }}</td>
+            <td class="text-right monospace">
+              {{ truck.products?.poidsNet ? truck.products?.poidsNet + ' kg' : '-' }}
+            </td>
           </tr>
           <tr *ngIf="filteredTrucks.length === 0">
             <td colspan="6" class="empty-cell">
-               <div class="empty-state">
-                   <span class="material-symbols-outlined notranslate">inbox</span>
-                   <p>Aucune donnée pour la période sélectionnée.</p>
-               </div>
+              <div class="empty-state">
+                <span class="material-symbols-outlined notranslate">inbox</span>
+                <p>Aucune donnée pour la période sélectionnée.</p>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
-
 </div>

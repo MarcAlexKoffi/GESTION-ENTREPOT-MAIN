@@ -32,7 +32,7 @@
                 </span>
                 <input
                   type="text"
-                  placeholder="Rechercher par nom ou immatriculation"
+                  placeholder="Rechercher par coopérative ou immatriculation"
                   [(ngModel)]="searchTerm"
                   (ngModelChange)="applyFilters()"
                 />
@@ -58,8 +58,8 @@
                 </span>
                 <input
                   type="text"
-                  onfocus="(this.type='date')"
-                  onblur="(this.value ? this.type='date' : this.type='text')"
+                  onfocus="this.type = 'date'"
+                  onblur="this.value ? (this.type = 'date') : (this.type = 'text')"
                   placeholder="Sélectionner une date"
                   [(ngModel)]="selectedDate"
                   (ngModelChange)="applyFilters()"
@@ -92,7 +92,7 @@
                   <tr>
                     <th>Entrepôt</th>
                     <th>Immatriculation</th>
-                    <th>Transporteur</th>
+                    <th>COOPERATIVE</th>
                     <th>Date Arrivée</th>
                     <th>Heure Enr.</th>
                     <th>Statut</th>
@@ -128,29 +128,67 @@
                       <span class="name">{{ row.immatriculation }}</span>
                     </td>
                     <td>
-                      <span class="sub">{{ row.transporteur || '—' }}</span>
+                      <span class="sub">{{ row.cooperative }}</span>
                     </td>
-                    <td>{{ row.createdAt | date : 'dd/MM/yyyy' }}</td>
+                    <td>{{ row.createdAt | date: 'dd/MM/yyyy' }}</td>
                     <td>{{ formatHeure(row.createdAt) }}</td>
                     <td>
                       <!-- AFFICHAGE DU STATUT PERSONNALISÉ (Identique au tableau d'entrepôt) -->
-                      <span *ngIf="row.statut === 'Enregistré'" class="status-pill status-pill--enregistre">
-                          <span class="material-symbols-outlined notranslate status-icon">check_circle</span> Enregistré
+                      <span
+                        *ngIf="row.statut === 'Enregistré'"
+                        class="status-pill status-pill--enregistre"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon"
+                          >check_circle</span
+                        >
+                        Enregistré
                       </span>
-                      <span *ngIf="row.statut === 'En attente'" class="status-pill status-pill--pending">
-                          <span class="material-symbols-outlined notranslate status-icon">hourglass_empty</span> En attente
+                      <span
+                        *ngIf="row.statut === 'En attente'"
+                        class="status-pill status-pill--pending"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon"
+                          >hourglass_empty</span
+                        >
+                        En attente
                       </span>
-                      <span *ngIf="row.statut === 'Validé' && row.advancedStatus !== 'ACCEPTE_FINAL'" class="status-pill status-pill--validated">
-                          <span class="material-symbols-outlined notranslate status-icon">verified</span> Validé
+                      <span
+                        *ngIf="row.statut === 'Validé' && row.advancedStatus !== 'ACCEPTE_FINAL'"
+                        class="status-pill status-pill--validated"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon"
+                          >verified</span
+                        >
+                        Validé
                       </span>
-                      <span *ngIf="row.advancedStatus === 'ACCEPTE_FINAL'" class="status-pill status-pill--accepted-final">
-                          <span class="material-symbols-outlined notranslate status-icon">assignment_turned_in</span> Accepté déf.
+                      <span
+                        *ngIf="row.advancedStatus === 'ACCEPTE_FINAL'"
+                        class="status-pill status-pill--accepted-final"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon"
+                          >assignment_turned_in</span
+                        >
+                        Accepté déf.
                       </span>
-                      <span *ngIf="row.statut === 'Refoulé' || (row.statut === 'Annulé' && row.advancedStatus !== 'REFUSE_RENVOYE')" class="status-pill status-pill--refoule">
-                          <span class="material-symbols-outlined notranslate status-icon">cancel</span> Refoulé
+                      <span
+                        *ngIf="
+                          row.statut === 'Refoulé' ||
+                          (row.statut === 'Annulé' && row.advancedStatus !== 'REFUSE_RENVOYE')
+                        "
+                        class="status-pill status-pill--refoule"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon"
+                          >cancel</span
+                        >
+                        Refoulé
                       </span>
-                      <span *ngIf="row.advancedStatus === 'REFUSE_RENVOYE'" class="status-pill status-pill--refoule" style="background-color: #fef9c3; color: #854d0e; border-color: #fde047;">
-                          <span class="material-symbols-outlined notranslate status-icon">reply</span> Renvoyé
+                      <span
+                        *ngIf="row.advancedStatus === 'REFUSE_RENVOYE'"
+                        class="status-pill status-pill--refoule"
+                        style="background-color: #fef9c3; color: #854d0e; border-color: #fde047"
+                      >
+                        <span class="material-symbols-outlined notranslate status-icon">reply</span>
+                        Renvoyé
                       </span>
                       <!-- Fallback old way if needed, or just invisible -->
                     </td>
@@ -173,9 +211,7 @@
 
             <!-- PAGINATION -->
             <div class="pagination-footer" *ngIf="filteredRows.length > 0">
-              <span class="pagination-info">
-                PAGE {{ currentPage }} DE {{ totalPages }}
-              </span>
+              <span class="pagination-info"> PAGE {{ currentPage }} DE {{ totalPages }} </span>
               <div class="pagination-controls">
                 <button
                   type="button"
@@ -220,8 +256,8 @@
                     <div class="summary-value">{{ selectedRow.immatriculation }}</div>
                   </div>
                   <div class="truck-summary-row">
-                    <div class="summary-key">Transporteur</div>
-                    <div class="summary-value">{{ selectedRow.transporteur || '—' }}</div>
+                    <div class="summary-key">Coopérative</div>
+                    <div class="summary-value">{{ selectedRow.cooperative }}</div>
                   </div>
                   <div class="truck-summary-row">
                     <div class="summary-key">Entrepôt</div>
@@ -230,7 +266,7 @@
                   <div class="truck-summary-row">
                     <div class="summary-key">Date arrivée</div>
                     <div class="summary-value">
-                      {{ selectedRow.createdAt | date : 'dd/MM/yyyy' }} •
+                      {{ selectedRow.createdAt | date: 'dd/MM/yyyy' }} •
                       {{ formatHeure(selectedRow.createdAt) }}
                     </div>
                   </div>
@@ -268,7 +304,7 @@
                       <div class="history-event">{{ h.event }}</div>
                       <div class="history-meta">
                         <strong>{{ h.by || '—' }}</strong> •
-                        {{ h.date | date : 'dd/MM/yyyy HH:mm' }}
+                        {{ h.date | date: 'dd/MM/yyyy HH:mm' }}
                       </div>
                     </div>
                   </div>
