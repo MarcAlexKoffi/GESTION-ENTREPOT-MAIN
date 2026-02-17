@@ -17,10 +17,55 @@ cloudinary.config({
 
 const app = express();
 
+// Gestion des erreurs non interceptées pour faciliter le debug en production
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  // Dans un vrai environnement de production, on peut redémarrer le process via le gestionnaire d'app (cPanel/PM2)
+  // process.exit(1);
+});
+
+
+// =========================================================================
+// SMART ROUTING FIX
+// =========================================================================
+// This middleware ensures that whether the request comes as /api/xyz or /xyz
+// it is correctly handled by our routes which are defined with /api/ prefix.
+app.use((req, res, next) => {
+  // If request is like /auth/login, but our routes are /api/auth/login
+  // We prepend /api internally so it matches.
+  if (!req.url.startsWith('/api/') && !req.url.startsWith('/uploads/')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // =======================
 // Middlewares
 // =======================
-app.use(cors());
+
+// CORS: autorisations provenant de la variable d'environnement ALLOWED_ORIGINS
+// Ex: ALLOWED_ORIGINS=https://votre-domaine.com,https://admin.votre-domaine.com
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // permettre les requêtes sans origine (ex: curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.length === 0 || allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS policy: origin not allowed"));
+  },
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
@@ -1030,6 +1075,11 @@ app.get("/api/notifications", async (req, res) => {
   }
 });
 
+// Lightweight health-check endpoint used by uptime monitors and cPanel
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), ts: Date.now() });
+});
+
 app.put("/api/notifications/:id/read", async (req, res) => {
   try {
     const { id } = req.params;
@@ -1041,7 +1091,11 @@ app.put("/api/notifications/:id/read", async (req, res) => {
   }
 });
 
+
+// Start Server for cPanel/Passenger
+// Passenger sets the port via process.env.PORT
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur backend démarré sur le port ${PORT}`);
 });
+
