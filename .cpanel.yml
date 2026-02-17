@@ -1,0 +1,20 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/cp2748240p13/public_html/
+    # 1. Déploiement du BACKEND (API)
+    # On copie les fichiers vers un dossier 'api' hors du dossier public pour la sécurité
+    - /bin/mkdir -p /home/cp2748240p13/api
+    - /bin/cp -R BACK/* /home/cp2748240p13/api/
+    # Installation des dépendances API (si node est dispo)
+    - cd /home/cp2748240p13/api && /usr/bin/npm install --production
+
+    # 2. Déploiement du FRONTEND (Angular)
+    # ATTENTION : Cela suppose que vous avez commité le dossier 'dist' (build local)
+    # Si le serveur le permet, on peut construire ici, mais c'est souvent trop lourd.
+    # Option A: Si vous envoyez le dossier 'dist' construit depuis votre PC :
+    - /bin/cp -R FRONT/dist/gestion-entrepot/browser/* $DEPLOYPATH
+    
+    # Option B: Si vous voulez construire sur le serveur (décommentez si nécessaire)
+    # - cd FRONT && /usr/bin/npm install && /usr/bin/npm run build
+    # - /bin/cp -R FRONT/dist/gestion-entrepot/browser/* $DEPLOYPATH

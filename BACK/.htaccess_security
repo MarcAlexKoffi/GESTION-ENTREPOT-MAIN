@@ -1,0 +1,10 @@
+# Empêcher l'accès direct aux fichiers du code source
+<FilesMatch "\.(env|json|js|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Exception: index.js est notre point d'entrée, mais on ne veut pas le télécharger
+# En fait, si Node tourne sur un port, Apache doit faire un ProxyPass.
+# Si on utilise Passenger, c'est automatique.
+# Pour l'instant, bloquons tout accès direct aux fichiers.

@@ -56,6 +56,7 @@ export class Login {
           this.errorMessage = 'Compte inactif ou suspendu.';
         } else {
           this.errorMessage = 'Erreur de connexion serveur.';
+          console.error(err);
         }
       },
     });
