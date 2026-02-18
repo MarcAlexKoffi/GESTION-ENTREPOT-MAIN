@@ -6,5 +6,5 @@ export const environment = {
   // En ligne, tu devras mettre ici l'URL que Render va te donner (ex: https://mon-app.onrender.com/api)
   apiUrl: isLocal 
     ? 'http://localhost:3000/api' 
-    : 'https://gestion-entrepot-main.onrender.com/api'
+    : 'https://entrepotmanager.com/api'
 };

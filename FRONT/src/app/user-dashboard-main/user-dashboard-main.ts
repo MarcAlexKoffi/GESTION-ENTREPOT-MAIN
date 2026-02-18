@@ -51,22 +51,34 @@ export class UserDashboardMain implements OnInit {
   }
 
   private loadCurrentUser(): void {
-    // Prefer last visited entrepot (when coming from an entrepot page)
-    const last = localStorage.getItem('lastVisitedEntrepot');
-    if (last) {
-      const n = Number(last);
-      if (!Number.isNaN(n)) {
-        this.entrepotId = n;
-        return;
-      }
-    }
-
+    // First load the user to know their role and assignment
     const raw = sessionStorage.getItem('currentUser');
     if (!raw) return;
 
     try {
       this.currentUser = JSON.parse(raw) as StoredUser;
-      this.entrepotId = this.currentUser.entrepotId;
+      
+      // If user has a specific warehouse assigned, forced usage of it
+      if (this.currentUser.entrepotId) {
+        this.entrepotId = this.currentUser.entrepotId;
+        // Optional: clear any stale "last visited" to avoid confusion if role changes later
+        localStorage.removeItem('lastVisitedEntrepot');
+        return;
+      }
+
+      // Only for admins/users without fixed warehouse: check last visited
+      const last = localStorage.getItem('lastVisitedEntrepot');
+      if (last) {
+        const n = Number(last);
+        if (!Number.isNaN(n)) {
+          this.entrepotId = n;
+          return;
+        }
+      }
+
+      // Default fallback if no last visited found
+      this.entrepotId = null;
+
     } catch {
       this.currentUser = null;
       this.entrepotId = null;
