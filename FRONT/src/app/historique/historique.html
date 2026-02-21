@@ -15,10 +15,12 @@
               class="btn-primary"
               type="button"
               (click)="exporterCSV()"
-              [disabled]="filteredRows.length === 0"
+              [disabled]="filteredRows.length === 0 || isExporting"
             >
-              <span class="material-symbols-outlined notranslate">download</span>
-              <span>Exporter en CSV</span>
+              <span class="material-symbols-outlined notranslate" *ngIf="!isExporting">download</span>
+              <span class="material-symbols-outlined notranslate header-spinner" *ngIf="isExporting">sync</span>
+              <span *ngIf="!isExporting">Exporter en CSV</span>
+              <span *ngIf="isExporting">Export en cours...</span>
             </button>
           </div>
 

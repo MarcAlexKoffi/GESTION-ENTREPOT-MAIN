@@ -686,3 +686,10 @@ body.dark {
     }
 }
 
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
+}
+
+.header-spinner { 
+    animation: spin 1s linear infinite; 
+}

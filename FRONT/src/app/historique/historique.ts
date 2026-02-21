@@ -53,6 +53,9 @@ export class Historique implements OnInit {
   // Details modal state
   showDetailsModal = false;
   selectedRow: TruckHistoryRow | null = null;
+  
+  // Loading state for export
+  isExporting = false;
 
   constructor(
     private truckService: TruckService,
@@ -250,61 +253,33 @@ export class Historique implements OnInit {
       return;
     }
 
-    // Export exactly 6 columns to match spec
-    const headers = [
-      'Entrepôt',
-      'Immatriculation',
-      'Coopérative',
-      'Date Arrivée Camion',
-      "Heure d'enregistrement",
-      'Statut',
-    ];
+    this.isExporting = true;
+    const filters = {
+      search: this.searchTerm,
+      entrepotId: this.selectedWarehouseId,
+      date: this.selectedDate,
+      status: this.selectedStatus
+    };
 
-    const rows = this.filteredRows.map((row) => {
-      const entrepot = this.warehousesOptions.find((w) => w.id === row.entrepotId);
-
-      const created = row.createdAt ? new Date(row.createdAt) : null;
-      const dateArrive =
-        created && !isNaN(created.getTime())
-          ? `${String(created.getDate()).padStart(2, '0')}/${String(
-              created.getMonth() + 1,
-            ).padStart(2, '0')}/${created.getFullYear()}`
-          : '';
-      const heureEnreg =
-        created && !isNaN(created.getTime())
-          ? `${String(created.getHours()).padStart(2, '0')}:${String(created.getMinutes()).padStart(
-              2,
-              '0',
-            )}`
-          : '';
-
-      // For the Excel export we include exactly 6 columns: entrepot, immat, transporteur, date, heure enreg, statut
-      return [
-        entrepot ? entrepot.name : '',
-        row.immatriculation,
-        row.cooperative,
-        dateArrive,
-        heureEnreg,
-        row.statut,
-      ];
+    this.truckService.exportTrucks(filters).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        // Changement extension .csv -> .xlsx
+        link.download = `export_historique_${this.getTodayFileName()}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.isExporting = false;
+      },
+      error: (err) => {
+        console.error('Erreur export Excel', err);
+        alert('Une erreur est survenue lors de l\'export Excel.');
+        this.isExporting = false;
+      }
     });
-
-    // Préfixer BOM pour Excel et utiliser ; comme séparateur
-    const csvBody = [
-      headers.join(';'),
-      ...rows.map((r) => r.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';')),
-    ].join('\n');
-    const csvContent = '\uFEFF' + csvBody;
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `historique_camions_${this.getTodayFileName()}.csv`;
-    link.click();
-
-    URL.revokeObjectURL(url);
   }
 
   openDetailsModal(row: TruckHistoryRow): void {

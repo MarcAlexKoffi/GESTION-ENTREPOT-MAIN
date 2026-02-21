@@ -69,6 +69,27 @@ export class TruckService {
     return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
+  // Exporter en CSV avec filtres
+  exportTrucks(filters: { search?: string; entrepotId?: string | number; date?: string; status?: string }): Observable<Blob> {
+    let params = new HttpParams();
+
+    if (filters.search) {
+      params = params.set('search', filters.search);
+    }
+    if (filters.entrepotId !== undefined && filters.entrepotId !== 'all') {
+      params = params.set('entrepotId', filters.entrepotId.toString());
+    }
+    if (filters.date) {
+      params = params.set('date', filters.date);
+    }
+    if (filters.status && filters.status !== 'all') {
+      params = params.set('status', filters.status);
+    }
+
+    // responseType: 'blob' est crucial pour télécharger un fichier binaire/texte
+    return this.http.get(`${this.apiUrl}/export`, { params, responseType: 'blob' });
+  }
+
   // Supprimer un camion
   deleteTruck(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);

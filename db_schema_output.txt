@@ -1,0 +1,133 @@
+--- Tables in database ---
+Tables found: 9
+
+--- Create Table: empotage_containers ---
+CREATE TABLE `empotage_containers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `empotageId` int(11) NOT NULL,
+  `numeroConteneur` varchar(255) DEFAULT NULL,
+  `nombreSacs` int(11) DEFAULT 0,
+  `volume` float DEFAULT 0,
+  `poids` float DEFAULT 0,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `empotageId` (`empotageId`),
+  CONSTRAINT `empotage_containers_ibfk_1` FOREIGN KEY (`empotageId`) REFERENCES `empotages` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: empotages ---
+CREATE TABLE `empotages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client` varchar(255) DEFAULT NULL,
+  `clientType` varchar(255) DEFAULT NULL,
+  `booking` varchar(255) DEFAULT NULL,
+  `conteneurs` int(11) DEFAULT 0,
+  `volume` float DEFAULT 0,
+  `dateStart` datetime DEFAULT NULL,
+  `dateEnd` datetime DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'En attente',
+  `entrepotId` int(11) DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: notifications ---
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `message` text NOT NULL,
+  `isRead` tinyint(1) DEFAULT 0,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  `relatedId` int(11) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: truck_admin_comments ---
+CREATE TABLE `truck_admin_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `truckId` int(11) NOT NULL,
+  `comment` text DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `truckId` (`truckId`),
+  CONSTRAINT `truck_admin_comments_ibfk_1` FOREIGN KEY (`truckId`) REFERENCES `trucks` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: truck_history ---
+CREATE TABLE `truck_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `truckId` int(11) NOT NULL,
+  `event` text NOT NULL,
+  `byRole` enum('admin','gerant') NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `truckId` (`truckId`),
+  CONSTRAINT `truck_history_ibfk_1` FOREIGN KEY (`truckId`) REFERENCES `trucks` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: truck_products ---
+CREATE TABLE `truck_products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `truckId` int(11) NOT NULL,
+  `numeroLot` varchar(100) DEFAULT NULL,
+  `nombreSacsDecharges` varchar(50) DEFAULT NULL,
+  `poidsBrut` varchar(50) DEFAULT NULL,
+  `poidsNet` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `truckId` (`truckId`),
+  CONSTRAINT `truck_products_ibfk_1` FOREIGN KEY (`truckId`) REFERENCES `trucks` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: trucks ---
+CREATE TABLE `trucks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `entrepotId` int(11) NOT NULL,
+  `immatriculation` varchar(255) NOT NULL,
+  `transporteur` varchar(255) NOT NULL,
+  `transfert` varchar(255) DEFAULT NULL,
+  `statut` varchar(50) DEFAULT 'Enregistré',
+  `heureArrivee` datetime DEFAULT current_timestamp(),
+  `heureDepart` datetime DEFAULT NULL,
+  `poids` float DEFAULT NULL,
+  `metadata` text DEFAULT NULL,
+  `cooperative` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `entrepotId` (`entrepotId`),
+  CONSTRAINT `trucks_ibfk_1` FOREIGN KEY (`entrepotId`) REFERENCES `warehouses` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: users ---
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nom` varchar(150) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','operator','driver','security') NOT NULL,
+  `entrepotId` int(11) DEFAULT NULL,
+  `status` enum('Actif','Inactif','En attente') DEFAULT 'En attente',
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  KEY `entrepotId` (`entrepotId`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`entrepotId`) REFERENCES `warehouses` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------
+
+--- Create Table: warehouses ---
+CREATE TABLE `warehouses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(150) NOT NULL,
+  `location` varchar(150) NOT NULL,
+  `imageUrl` text DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-----------------------------------

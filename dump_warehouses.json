@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Entrepot 1",
+    "location": "ABIDJAN",
+    "imageUrl": "",
+    "createdAt": "2026-02-21T09:18:10.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Entrepot 2",
+    "location": "YAKRO",
+    "imageUrl": "",
+    "createdAt": "2026-02-21T09:18:25.000Z"
+  }
+]

@@ -349,6 +349,183 @@ app.get('/api/trucks', async (req, res) => {
   }
 });
 
+// EXPORT TRUCKS CSV
+const ExcelJS = require('exceljs');
+
+// EXPORT TRUCKS (CSV or Excel)
+app.get('/api/trucks/export', async (req, res) => {
+  try {
+    const { search, entrepotId, date, status } = req.query;
+
+    console.log('GET /api/trucks/export', { search, entrepotId, date, status });
+
+    // 1. Requête de base avec jointure Entrepôt
+
+    let query = `
+      SELECT t.*, t.heureArrivee as createdAt, w.name as entrepotName
+      FROM trucks t
+      LEFT JOIN warehouses w ON t.entrepotId = w.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    // 2. Filtres SQL simples
+    // Search
+    if (search && search.trim() !== '') {
+      const term = `%${search.trim()}%`;
+      query += ` AND (t.immatriculation LIKE ? OR t.cooperative LIKE ?)`;
+      params.push(term, term);
+    }
+    // Entrepôt
+    if (entrepotId && entrepotId !== 'all') {
+      query += ` AND t.entrepotId = ?`;
+      params.push(Number(entrepotId));
+    }
+    // Date (YYYY-MM-DD)
+    if (date && date.trim() !== '') {
+      // Comparison exact date part
+      query += ` AND DATE(t.heureArrivee) = ?`;
+      params.push(date);
+    }
+
+    query += ` ORDER BY t.heureArrivee DESC`;
+
+    const [rows] = await db.query(query, params);
+
+    // 3. Post-traitement (Metadata + Status complexe)
+    let filteredRows = rows.map(row => {
+      let meta = {};
+      try {
+        if (row.metadata) meta = JSON.parse(row.metadata);
+      } catch (e) {}
+      
+      // Merge pour avoir un objet plat incluant advancedStatus, etc.
+      return { ...meta, ...row, metadata: meta };
+    });
+
+    // Filtre Status (reprise logique Frontend)
+    if (status && status !== 'all') {
+      filteredRows = filteredRows.filter(row => {
+        const s = status;
+        const rowStatut = row.statut;
+        const rowAdv = row.advancedStatus; // from metadata
+
+        if (s === 'Enregistré') {
+          return rowStatut === 'Enregistré';
+        } else if (s === 'En attente') {
+          return rowStatut === 'En attente';
+        } else if (s === 'Validé') {
+          // Validé MAIS PAS Accepté final
+          return rowStatut === 'Validé' && rowAdv !== 'ACCEPTE_FINAL';
+        } else if (s === 'Accepté') {
+          return rowAdv === 'ACCEPTE_FINAL';
+        } else if (s === 'Refoulé') {
+          const isRefoule = rowStatut === 'Refoulé';
+          const isAnnuleOther = rowStatut === 'Annulé' && rowAdv !== 'REFUSE_RENVOYE';
+          return isRefoule || isAnnuleOther;
+        } else if (s === 'Renvoyé') {
+          return rowStatut === 'Annulé' && rowAdv === 'REFUSE_RENVOYE';
+        } else {
+          // Fallback
+          return rowStatut === s;
+        }
+      });
+    }
+
+    // 4. Utilisation de ExcelJS pour créer un fichier .xlsx propre avec bordures
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Export Camions');
+
+    // Définition des colonnes
+    worksheet.columns = [
+      { header: 'Date Arrivée', key: 'date', width: 12 },
+      { header: 'Heure', key: 'time', width: 8 },
+      { header: 'Coopérative', key: 'coop', width: 20 },
+      { header: 'N° FT', key: 'ft', width: 15 },
+      { header: 'Poids Brut', key: 'pBrut', width: 12 },
+      { header: 'Poids Net', key: 'pNet', width: 12 },
+      { header: 'UT (Entrepôt)', key: 'ut', width: 20 },
+      { header: 'KOR', key: 'kor', width: 8 },
+      { header: 'TH', key: 'th', width: 8 },
+      { header: 'N° de Lot', key: 'lot', width: 15 },
+      { header: 'Nb Sacs', key: 'sacs', width: 10 },
+      { header: 'Immatriculation', key: 'immat', width: 15 },
+    ];
+
+    // Style de l'en-tête (Gras + Bordures + Fond gris clair)
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFEFEFEF' }
+    };
+
+    // Ajout des données
+    filteredRows.forEach(row => {
+      // Date Parsing
+      let dateStr = '';
+      let timeStr = '';
+      if (row.createdAt) {
+        const d = new Date(row.createdAt);
+        if (!isNaN(d.getTime())) {
+          // Format YYYY-MM-DD
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const min = String(d.getMinutes()).padStart(2, '0');
+          dateStr = `${yyyy}-${mm}-${dd}`;
+          timeStr = `${hh}:${min}`;
+        }
+      }
+
+      const products = row.metadata?.products || {};
+      
+      // Valeurs
+      worksheet.addRow({
+        date: dateStr,
+        time: timeStr,
+        coop: row.cooperative || '',
+        ft: row.transfert || '',
+        pBrut: products.poidsBrut ? parseFloat(products.poidsBrut) : null,
+        pNet: products.poidsNet ? parseFloat(products.poidsNet) : null,
+        ut: row.entrepotName || '',
+        kor: row.kor || row.metadata?.kor || '',
+        th: row.th || row.metadata?.th || '',
+        lot: products.numeroLot || '',
+        sacs: products.nombreSacsDecharges || '',
+        immat: row.immatriculation || ''
+      });
+    });
+
+    // Appliquer des bordures à toutes les cellules remplies
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'left' };
+      });
+    });
+
+    // Ecriture de la réponse en stream
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="export_${new Date().toISOString().slice(0,10)}.xlsx"`);
+    
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (err) {
+    console.error('Erreur export Excel', err);
+    res.status(500).send('Erreur lors de l\'export Excel');
+  }
+});
+
+// PUT Truck
+
 // PUT Truck
 app.put('/api/trucks/:id', async (req, res) => {
   const { id } = req.params;
