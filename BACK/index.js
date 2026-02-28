@@ -331,7 +331,7 @@ app.get('/api/trucks', async (req, res) => {
     const [rows] = await db.query(query, params);
     
     // Parse metadata
-    const parsedRows = rows.map(row => {
+    let parsedRows = rows.map(row => {
       let extras = {};
       try {
         if (row.metadata) extras = JSON.parse(row.metadata);
@@ -340,6 +340,20 @@ app.get('/api/trucks', async (req, res) => {
       // Merge: columns (rest) take precedence over metadata (extras)
       // This prevents bad metadata (like heureArrivee string) from overwriting actual DB timestamp
       return { ...extras, ...rest };
+    });
+
+    // Filtre des doublons sur le champ 'transfert' (N° FT)
+    // On ne garde que le plus récent (le premier trouvé car trié par ID DESC ou heureArrivee DESC)
+    const seenTransfert = new Set();
+    parsedRows = parsedRows.filter(row => {
+      if (row.transfert && row.transfert.trim() !== '') {
+        const ft = row.transfert.trim();
+        if (seenTransfert.has(ft)) {
+          return false;
+        }
+        seenTransfert.add(ft);
+      }
+      return true;
     });
     
     res.json(parsedRows);
@@ -401,6 +415,20 @@ app.get('/api/trucks/export', async (req, res) => {
       
       // Merge pour avoir un objet plat incluant advancedStatus, etc.
       return { ...meta, ...row, metadata: meta };
+    });
+
+    // Filtre pour éviter les doublons sur le N° FT (transfert)
+    // On garde le plus récent (le premier trouvé car trié par DATE DESC)
+    const seenFT = new Set();
+    filteredRows = filteredRows.filter(row => {
+      if (row.transfert && row.transfert.trim() !== '') {
+        const ft = row.transfert.trim();
+        if (seenFT.has(ft)) {
+          return false;
+        }
+        seenFT.add(ft);
+      }
+      return true;
     });
 
     // Filtre Status (reprise logique Frontend)
