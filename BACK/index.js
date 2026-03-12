@@ -266,6 +266,14 @@ app.post('/api/trucks', async (req, res) => {
      if (warehouseCheck.length === 0) {
         return res.status(400).json({ message: 'Entrepôt invalide ou inexistant' });
      }
+
+     // VALIDATION: Unicité Fiche Transfert
+     if (transfert && transfert.trim() !== '') {
+        const [existingTransfer] = await db.query('SELECT id FROM trucks WHERE transfert = ? LIMIT 1', [transfert.trim()]);
+        if (existingTransfer.length > 0) {
+           return res.status(400).json({ message: 'Ce numéro de fiche de transfert existe déjà dans le système.' });
+        }
+     }
   } catch(e) {
      console.error("Validation Error:", e);
      return res.status(500).json({ message: 'Erreur validation entrepôt', error: e.message });
@@ -344,6 +352,7 @@ app.get('/api/trucks', async (req, res) => {
 
     // Filtre des doublons sur le champ 'transfert' (N° FT)
     // On ne garde que le plus récent (le premier trouvé car trié par ID DESC ou heureArrivee DESC)
+    /*
     const seenTransfert = new Set();
     parsedRows = parsedRows.filter(row => {
       if (row.transfert && row.transfert.trim() !== '') {
@@ -355,6 +364,7 @@ app.get('/api/trucks', async (req, res) => {
       }
       return true;
     });
+    */
     
     res.json(parsedRows);
   } catch (err) {
@@ -410,33 +420,33 @@ app.get('/api/trucks/export', async (req, res) => {
     let filteredRows = rows.map(row => {
       let meta = {};
       try {
-        if (row.metadata) meta = JSON.parse(row.metadata);
-      } catch (e) {}
+        if (row.metadata) {
+           // Handle case where mysql2 returns object or string
+           if (typeof row.metadata === 'string') {
+              meta = JSON.parse(row.metadata);
+           } else if (typeof row.metadata === 'object') {
+              meta = row.metadata;
+           }
+        }
+      } catch (e) {
+        console.error('Error parsing metadata for truck ' + row.id, e);
+      }
       
       // Merge pour avoir un objet plat incluant advancedStatus, etc.
-      return { ...meta, ...row, metadata: meta };
+      // On attache "parsedMetadata" explicitement pour l'export Excel
+      return { ...meta, ...row, parsedMetadata: meta };
     });
 
-    // Filtre pour éviter les doublons sur le N° FT (transfert)
-    // On garde le plus récent (le premier trouvé car trié par DATE DESC)
-    const seenFT = new Set();
-    filteredRows = filteredRows.filter(row => {
-      if (row.transfert && row.transfert.trim() !== '') {
-        const ft = row.transfert.trim();
-        if (seenFT.has(ft)) {
-          return false;
-        }
-        seenFT.add(ft);
-      }
-      return true;
-    });
-
+    // SUPPRESSION DU FILTRE DE DEDUPLICATION (N° FT) POUR L'EXPORT
+    // Cela empêchait l'export de certaines lignes si un doublon existait avec un autre statut.
+    
     // Filtre Status (reprise logique Frontend)
     if (status && status !== 'all') {
       filteredRows = filteredRows.filter(row => {
         const s = status;
         const rowStatut = row.statut;
-        const rowAdv = row.advancedStatus; // from metadata
+        // advancedStatus comes from ...meta merge
+        const rowAdv = row.advancedStatus; 
 
         if (s === 'Enregistré') {
           return rowStatut === 'Enregistré';
@@ -507,7 +517,9 @@ app.get('/api/trucks/export', async (req, res) => {
         }
       }
 
-      const products = row.metadata?.products || {};
+      // Use explicit parsedMetadata
+      const meta = row.parsedMetadata || {};
+      const products = meta.products || {};
       
       // Valeurs
       worksheet.addRow({
@@ -515,13 +527,13 @@ app.get('/api/trucks/export', async (req, res) => {
         time: timeStr,
         coop: row.cooperative || '',
         ft: row.transfert || '',
-        pBrut: products.poidsBrut ? parseFloat(products.poidsBrut) : null,
-        pNet: products.poidsNet ? parseFloat(products.poidsNet) : null,
+        pBrut: products.poidsBrut ? parseFloat(products.poidsBrut) : (meta.poidsBrut ? parseFloat(meta.poidsBrut) : null),
+        pNet: products.poidsNet ? parseFloat(products.poidsNet) : (meta.poidsNet ? parseFloat(meta.poidsNet) : null),
         ut: row.entrepotName || '',
-        kor: row.kor || row.metadata?.kor || '',
-        th: row.th || row.metadata?.th || '',
-        lot: products.numeroLot || '',
-        sacs: products.nombreSacsDecharges || '',
+        kor: row.kor || meta.kor || '',
+        th: row.th || meta.th || '',
+        lot: products.numeroLot || meta.numeroLot || '',
+        sacs: products.nombreSacsDecharges || meta.nombreSacsDecharges || '',
         immat: row.immatriculation || ''
       });
     });
@@ -569,6 +581,17 @@ app.put('/api/trucks/:id', async (req, res) => {
   } = req.body;
 
   try {
+    // VALIDATION: Unicité Fiche Transfert (dans le cas d'une modif)
+    if (transfert && transfert.trim() !== '') {
+        const [existingTransfer] = await db.query(
+          'SELECT id FROM trucks WHERE transfert = ? AND id != ? LIMIT 1', 
+          [transfert.trim(), id]
+        );
+        if (existingTransfer.length > 0) {
+           return res.status(400).json({ message: 'Ce numéro de fiche de transfert est déjà pris par un autre camion.' });
+        }
+    }
+
     // 1. Récupérer les métadonnées actuelles pour fusion
     const [rows] = await db.query('SELECT metadata FROM trucks WHERE id = ?', [id]);
     if (rows.length === 0) {
